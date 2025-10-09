@@ -1,0 +1,157 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&family=Jura:wght@300..700&display=swap');
+
+:root {
+    --error-bg-gradient-light: linear-gradient(135deg, #fff, #f0f0f0);
+    --error-bg-gradient-dark: linear-gradient(135deg, #252525, #1a1a1a);
+    --error-content-bg-light: rgba(255, 255, 255, 0.6);
+    --error-content-bg-dark: rgba(37, 37, 37, 0.6);
+    --error-accent: #538fff;
+    --error-accent-hover: #407cd6;
+    /* Shape colors derived from your theme */
+    --shape-color-light: #e1cd3a;
+    --shape-color-light2: #eadb689d;
+    --shape-color-dark: #454545;
+    --shape-color-dark2: #2a2a2a;
+    --shape-opacity: 0.7;
+
+    /* Set default variables for light mode */
+    --error-bg-gradient: var(--error-bg-gradient-light);
+    --error-content-bg: var(--error-content-bg-light);
+    --shape-color: var(--shape-color-light);
+    --shape-color2: var(--shape-color-light2);
+}
+
+
+[data-theme="dark"] {
+    --error-bg-gradient: var(--error-bg-gradient-dark);
+    --error-content-bg: var(--error-content-bg-dark);
+    --shape-color: var(--shape-color-dark);
+    --shape-color2: var(--shape-color-dark2);
+}
+
+.error-container {
+    position: relative;
+    /* Allows absolute positioning of shapes */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--error-bg-gradient);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    /* Prevents shapes from overflowing */
+}
+
+/* Styles for the background shapes */
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    /* Circular shapes */
+    opacity: var(--shape-opacity);
+
+    background: linear-gradient(to left, var(--shape-color), var(--shape-color2));
+}
+
+.shape1 {
+    width: 300px;
+    height: 300px;
+    top: 10%;
+    left: 10%;
+    transform: rotate(30deg);
+}
+
+.shape2 {
+    width: 200px;
+    height: 200px;
+    bottom: 20%;
+    right: 15%;
+    transform: rotate(-45deg);
+}
+
+.shape3 {
+    width: 400px;
+    height: 400px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(60deg);
+}
+
+/* Glassmorphism content */
+.error-content {
+    position: relative;
+    /* Stays above shapes */
+    z-index: 1;
+    /* Ensures content is on top */
+    text-align: center;
+    background: var(--error-content-bg);
+    backdrop-filter: blur(10px);
+    /* Blurs the shapes behind */
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: fadeInContent 0.5s forwards;
+}
+
+.error-code {
+    font-size: 5rem;
+    font-weight: bold;
+    color: var(--error-accent);
+    margin-bottom: 20px;
+}
+
+.error-code span {
+    display: inline-block;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+.error-code span:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.error-code span:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.error-code span:nth-child(3) {
+    animation-delay: 0.5s;
+}
+
+.error-content p {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    color: var(--text-color);
+}
+
+.error-home-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--error-accent);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.error-home-link:hover {
+    background-color: var(--error-accent-hover);
+}
+
+@keyframes fadeInContent {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

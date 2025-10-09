@@ -1,0 +1,646 @@
+/* src/scss/business-dashboard.scss
+   Cleaned & aligned with BusinessDashboard JSX
+*/
+
+.business-create-page {
+    padding: 28px;
+    font-family: "Jura", sans-serif;
+    color: var(--sign-si);
+
+    /* Header + tabs (single source of truth) */
+    .bc-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 20px;
+
+        .bc-header-left {
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 26px;
+            color: var(--sign-txt-6xl);
+            font-weight: 700;
+        }
+
+        .muted {
+            color: var(--sign-input);
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .bc-tabs {
+            display: flex;
+            gap: 8px;
+        }
+    }
+
+    /* Visual style for tabs */
+    .bc-tabs {
+        .tab {
+            appearance: none;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            color: var(--sign-input);
+            cursor: pointer;
+            transition: transform .08s ease, box-shadow .12s ease, background .12s;
+            outline: none;
+
+            &:hover {
+                transform: translateY(-2px);
+            }
+
+            &.active {
+                background: linear-gradient(90deg, var(--home-showContent-light), var(--home-showContent-dark));
+                color: #000;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+                border: none;
+            }
+        }
+    }
+
+    .bc-body {
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 22px;
+
+        @media (max-width: 1024px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Card shell */
+    .card {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+        border-radius: 12px;
+        padding: 18px;
+        margin: 10px 0px;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+
+        .card-title {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            color: var(--sign-txt-6xl);
+            font-weight: 700;
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: var(--sign-labels);
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            background: rgba(255, 255, 255, 0.01);
+            color: var(--sign-input);
+            font-size: 14px;
+            outline: none;
+            transition: transform .12s, box-shadow .12s;
+        }
+
+        option {
+            color: black;
+        }
+
+
+
+        textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: linear-gradient(45deg, transparent 50%, var(--sign-input) 50%),
+                linear-gradient(135deg, var(--sign-input) 50%, transparent 50%);
+            background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 12px) calc(1em + 2px);
+            background-size: 6px 6px, 6px 6px;
+            background-repeat: no-repeat;
+        }
+
+        &:focus-within {
+            transform: translateY(-0.5px);
+        }
+
+        .mt {
+            margin-top: 10px;
+        }
+    }
+
+    /* READ-ONLY visual tweaks */
+    .card.read-only {
+        opacity: 0.95;
+        /* slightly dim entire card */
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.005));
+        pointer-events: auto;
+        /* keep list scrollable, but individual inputs disabled */
+    }
+
+    /* show lock icon beside title via pseudo-element */
+    .card.read-only .card-title {
+        position: relative;
+        padding-right: 28px;
+    }
+
+    .card.read-only .card-title::after {
+        content: "🔒";
+        position: absolute;
+        right: 0;
+        top: 0;
+        font-size: 18px;
+        line-height: 1;
+        transform: translateY(2px);
+    }
+
+    /* disabled inputs: stronger visual cue */
+    .card.read-only input[disabled],
+    .card.read-only textarea[disabled],
+    .card.read-only select[disabled] {
+        background: rgba(255, 255, 255, 0.01);
+        color: var(--sign-input);
+        opacity: 0.7;
+        cursor: not-allowed;
+        border-color: rgba(0, 0, 0, 0.04);
+        box-shadow: none;
+    }
+
+    /* read-only banner */
+    .readonly-banner {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding: 12px 18px;
+        border-radius: 10px;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+        border: 1px solid rgba(0, 0, 0, 0.04);
+
+        strong {
+            font-weight: 700;
+        }
+
+        .muted {
+            font-size: 13px;
+            color: var(--sign-input);
+        }
+    }
+
+    /* disable invite/role actions when read-only (button disabled appearance) */
+    .btn[disabled] {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    /* small hint inside card for read-only */
+    .card.read-only .muted.small {
+        color: var(--sign-input);
+        opacity: 0.9;
+    }
+
+
+    /* Layout-specific card helpers used in the JSX */
+    .card-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 18px;
+
+        @media (max-width: 720px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .card-left {}
+
+    .card-right {}
+
+    /* Invite form grid */
+    .invite-grid {
+        display: grid;
+        grid-template-columns: 1fr 200px;
+        gap: 12px;
+        align-items: end;
+
+        @media (max-width: 720px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Compact form row used for role create/edit */
+    .form-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .small-input {
+        width: 100px;
+    }
+
+    /* Small, inline action group */
+    .bc-actions-inline {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    /* Invite/actions area */
+    .bc-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 14px;
+        gap: 8px;
+
+        .btn {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            min-height: 40px;
+        }
+
+        .primary {
+            background: linear-gradient(90deg, #ffffff, rgba(255, 255, 255, 0.95));
+            color: #000;
+            box-shadow: 0 8px 18px rgba(73, 73, 73, 0.08);
+        }
+
+        .ghost {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--sign-input);
+        }
+
+        .btn[disabled] {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+    }
+
+    /* members / roles lists */
+    .members-list,
+    .roles-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .member-row,
+    .role-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.01);
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        margin-bottom: 8px;
+
+        strong {
+            color: var(--sign-txt-6xl);
+        }
+
+        .muted {
+            color: var(--sign-input);
+            font-size: 13px;
+        }
+
+        .muted.small {
+            font-size: 12px;
+            color: var(--sign-input);
+        }
+    }
+
+    /* Member avatar + info */
+    .member-left {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .avatar-pill {
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        font-weight: 800;
+        color: var(--sign-txt-6xl);
+    }
+
+    .member-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Chips */
+    .chip {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        background: transparent;
+        color: var(--sign-input);
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+
+        &.on {
+            background: linear-gradient(90deg, var(--home-showContent-light), var(--home-showContent-dark));
+            color: #000;
+            border: none;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        }
+    }
+
+    /* Role actions (edit/delete) */
+    .role-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .role-actions .btn.small {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    .role-actions .btn.ghost {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    /* ---------- START: Edit role grid + actions (ADDED) ---------- */
+
+    /* edit-grid: fields layout in the Edit Role card */
+    .edit-grid {
+        display: grid;
+        grid-template-columns: 1fr 120px 120px;
+        /* name | level | capacity */
+        gap: 12px;
+        align-items: start;
+        margin-top: 6px;
+
+        .field {
+            label {
+                margin-bottom: 6px;
+                display: block;
+                color: var(--sign-labels);
+                font-size: 13px;
+            }
+
+            input {
+                width: 100%;
+                padding: 10px 12px;
+                border-radius: 8px;
+            }
+        }
+
+        .small-input {
+            padding: 8px 10px;
+        }
+
+        @media (max-width: 720px) {
+            grid-template-columns: 1fr;
+            /* stack on mobile */
+        }
+    }
+
+    /* role-edit-actions: Save / Cancel area */
+    .role-edit-actions {
+        display: flex;
+        justify-content: flex-end;
+        /* align right on wide screens */
+        gap: 12px;
+        margin-top: 14px;
+
+        .btn {
+            min-width: 120px;
+        }
+
+        .btn.ghost {
+            min-width: 110px;
+        }
+
+        @media (max-width: 720px) {
+            flex-direction: column-reverse;
+            /* Save on top, Cancel below for easy thumb reach */
+            align-items: stretch;
+
+            .btn {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+    }
+
+    /* tweak: role-actions behaviour on very small screens */
+    .role-actions {
+        @media (max-width: 520px) {
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+
+            .btn.small {
+                width: 100px;
+            }
+        }
+    }
+
+    /* ---------- END: Edit role grid + actions (ADDED) ---------- */
+
+    /* Preview column */
+    .bc-preview {
+        .preview-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+
+            @media (min-width: 1025px) {
+                position: sticky;
+                top: 20px;
+                align-self: start;
+            }
+
+            .preview-header {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+
+                .logo {
+                    width: 72px;
+                    height: 72px;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    display: grid;
+                    place-items: center;
+                    background: rgba(255, 255, 255, 0.03);
+
+                    img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: contain;
+                    }
+
+                    .logo-pill {
+                        font-weight: 800;
+                        color: var(--sign-txt-6xl);
+                    }
+                }
+
+                .title {
+                    h3 {
+                        margin: 0;
+                        font-size: 18px;
+                        color: var(--sign-txt-6xl);
+                    }
+
+                    .muted {
+                        color: var(--sign-input);
+                        font-size: 13px;
+                    }
+                }
+            }
+
+            .preview-body {
+                .muted {
+                    color: var(--sign-input);
+                    font-size: 13px;
+                }
+
+                .desc {
+                    margin-top: 8px;
+                    color: var(--sign-input);
+                    font-size: 13px;
+                    line-height: 1.4;
+                }
+
+                .meta {
+                    margin-top: 12px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    font-size: 13px;
+                    color: var(--sign-input);
+
+                    strong {
+                        color: var(--sign-si);
+                    }
+
+                    a {
+                        color: var(--sign-input);
+                        text-decoration: underline;
+
+                        &:hover {
+                            text-decoration: none;
+                        }
+                    }
+                }
+
+                .preview-actions {
+                    display: flex;
+                    gap: 8px;
+                    margin-top: 12px;
+
+                    .btn.small {
+                        padding: 8px 10px;
+                        border-radius: 8px;
+                        min-height: 36px;
+                    }
+
+                    .btn.small.ghost {
+                        background: transparent;
+                        border: 1px solid rgba(255, 255, 255, 0.04);
+                    }
+                }
+            }
+        }
+    }
+
+    /* status messages, loading */
+    .bc-loading {
+        padding: 30px;
+        text-align: center;
+        color: var(--sign-input);
+    }
+
+    .bc-error {
+        color: #ff6b6b;
+        font-weight: 700;
+        margin-top: 8px;
+    }
+
+    .bc-success {
+        color: #7bd389;
+        font-weight: 700;
+        margin-top: 8px;
+    }
+
+    /* spinner */
+    .spinner {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        border-top-color: var(--home-showContent-light);
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* responsive tweaks */
+    @media (max-width: 720px) {
+        padding: 16px;
+
+        .bc-body {
+            gap: 12px;
+        }
+
+        .preview-card .preview-header .logo {
+            width: 56px;
+            height: 56px;
+        }
+
+        .bc-actions {
+            flex-direction: column-reverse;
+            gap: 10px;
+            align-items: stretch;
+        }
+    }
+}

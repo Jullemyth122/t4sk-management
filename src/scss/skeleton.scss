@@ -1,0 +1,139 @@
+
+.skeleton-block {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.09) 50%, rgba(255, 255, 255, 0.06) 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.2s linear infinite;
+    display: block;
+    width: 100%;
+    height: 16px;
+    border-radius: 8px;
+}
+
+.skeleton-block.rounded {
+    border-radius: 8px;
+}
+
+.skeleton-block.small {
+    height: 10px;
+}
+
+.skeleton-block.medium {
+    height: 16px;
+}
+
+.skeleton-block.large {
+    height: 28px;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* PageLoader */
+.page-loader {
+    min-height: calc(100vh - 75px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #fff;
+    text-align: center;
+    padding: 24px;
+}
+
+.page-loader.compact {
+    min-height: 200px;
+    padding: 12px;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.12);
+    border-top-color: rgba(255, 255, 255, 0.9);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loader-text {
+    opacity: 0.95;
+    font-size: 14px;
+    color: var(--text-muted, #eaeaea);
+}
+
+/* HomeSkeleton layout tweaks - try to match your home.scss */
+.skeleton-home {
+    .headline-skel {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        padding: 24px 12px;
+    }
+
+    .title-skel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .content-banner-skel {
+        padding: 24px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+    }
+
+    .show-content-skel {
+        display: flex;
+        gap: 20px;
+        width: 85vw;
+        max-width: 1200px;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+
+    .content1-skel {
+        width: 320px;
+    }
+
+    .subtask-scroll-skel {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 65vh;
+        overflow: hidden;
+    }
+
+    .content2-skel {
+        width: 420px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+/* small responsive tweak */
+@media (max-width: 900px) {
+    .skeleton-home .show-content-skel {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .skeleton-home .content2-skel {
+        width: 100%;
+    }
+}

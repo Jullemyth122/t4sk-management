@@ -1,0 +1,545 @@
+/* choose-account.scss
+   Professional "task management" style using your theme variables.
+*/
+
+.choose-page {
+    background: transparent;
+    font-family: "Jura", sans-serif;
+    position: relative;
+
+    .topbar {
+        position: fixed;
+        top: 18px;
+        right: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 40;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.02));
+        padding: 8px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        min-width: 220px;
+    }
+
+    .topbar-user {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        min-width: 140px;
+    }
+
+    .topbar-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        color: #000;
+        background: linear-gradient(180deg, var(--home-showContent-light), var(--home-showContent-dark));
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        font-size: 14px;
+    }
+
+    .topbar-name {
+        color: var(--sign-si);
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 120px;
+    }
+
+    .btn-logout {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        padding: 8px 10px;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        color: var(--sign-input);
+        transition: transform .12s ease, box-shadow .12s ease, background .12s;
+    }
+
+    .btn-logout:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+    }
+
+    .btn-logout:disabled {
+        opacity: 0.6;
+        cursor: default;
+        transform: none;
+    }
+
+    .logout-spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.18);
+        border-left-color: var(--home-showContent-dark);
+        animation: spin .9s linear infinite;
+    }
+
+    /* invites dropdown in topbar */
+    .topbar-invites {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+
+        .invite-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--sign-input);
+            cursor: pointer;
+            font-weight: 700;
+            transition: transform .08s, background .12s;
+        }
+
+        .invite-toggle:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .invite-dropdown-topbar {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 360px;
+            max-width: calc(100vw - 40px);
+            max-height: 420px;
+            background: linear-gradient(180deg, rgba(12, 12, 12, 0.96), rgba(24, 24, 24, 0.96));
+            color: var(--sign-input);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            box-shadow: 0 14px 40px rgba(2, 6, 23, 0.6);
+            z-index: 120;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+        }
+
+        .invite-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .invite-header .title {
+            font-weight: 700;
+            color: var(--sign-txt-6xl);
+            font-size: 14px;
+        }
+
+        .invite-header .muted {
+            color: var(--sign-input);
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .invite-list {
+            overflow-y: auto;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .invite-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 12px;
+            border-radius: 10px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.00));
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            transition: background .12s, transform .08s;
+        }
+
+        .invite-item:hover {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            transform: translateY(-2px);
+        }
+
+        .invite-left {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .invite-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .invite-title {
+            font-weight: 800;
+            color: var(--sign-txt-6xl);
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .invite-sub {
+            font-size: 13px;
+            color: var(--sign-input);
+        }
+
+        .invite-msg {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.75);
+            margin-top: 6px;
+            max-height: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .invite-time {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.45);
+            margin-top: 6px;
+        }
+
+        .invite-right {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+            margin-left: 6px;
+        }
+
+        /* action buttons */
+        .invite-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-end;
+            width: 100%;
+        }
+
+        .invite-actions .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            line-height: 1;
+            min-width: 92px;
+            transition: transform .08s ease, box-shadow .12s ease, opacity .12s;
+        }
+
+        .invite-actions .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .invite-actions .btn.accept {
+            background: linear-gradient(90deg, var(--home-showContent-light), var(--home-showContent-dark));
+            color: #000;
+            border: none;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+        }
+
+        .invite-actions .btn.accept.loading {
+            opacity: 0.9;
+        }
+
+        .invite-actions .btn.decline {
+            background: transparent;
+            color: var(--sign-input);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .invite-loading,
+        .no-invites {
+            padding: 16px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* slim scrollbar */
+        .invite-dropdown-topbar .invite-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .invite-dropdown-topbar .invite-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+            border-radius: 999px;
+        }
+    }
+
+    /* end topbar-invites */
+}
+
+/* main card */
+.choose-card {
+    background: radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.02));
+    padding: 6px;
+    border-radius: 14px;
+    box-shadow: 0 18px 44px rgba(9, 30, 66, 0.12);
+}
+
+/* Intro / left */
+.intro-block {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.02));
+    color: var(--sign-si);
+    border-radius: 10px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.brand {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    .brand-logo {
+        font-weight: 700;
+        color: var(--text-color);
+        letter-spacing: 2px;
+        font-size: 20px;
+    }
+
+    .brand-sub {
+        color: var(--sign-txt-6xl);
+        font-weight: 600;
+    }
+}
+
+.intro-title {
+    margin-top: 8px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--sign-txt-6xl);
+}
+
+.intro-text {
+    margin-top: 8px;
+    color: var(--sign-input);
+    max-width: 95%;
+    line-height: 1.45;
+    font-size: 14px;
+}
+
+/* features list */
+.feature dt {
+    font-weight: 700;
+    color: var(--sign-si);
+}
+
+.feature dd {
+    color: var(--sign-input);
+    font-size: 13px;
+}
+
+/* options column */
+.options-block {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* cards grid already in markup */
+.option-wrap {}
+
+/* base card style */
+.option-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px;
+    border-radius: 10px;
+    min-height: 150px;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    transition: transform .18s cubic-bezier(.2, .9, .3, 1), box-shadow .18s;
+    cursor: pointer;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.option-card:hover,
+.option-card:focus {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 48px rgba(9, 30, 66, 0.12);
+}
+
+/* theme gradients (use your variables - warm vs cool) */
+.option-card.personal {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)),
+        linear-gradient(120deg, var(--bs-bg-light), var(--home-showContent-light));
+    border: 1px solid rgba(148, 141, 66, 0.12);
+}
+
+.option-card.business {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)),
+        linear-gradient(120deg, var(--bs-bg-dark), var(--home-showContent2-light));
+    border: 1px solid rgba(83, 143, 255, 0.12);
+}
+
+/* card top */
+.card-top {}
+
+/* icon */
+.icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--sign-txt-6xl);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* titles */
+.card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--sign-txt-6xl);
+}
+
+.card-sub {
+    font-size: 12px;
+    color: var(--sign-input);
+}
+
+/* features list */
+.card-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+        font-size: 13px;
+        color: var(--sign-input);
+        margin-bottom: 6px;
+    }
+}
+
+/* footer area */
+.card-action .muted {
+    font-size: 12px;
+    color: var(--sign-input);
+}
+
+/* CTA styles */
+.cta {
+    font-weight: 700;
+    color: var(--home-showContent-dark);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.95));
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* small badge */
+.badge {
+    margin-left: auto;
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--sign-si);
+}
+
+.badge.pro {
+    background: linear-gradient(90deg, rgba(83, 143, 255, 0.15), rgba(255, 255, 255, 0.04));
+}
+
+/* spinner simple */
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.18);
+    border-left-color: var(--home-showContent-dark);
+    animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* error */
+.error-box {
+    margin-top: 8px;
+    color: #ff6b6b;
+    font-weight: 600;
+}
+
+/* small note */
+.small-note {
+    color: var(--sign-input);
+    opacity: 0.9;
+}
+
+/* responsive */
+@media (max-width: 1024px) {
+    .choose-card {
+        grid-template-columns: 1fr;
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .intro-block,
+    .options-block {
+        width: 100%;
+    }
+
+    .option-wrap {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 720px) {
+    .topbar {
+        right: 12px;
+        top: 12px;
+        padding: 6px;
+    }
+
+    .topbar-invites .invite-dropdown-topbar {
+        right: 0;
+        left: 8px;
+        width: calc(100vw - 32px);
+        max-width: none;
+    }
+
+    .invite-actions .btn {
+        min-width: 72px;
+        padding: 8px;
+    }
+}

@@ -1,0 +1,384 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jura:wght@300..700&family=Krona+One&display=swap');
+
+:root {
+    --int-comp_wd:49%;
+    --si-comp_wd:49%;
+    --int-comp_dp:block;
+    --signup-in-comp_wd:80vw;
+    --copyright_dp:none;
+    --line_dp:block;
+    --form-pd:30px 50px;
+    --form_h1_head:25px;
+    --form_h1_head2:20px;
+    --label-txt: 16px;
+    --height-signup:100vh;
+    --height-signup-in:85vh;
+}
+
+@media (max-width:1280px) {
+    :root {
+        --signup-in-comp_wd:90vw;
+        --int-comp_wd:35%;
+        --si-comp_wd:63%;
+    }
+}
+
+@media (max-width:850px) {
+    :root {
+        --copyright_dp:block;
+        --int-comp_dp:none;
+        --si-comp_wd:100%;
+        --form-pd:22px 38px;
+        --form_h1_head:15px;
+        --form_h1_head2:12px;
+        --label-txt: 13px;
+
+    }
+}
+
+@media(max-width:650px) {
+    :root {
+        --line_dp:none;
+        --form-pd:0px 5px;
+    }
+}
+
+@media (max-height:700px) {
+    :root {
+        --height-signup:700px;
+        --height-signup-in:90%;
+    }
+}
+ 
+.signup-comp {
+    width: 100%;
+    height: var(--height-signup);
+    background: var(--signup-comp);
+    position: relative;
+    overflow: hidden;
+
+    .signup-in-comp {
+        width: var(--signup-in-comp_wd);
+        height: var(--height-signup-in);
+
+        .circle {
+            border-radius: 50%;
+            position: absolute;
+            left: -17.5%;
+            bottom: -20%;
+            width: 28.5vw;
+            height: 28.5vw;
+            filter: blur(1.5px);
+            background: radial-gradient(circle at 50% 0%, var(--signup-shape-light), var(--signup-shape-dark));
+        }
+
+        .box {
+            transform: rotate(45deg);
+            width: 150px;
+            height: 150px;
+            position: absolute;
+            right: -75px;
+            top: 30px;
+            filter: blur(1.5px);
+            background: radial-gradient(circle at 0% 100%, var(--signup-shape-light), var(--signup-shape-dark));
+        }
+
+        .box_dev {
+            width: 15vw;
+            height: 15vw;
+            position: absolute;
+            right: -7vw;
+            bottom: -7vw;
+            filter: blur(1.5px);
+            border-top-left-radius: 50%;
+            background: radial-gradient(circle at 50% 0%, var(--signup-shape-light), var(--signup-shape-dark));
+        }
+
+        .sign-out-comp {
+            padding: 20px;
+            gap: 15px;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, var(--sign-otc-light), var(--sign-otc-dark));
+            box-shadow: 0px 1px 50px 1px var(--sign-bx-otc-light);
+            border-radius: 10px;
+            backdrop-filter: blur(4px);
+            z-index: 2;
+
+            .int_comp {
+                display: var(--int-comp_dp);
+                z-index: 3;
+                height: 100%;
+                width: var(--int-comp_wd);
+
+                h1.text-6xl {
+                    font-family: "Krona One", sans-serif;
+                    color: var(--sign-txt-6xl);
+                }
+                h1.text-4xl {
+                    font-family: "Krona One", sans-serif;
+                    color: var(--sign-txt-6xl);
+                }
+
+                h1 {
+                    color: #000;
+
+                    span.highlight {
+                        color: var(--sign-highlight);
+                    }
+                }
+
+                .line {
+                    width: 70%;
+                    height: 2px;
+                    border: 2px dashed var(--sign-dashline);
+                }
+
+                svg {
+                    width: 100%;
+                }
+
+                p {
+                    position: absolute;
+                    left: 0;
+                    bottom: 0;
+                    color: #1067b8;
+                }
+
+                .sct-l {
+                    color: var(--sign-sct);
+                }
+
+            }
+
+            .line {
+                display: var(--line_dp);
+                width: 2px;
+                height: 100%;
+                border: 2px dashed var(--sign-dashline2);
+
+            }
+
+            .si_comp {
+                z-index: 3;
+                height: 100%;
+                width: var(--si-comp_wd);
+                font-family: 'Jura', sans-serif;
+                position: relative;
+                // margin: 10rem auto;
+                overflow: hidden;
+
+                * {
+                    color: var(--sign-si);
+                }
+
+                .copyright {
+                    display: var(--copyright_dp);
+                    color: var(--sign-sct);
+                }
+
+                .form-sign-up {
+                    width: 100%;
+                    height: calc(100% - 25px);
+                    padding: var(--form-pd);
+
+                }
+
+                .form-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    gap: 10px;
+
+                    h1 {
+                        color: #D9D9D9;
+                        cursor: pointer;
+                        font-size: var(--form_h1_head2);
+                        transition: all 0.75s cubic-bezier(0.215, 0.610, 0.355, 1);
+                    }
+
+                    .activehigh {
+                        font-size: 25px;
+                        cursor: default;
+                        font-size: var(--form_h1_head);
+                        color: var(--sign-si);
+                    }
+
+                }
+
+                .slider {
+                    // background: orange;
+                    z-index: 10;
+                    position: relative;
+                    overflow: hidden;
+                    width: 100%;
+                    height: 100%;
+                    // background: orange;
+                }
+
+                .label-inputs {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                }
+
+                .label-input {
+                    display: grid;
+                    gap: 20px;
+                    padding: 20px;
+
+                    label {
+                        font-size: var(--label-txt);
+                        color: var(--sign-labels);
+                    }
+
+                    input {
+                        background: none;
+                        outline: none;
+                        font-size: var(--label-txt);
+                        border-bottom: 1px solid var(--sign-labels);
+                        color: var(--sign-input);
+                        transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+                        &::placeholder {
+                            font-size: var(--label-txt);
+                            color: var(--sign-input);
+                        }
+
+                        &:hover {
+                            padding-bottom: 7.5px;
+                            scale: 1.05;
+                        }
+                    }
+                }
+
+                .error-message,
+                .success-message {
+                    color: var(--sign-input);
+                }
+
+                .separate {
+                    color: var(--sign-input);
+                    padding: 17.5px;
+
+                }
+
+                .button-sign {
+                    margin: 20px 0px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    svg {
+                        width: 20px;
+                        height: 20px;
+                    }
+                }
+
+                .connect {
+                    gap: 5px;
+                    h5 {
+                        color: #fff;
+                    }
+                }
+
+                .button-sign {
+                    box-shadow: 0px 0px 5px #c7bb8d9b;
+                    padding: 10px 20px;
+                    outline: none;
+                    border-radius: 7.5px;
+                    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+
+                    &.create-button {
+                        background: #fff;
+
+                        h5 {
+                            font-size: var(--label-txt);
+                            color: #000;
+                            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                            // transition: all 1s ease-in-out;
+                        }
+
+                        &:hover {
+                            background: var(--sign-labels);
+                            scale: 1.15;
+
+                            h5 {
+                                color: #fff;
+                            }
+                        }
+                    }
+
+                    &.google {
+                        font-size: var(--label-txt);
+
+                        // background: #fa3c3c;
+                        background: linear-gradient(to right, #fa3c3c, #fff4a281);
+                        background-size: 150% 150%; // Enlarge the gradient for a smooth animation effect
+                        transition: background-size 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94); // Animate the gradient size on hover
+
+                        &:hover {
+                            background-size: 100% 100%; // Shrink the gradient on hover to animate
+                        }
+
+                    }
+
+                    &.fbook {
+                        font-size: var(--label-txt);
+
+                        background: linear-gradient(to right, #538FFF, #fff4a281);
+                        background-size: 200% 200%; // Enlarge the gradient for a smooth animation effect
+                        transition: background-size 1s ease-in-out; // Animate the gradient size on hover
+
+                        &:hover {
+                            background-size: 100% 100%; // Shrink the gradient on hover to animate
+                        }
+                    }
+                }
+
+
+                .info-sign {
+                    cursor: pointer;
+
+                    h5 {
+                        color: var(--sign-input);
+                        padding: 10px;
+                        position: relative;
+                        font-size: var(--label-txt);
+
+                        &::after {
+                            width: 100%;
+                            content: '';
+                            height: 1.5px;
+                            background: var(--sign-input);
+                            position: absolute;
+                            left: 0;
+                            bottom: 0;
+                        }
+                    }
+                }
+
+            }
+
+            .box_dev {
+                filter: blur(0px);
+                background: radial-gradient(circle at 50% 0%, var(--signup-shape2-light), var(--signup-shape2-dark));
+            }
+
+            .box {
+                filter: blur(0px);
+                background: radial-gradient(circle at 0% 100%, var(--signup-shape2-light), var(--signup-shape2-dark));
+            }
+
+            .circle {
+                filter: blur(0px);
+                background: radial-gradient(circle at 50% 0%, var(--signup-shape2-light), var(--signup-shape2-dark));
+            }
+        }
+    }
+
+
+}

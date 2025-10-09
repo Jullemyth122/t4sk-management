@@ -1,0 +1,220 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jura:wght@300..700&family=Kodchasan:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&family=Kode+Mono:wght@400..700&family=Krona+One&family=Liu+Jian+Mao+Cao&family=Sevillana&display=swap');
+
+/* :root  */
+[data-theme="dark"] 
+{
+  --bg-color: #fff;
+  --text-color: #000;
+
+  /* Navside bg-light */
+  --bg-nav-grd-darkLight: #d1c251;
+  --bg-nav-grd-darkDark: #538fff;
+  --notif-textColor: #305292e0;
+  --notif-grd-light: #eae0967b;
+  --notif-grd-dark: #538fffb0;
+
+  /* Home */
+  --home-elip1-grd-light: #fff;
+  --home-elip1-grd-dark: #d1c251;
+
+  --home-elip2-grd-light: #fff;
+  --home-elip2-grd-dark: #538fff;
+  --home-elipBoxShadow: 0px 0px 0px #212121;
+
+  --home-showContent-light: #d1c251;
+  --home-showContent-dark: #538fff;
+
+  --home-showContent2-light: #ffffffca;
+  --home-showContent2-dark: #dacc6292;
+
+
+  /* Dashboard */
+  --dash-sbar-light: #d9cd6c71;
+  --dash-sbar-dark: #8cbaff68;
+  --dash-tSbar: #538fff;
+  --dash-MsbarT: #538fff;
+
+  --sidenav-H1: #000;
+  --sidenav-slash: #ffffff97;
+  --sidenav-ISO: #000;
+
+
+  --sidenav-hoverBoardTitle: #5cabff97;
+
+  /* Board of Dashboard */
+  --bd-head_b: #5AB0FF;
+  --bd-head_b2: #407cd6;
+
+  --bd-inp_list: #ffffff9f;
+
+  --bd-cat-l1: #5aafffcd;
+  --bd-cat-l2: #8cbaff4f;
+  --bd-cat-l3: #a4910245;
+
+  /* Board Task Modal */
+  --task-modalBG: #204de3;
+  --task-modalbtnBG: #82a8ff;
+  --task-modalbtnBG1: #7088e8;
+  --task-modalColor1: #fff;
+  --task-modalColor2: #ddd;
+
+  /* Board Select */
+  --chat-svg: #0059ff;
+  --chat-box: #000;
+
+  --bs-bg-light: #b2ad789e;
+  --bs-bg-dark: #639aff76;
+
+  --bs-hdl-bg: var(--bg-nav-grd-darkLight);
+  --bs-hdl-bg2: var(--bg-nav-grd-darkDark);
+
+  /* Settings */
+  --settings-darkLight: #d1c251;
+  --settings-darkDark: #538fff;
+
+  --setting-pH1: #24292e;
+  --setting-pH2: #24292e;
+
+
+  /* Signup */
+  --signup-comp: #FFFDF6;
+
+  --signup-shape-light: #9ACFFF;
+  --signup-shape-dark: #fff39a46;
+
+  --signup-shape2-light: #538FFF;
+  --signup-shape2-dark: #fff39a46;
+
+  --sign-otc-light: #99925c62;
+  --sign-otc-dark: #fff39a5f;
+  --sign-bx-otc-light: #c7bb8d78;
+
+  --sign-txt-6xl: #3173B1;
+  --sign-highlight: #E4D34B;
+
+  --sign-dashline: #000;
+  --sign-dashline2: #538FFF;
+  --sign-sct: #000;
+
+  --sign-si: #E4D34B;
+
+  --sign-labels: #538FFF;
+  --sign-input: #000;
+
+
+}
+
+/* [data-theme="dark"]  */
+:root {
+  --bg-color: #252525;
+  --text-color: #fff;
+
+  /* Navside bg-dark */
+  --bg-nav-grd-darkLight: #454545;
+  --bg-nav-grd-darkDark: #232222;
+  --notif-textColor: #ffffff;
+  --notif-grd-light: #454545;
+  --notif-grd-dark: #232222;
+
+  /* Home */
+  --home-elip1-grd-light: #212020;
+  --home-elip1-grd-dark: #424242;
+
+  --home-elip2-grd-light: #212020;
+  --home-elip2-grd-dark: #424242;
+  --home-elipBoxShadow: 0px 2px 10px #212121;
+
+  --home-showContent-light: #212121;
+  --home-showContent-dark: #424242;
+
+  --home-showContent2-light: #222222;
+  --home-showContent2-dark: #6a6a6a;
+
+  /* Dashboard */
+  --dash-sbar-light: #4b4b4b;
+  --dash-sbar-dark: #3f3f3f;
+  --dash-tSbar: #232323;
+  --dash-MsbarT: #fff;
+
+  --sidenav-H1: #adadad;
+  --sidenav-slash: #35353597;
+  --sidenav-ISO: #cfcfcf;
+
+
+  --sidenav-hoverBoardTitle: #68748097;
+
+  /* Board of Dashboard */
+  --bd-head_b: #686868;
+  --bd-head_b2: #484848;
+
+  --bd-inp_list: #2121219f;
+
+  --bd-cat-l1: #858585cd;
+  --bd-cat-l2: #7474744f;
+  --bd-cat-l3: #49494945;
+
+  /* Board Task Modal */
+  --task-modalBG: #373737;
+  --task-modalbtnBG: #212121;
+  --task-modalbtnBG1: #282626;
+
+  --task-modalColor1: #fff;
+  --task-modalColor2: #ddd;
+
+  /* Board Select */
+  --bs-bg-light: #717171e3;
+  --bs-bg-dark: #414141df;
+
+  --bs-hdl-bg: #b0c2e4c7;
+  --chat-svg: #ffffff;
+
+
+  /* Settings */
+  --settings-darkLight: #4b4b4b;
+  --settings-darkDark: #3f3f3f;
+
+  --setting-pH1: #dadada;
+  --setting-pH2: #232323;
+
+
+  /* Signup */
+  --signup-comp: #232323;
+
+
+  --signup-shape-light: #565656;
+  --signup-shape-dark: #282828d0;
+
+  --sign-otc-light: #4b4b4b62;
+  --sign-otc-dark: #5050505f;
+  --sign-bx-otc-light: #2f2f2f78;
+
+  --sign-txt-6xl: #d8d0a0;
+  --sign-highlight: #1e1e1e;
+
+  --sign-dashline: #1e1e1e;
+  --sign-dashline2: #1e1e1e;
+  --sign-sct: #d8d0a0;
+
+  --sign-si: #d8d0a0;
+
+  --signup-shape2-light: #d8d0a0;
+  --signup-shape2-dark: #363636a7;
+
+  --sign-labels: #787878;
+  --sign-input: #fff;
+
+}
+
+body,
+* {
+  /* margin: 0; */
+  /* padding: 0; */
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
