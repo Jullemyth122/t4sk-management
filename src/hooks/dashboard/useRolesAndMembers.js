@@ -43,7 +43,11 @@ export function useRolesAndMembers({ businessId, dispatchSet, businessOwnerUid, 
     // Inject owner if missing
     useEffect(() => {
         if (!businessOwnerUid) return;
-        const found = (members || []).some(m => String(m.uid || m.id) === String(businessOwnerUid));
+        // If members already include owner (by uid), nothing to do
+        const found = (members || []).some(m => {
+            const key = m.uid || m.id || null;
+            return key && String(key) === String(businessOwnerUid);
+        });
         if (found) return;
         (async () => {
             try {
