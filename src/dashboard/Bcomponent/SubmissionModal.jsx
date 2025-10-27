@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { timeAgo } from '../../utils/time';
 import CustomSelect from './CustomSelect';
+import { createPortal } from 'react-dom';
 
 export default function SubmissionModal({
     open,
@@ -144,7 +145,7 @@ export default function SubmissionModal({
       { value: 'request-feedback', label: 'Request feedback', subtitle: 'Need input from reviewer' },
     ];
 
-    return (
+    const modalContent = (
         <div className="sd-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="sd-modal-title">
             <div className="sd-modal" role="document">
                 <div className="sd-modal-grid">
@@ -285,4 +286,6 @@ export default function SubmissionModal({
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body)
 }

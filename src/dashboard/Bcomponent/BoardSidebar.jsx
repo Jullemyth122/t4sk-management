@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 export default function BoardSidebar({
     boards,
@@ -22,7 +22,10 @@ export default function BoardSidebar({
 
 }) {
 
-    console.log(boardPage, boardsTotalPages, boardsPerPage)
+    useEffect(() => {
+        console.log(boardPage, boardsTotalPages, boardsPerPage)
+    }, [boardPage, boardsTotalPages, boardsPerPage])
+
     return (
         <div className="bd-section bd-boards-pane">
             <div className="bd-boards-head"><h3>Boards</h3><span className="count">{boards.length}</span></div>

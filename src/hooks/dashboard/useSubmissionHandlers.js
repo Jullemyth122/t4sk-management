@@ -11,7 +11,10 @@ export function useSubmissionHandlers({ businessId, uid, userEmail, dispatchSet,
         const card = (cardsMap[listId] || []).find(c => c.id === cardId);
         if (!card) return dispatchSet('uiError', 'Card not found');
         const listDoc = lists.find(l => l.id === listId) || {};
-        const mergedAssignees = Array.from(new Set([...(card.assignees || []), ...(listDoc.assignees || [])].filter(Boolean).map(String).trim()));
+        const mergedAssignees = Array.from(new Set([...(card.assignees || []), ...(listDoc.assignees || [])]
+            .filter(Boolean)
+            .map(a => String(a).trim())  // <- Trim each item here
+        ));
         const isAssignee = mergedAssignees.some(a => a === uid || a.toLowerCase() === userEmail.toLowerCase());
         if (!isAssignee) return dispatchSet('uiError', 'Permission denied');
         snapshotRef.current.cardsMap = { ...cardsMap };
@@ -56,7 +59,7 @@ export function useSubmissionHandlers({ businessId, uid, userEmail, dispatchSet,
                     title: `Task assigned for review`,
                     body: `${selectedBoard?.name || 'Board'} — ${card.title}`,
                     link: `/business/${businessId}/boards/${selectedBoardId}`,
-                    createdAt: serverTimestamp(),
+                    createdAt: new Date(),  // <- Use client timestamp
                     read: false
                 };
                 await updateDoc(doc(db, 'account', submissionObj.reviewerUid), { notifications: arrayUnion(notif) });
@@ -99,7 +102,7 @@ export function useSubmissionHandlers({ businessId, uid, userEmail, dispatchSet,
                     title: action === 'approve' ? 'Your submission was approved' : 'Your submission was rejected',
                     body: `${selectedBoard?.name || 'Board'} — ${card.title}`,
                     link: `/business/${businessId}/boards/${selectedBoardId}`,
-                    createdAt: serverTimestamp(),
+                    createdAt: new Date(),  // <- Use client timestamp
                     read: false
                 };
                 await updateDoc(doc(db, 'account', submitterUid), { notifications: arrayUnion(notif) });
