@@ -425,8 +425,113 @@ export default function CardItem({
                                 max="100"
                                 value={cardDrafts[card.id]?.progress ?? card.progress ?? 0}
                                 onChange={(e) => setCardDrafts((p) => ({ ...p, [card.id]: { ...(p[card.id] || {}), progress: Number(e.target.value) } }))}
+                                disabled={(cardDrafts[card.id]?.subtasks || card.subtasks || []).length > 0}
+                                title={(cardDrafts[card.id]?.subtasks || card.subtasks || []).length > 0 ? "Progress driven by subtasks" : "Manual progress"}
                             />
                             <div style={{ minWidth: 40, textAlign: 'right' }}>{cardDrafts[card.id]?.progress ?? card.progress ?? 0}%</div>
+                        </div>
+                    </div>
+
+                    {/* Subtasks UI in Edit Mode */}
+                    <div className="card-edit-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8, marginTop: 12 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <label style={{ fontSize: 13, fontWeight: 600 }}>Subtasks</label>
+                            <span style={{ fontSize: 11, color: 'var(--sidenav-ISO)' }}>
+                                {(cardDrafts[card.id]?.subtasks || card.subtasks || []).filter(s => s.completed).length} / {(cardDrafts[card.id]?.subtasks || card.subtasks || []).length} done
+                            </span>
+                        </div>
+
+                        <div className="subtask-list">
+                            {(cardDrafts[card.id]?.subtasks || card.subtasks || []).map((st, idx) => (
+                                <div key={st.id || idx} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={!!st.completed}
+                                        onChange={(e) => {
+                                            const newSubtasks = [...(cardDrafts[card.id]?.subtasks || card.subtasks || [])];
+                                            newSubtasks[idx] = { ...newSubtasks[idx], completed: e.target.checked };
+
+                                            // auto-calc progress if subtasks exist
+                                            const total = newSubtasks.length;
+                                            const done = newSubtasks.filter(s => s.completed).length;
+                                            const newProgress = total > 0 ? Math.round((done / total) * 100) : 0;
+
+                                            setCardDrafts(p => ({
+                                                ...p,
+                                                [card.id]: {
+                                                    ...(p[card.id] || {}),
+                                                    subtasks: newSubtasks,
+                                                    progress: newProgress
+                                                }
+                                            }));
+                                        }}
+                                    />
+                                    <input
+                                        style={{ flex: 1, padding: '4px 6px', fontSize: 13, border: 'none', background: 'transparent' }}
+                                        value={st.text}
+                                        onChange={(e) => {
+                                            const newSubtasks = [...(cardDrafts[card.id]?.subtasks || card.subtasks || [])];
+                                            newSubtasks[idx] = { ...newSubtasks[idx], text: e.target.value };
+                                            setCardDrafts(p => ({ ...p, [card.id]: { ...(p[card.id] || {}), subtasks: newSubtasks } }));
+                                        }}
+                                        placeholder="Subtask..."
+                                    />
+                                    <button
+                                        type="button"
+                                        className="card-btn card-btn-ghost card-btn-danger"
+                                        style={{ padding: '2px 6px', fontSize: 12 }}
+                                        onClick={() => {
+                                            const newSubtasks = (cardDrafts[card.id]?.subtasks || card.subtasks || []).filter((_, i) => i !== idx);
+                                            // recalibrate progress
+                                            const total = newSubtasks.length;
+                                            const done = newSubtasks.filter(s => s.completed).length;
+                                            const newProgress = total > 0 ? Math.round((done / total) * 100) : (cardDrafts[card.id]?.progress ?? 0); // fallback if cleared
+
+                                            setCardDrafts(p => ({
+                                                ...p,
+                                                [card.id]: {
+                                                    ...(p[card.id] || {}),
+                                                    subtasks: newSubtasks,
+                                                    progress: newProgress
+                                                }
+                                            }));
+                                        }}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: 6 }}>
+                            <input
+                                placeholder="+ Add new subtask..."
+                                style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--bd-border)', fontSize: 13, background: 'var(--bd-inp)' }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && e.target.value.trim()) {
+                                        e.preventDefault();
+                                        const text = e.target.value.trim();
+                                        const newSub = { id: `st-${Date.now()}`, text, completed: false };
+                                        const curSubtasks = [...(cardDrafts[card.id]?.subtasks || card.subtasks || [])];
+                                        const newSubtasks = [...curSubtasks, newSub];
+
+                                        // recalc progress
+                                        const total = newSubtasks.length;
+                                        const done = newSubtasks.filter(s => s.completed).length;
+                                        const newProgress = total > 0 ? Math.round((done / total) * 100) : 0;
+
+                                        setCardDrafts(p => ({
+                                            ...p,
+                                            [card.id]: {
+                                                ...(p[card.id] || {}),
+                                                subtasks: newSubtasks,
+                                                progress: newProgress
+                                            }
+                                        }));
+                                        e.target.value = '';
+                                    }
+                                }}
+                            />
                         </div>
                     </div>
 
@@ -442,7 +547,10 @@ export default function CardItem({
 
                                 if (draft.complexityMode !== undefined) updates.complexityMode = draft.complexityMode;
                                 if (draft.complexity !== undefined) updates.complexity = draft.complexity === '' ? null : draft.complexity;
+                                if (draft.complexityMode !== undefined) updates.complexityMode = draft.complexityMode;
+                                if (draft.complexity !== undefined) updates.complexity = draft.complexity === '' ? null : draft.complexity;
                                 if (draft.progress !== undefined) updates.progress = Number(draft.progress) || 0;
+                                if (draft.subtasks !== undefined) updates.subtasks = draft.subtasks;
 
                                 const due = updates.dueDate || card.dueDate || null;
                                 const priorityLabel = cardDrafts[card.id]?.priority ?? card.priority ?? 'medium';
@@ -629,6 +737,78 @@ export default function CardItem({
                                         <div style={{ marginTop: 6, fontStyle: 'italic' }}>{card.submission.reviewNote}</div>
                                     </div>
                                 ) : null}
+                            </div>
+                        )}
+
+                        {/* View mode subtasks - Full visible checklist */}
+                        {!isEditing && Array.isArray(card.subtasks) && card.subtasks.length > 0 && (
+                            <div className="card-subtasks-view" style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--sidenav-ISO)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    Tasks · {card.subtasks.filter(s => s.completed).length} of {card.subtasks.length} complete
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                    {card.subtasks.map((st, idx) => {
+                                        const canToggle = isAssignee && !isLocked;
+                                        return (
+                                            <div
+                                                key={st.id || idx}
+                                                onClick={() => {
+                                                    if (!canToggle) return;
+                                                    const newSubtasks = [...card.subtasks];
+                                                    newSubtasks[idx] = { ...st, completed: !st.completed };
+                                                    const total = newSubtasks.length;
+                                                    const done = newSubtasks.filter(s => s.completed).length;
+                                                    const newProgress = total > 0 ? Math.round((done / total) * 100) : 0;
+                                                    handleUpdateCard({
+                                                        listId,
+                                                        cardId: card.id,
+                                                        updates: { subtasks: newSubtasks, progress: newProgress },
+                                                        listAssignees: parentList?.assignees || []
+                                                    });
+                                                }}
+                                                style={{
+                                                    display: 'flex',
+                                                    gap: 10,
+                                                    alignItems: 'flex-start',
+                                                    padding: '6px 8px',
+                                                    borderRadius: 6,
+                                                    background: st.completed ? 'rgba(76, 175, 80, 0.06)' : 'rgba(0,0,0,0.02)',
+                                                    transition: 'all 0.2s ease',
+                                                    cursor: canToggle ? 'pointer' : 'default',
+                                                    userSelect: 'none'
+                                                }}
+                                                title={canToggle ? 'Click to toggle completion' : (isLocked ? 'Card is locked' : 'Not assigned to you')}
+                                            >
+                                                <div style={{
+                                                    minWidth: 18,
+                                                    height: 18,
+                                                    borderRadius: 4,
+                                                    border: `2px solid ${st.completed ? '#4caf50' : '#ccc'}`,
+                                                    background: st.completed ? '#4caf50' : 'white',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    marginTop: 2,
+                                                    color: 'white',
+                                                    fontSize: 11,
+                                                    fontWeight: 'bold'
+                                                }}>
+                                                    {st.completed && '✓'}
+                                                </div>
+                                                <div style={{
+                                                    flex: 1,
+                                                    fontSize: 13.5,
+                                                    lineHeight: '1.5',
+                                                    textDecoration: st.completed ? 'line-through' : 'none',
+                                                    color: st.completed ? 'var(--sidenav-ISO)' : 'inherit',
+                                                    opacity: st.completed ? 0.75 : 1
+                                                }}>
+                                                    {st.text}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
 

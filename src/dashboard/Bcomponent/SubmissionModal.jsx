@@ -188,6 +188,50 @@ export default function SubmissionModal({
                             </div>
                         </div>
 
+                        {/* Subtasks section */}
+                        {card?.subtasks && card.subtasks.length > 0 && (
+                            <div className="sd-assignees" style={{ marginTop: 16 }}>
+                                <strong>Tasks · {card.subtasks.filter(s => s.completed).length} of {card.subtasks.length} complete</strong>
+                                <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                    {card.subtasks.map((st, idx) => (
+                                        <div key={st.id || idx} style={{
+                                            display: 'flex',
+                                            gap: 8,
+                                            alignItems: 'center',
+                                            padding: '6px 8px',
+                                            borderRadius: 6,
+                                            background: st.completed ? 'rgba(76, 175, 80, 0.08)' : 'rgba(0,0,0,0.03)'
+                                        }}>
+                                            <div style={{
+                                                minWidth: 16,
+                                                height: 16,
+                                                borderRadius: 3,
+                                                border: `2px solid ${st.completed ? '#4caf50' : '#ccc'}`,
+                                                background: st.completed ? '#4caf50' : 'white',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                color: 'white',
+                                                fontSize: 10,
+                                                fontWeight: 'bold'
+                                            }}>
+                                                {st.completed && '✓'}
+                                            </div>
+                                            <div style={{
+                                                flex: 1,
+                                                fontSize: 13,
+                                                textDecoration: st.completed ? 'line-through' : 'none',
+                                                color: st.completed ? 'var(--sidenav-ISO)' : 'inherit',
+                                                opacity: st.completed ? 0.7 : 1
+                                            }}>
+                                                {st.text}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="sd-note-mini">
                             <small className="sd-muted">You can retract a submission while it hasn't been reviewed.</small>
                             <div className="sd-server-time">Server time: {card?.submittedAt ? timeAgo(card.submittedAt) : '—'}</div>
@@ -196,16 +240,38 @@ export default function SubmissionModal({
 
                     {/* Right form */}
                     <div className="sd-right" role="form" aria-labelledby="sd-modal-title">
-                        <div className="sd-field-row">
-                            <label className="sd-label">Submission type</label>
-                            <CustomSelect
-                                options={typeOptions}
-                                value={type}
-                                onChange={(v) => setType(v)}
-                                placeholder="Select submission type"
-                                searchable={false}
-                                ariaLabel="Submission type"
-                            />
+                        <div className="sd-field-row sd-row-inline">
+                            <div style={{ flex: 1 }}>
+                                <label className="sd-label">Submission type</label>
+                                <CustomSelect
+                                    options={typeOptions}
+                                    value={type}
+                                    onChange={(v) => setType(v)}
+                                    placeholder="Select submission type"
+                                    searchable={false}
+                                    ariaLabel="Submission type"
+                                />
+                            </div>
+
+                            <div className="sd-reviewer" style={{ flex: 1 }}>
+                                <label className="sd-label">
+                                    Assign reviewer
+                                    {reviewerSourceLabel && (
+                                        <span style={{ fontSize: '0.8rem', color: 'var(--sidenav-ISO)', fontWeight: 400, marginLeft: 8 }}>
+                                            — {reviewerSourceLabel.replace('Showing ', '')}
+                                        </span>
+                                    )}
+                                </label>
+                                {/* simplified label row */}
+                                <CustomSelect
+                                    options={reviewerOptions}
+                                    value={reviewerUid}
+                                    onChange={(v) => setReviewerUid(v)}
+                                    placeholder="— none —"
+                                    searchable={true}
+                                    ariaLabel="Assign reviewer"
+                                />
+                            </div>
                         </div>
 
                         <div className="sd-field-row">
@@ -245,35 +311,12 @@ export default function SubmissionModal({
                             )}
                         </div>
 
-                        <div className="sd-field-row sd-row-inline">
-                            <label className="sd-checkbox">
+                        {/* <div className="sd-field-row sd-row-inline">
+                             <label className="sd-checkbox">
                                 <input type="checkbox" checked={qaChecked} onChange={(e)=>setQaChecked(e.target.checked)} />
                                 <span>Passes acceptance criteria</span>
                             </label>
-
-                            <div className="sd-reviewer">
-                                <label className="sd-label">Assign reviewer (optional)</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                                    { reviewerSourceLabel ? (
-                                        <div style={{ fontSize: 12, color: 'var(--sidenav-ISO)' }}>{reviewerSourceLabel}</div>
-                                    ) : null }
-                                    { ownerIncluded ? (
-                                        <div style={{ fontSize: 12, background: 'rgba(0,0,0,0.04)', padding: '4px 8px', borderRadius: 999, color: 'var(--sidenav-ISO)' }}>
-                                            Owner included
-                                        </div>
-                                    ) : null }
-                                </div>
-
-                                <CustomSelect
-                                    options={reviewerOptions}
-                                    value={reviewerUid}
-                                    onChange={(v) => setReviewerUid(v)}
-                                    placeholder="— none —"
-                                    searchable={true}
-                                    ariaLabel="Assign reviewer"
-                                />
-                            </div>
-                        </div>
+                        </div> */}
 
                         <div className="sd-footer">
                         <button className="sd-btn sd-btn-ghost" onClick={()=>onClose?.()} disabled={submitting}>Cancel</button>

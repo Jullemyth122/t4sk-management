@@ -1,5 +1,5 @@
-// src/hooks/dashboard/usePermissionsAndDerived.js
 import { useMemo } from "react";
+import useHasPerm from "../useHasPerm";
 
 export function usePermissionsAndDerived({ profile, businessId, roles = [], members = [],boards, boardQuery, memberQuery, lists = [], uid, userEmail, getMemberLevel, businessOwnerUid }) {
     const userRoleId = useMemo(() => {
@@ -15,7 +15,7 @@ export function usePermissionsAndDerived({ profile, businessId, roles = [], memb
         return rDoc ? rDoc.name || rDoc.id : userRoleId;
     }, [userRoleId, roles]);
 
-    // compute userLevel here (based on userRoleId + roles)
+    // compute userLevel here (legacy support / visual)
     const userLevel = useMemo(() => {
         if (!userRoleId) return 0;
         if (userRoleId === 'owner') return 999;
@@ -23,17 +23,22 @@ export function usePermissionsAndDerived({ profile, businessId, roles = [], memb
         return r ? Number(r.level || 0) : 0;
     }, [userRoleId, roles]);
 
-    const canEditBoardValue = useMemo(() => {
-        if (!userRoleId) return false;
-        if (userRoleId === 'owner') return true;
-        const r = roles.find((rr) => rr.id === userRoleId);
-        return r ? Number(r.level || 0) >= 5 : false;
-    }, [userRoleId, roles]);
+    // NEW: Use granular permissions
+    const { can } = useHasPerm(roles, businessId);
 
-    const canCreateBoard = useMemo(() => userRoleId === 'owner' || userLevel >= 2, [userRoleId, userLevel]);
-    const canCreateList = useMemo(() => userRoleId === 'owner' || userLevel >= 2, [userRoleId, userLevel]);
-    const canViewMembers = useMemo(() => userRoleId === 'owner' || userLevel >= 2, [userRoleId, userLevel]);
-    const canAssignTasks = useMemo(() => userRoleId === 'owner' || userLevel > 2, [userRoleId, userLevel]);
+    const canEditBoardValue = can('boards.update');
+    const canCreateBoard = can('boards.create');
+    const canCreateList = can('lists.create');
+    const canViewMembers = can('members.read');
+    const canAssignTasks = can('cards.assign'); 
+    
+    // Additional granular permissions needed by dashboard components
+    const canDeleteBoard = can('boards.delete');
+    const canDeleteList = can('lists.delete');
+    const canUpdateList = can('lists.update');
+    const canCreateCard = can('cards.create');
+    const canUseOCR = can('ocr.use');
+    const canViewBoards = can('boards.read');
 
     const boardsFiltered = useMemo(() => {
         if (!boardQuery) return boards || [];
@@ -60,9 +65,17 @@ export function usePermissionsAndDerived({ profile, businessId, roles = [], memb
 
     const listsVisible = useMemo(() => {
         if (!Array.isArray(lists)) return [];
-        if (userLevel > 2) return lists;
+        // if user has general "boards.read" (or lists.read?), they typically see all lists in that board
+        // Assuming if they can view the board, they can view lists.
+        // But let's check if we want to restrict personal lists?
+        // For now, let's say if you can 'boards.read', you see all.
+        // Or keep legacy check: userLevel > 2 sees all.
+        // Let's use 'boards.read' as "Member Access".
+        if (can('boards.read')) return lists; 
+        
+        // Fallback for restricted users: only see lists they are assigned to
         return lists.filter(l => (l.assignees || []).some(x => String(x).trim() === uid || String(x).trim().toLowerCase() === userEmail));
-    }, [lists, userLevel, uid, userEmail]);
+    }, [lists, can, uid, userEmail]);
 
     const reviewerOptions = useMemo(() => {
         if (!Array.isArray(members) || members.length === 0) return null;
@@ -73,7 +86,12 @@ export function usePermissionsAndDerived({ profile, businessId, roles = [], memb
             const mEmail = (m.email || '').toLowerCase();
             const level = getMemberLevel(m);
             const isOwner = businessOwnerUid && mUid && String(mUid) === String(businessOwnerUid);
-            if (!isOwner && level <= 2) return;
+            // Hide very low level members from reviewers? Or just show everyone?
+            // Legacy was level <= 2 hidden unless owner.
+            // Maybe keep that for noise reduction, or allow configuration?
+            // Let's keep it but relax if we want full list.
+            if (!isOwner && level <= 0) return; // only hide level 0 (guests?)
+            
             const val = mUid || mEmail;
             if (!val || seen.has(val)) return;
             seen.add(val);
@@ -112,12 +130,18 @@ export function usePermissionsAndDerived({ profile, businessId, roles = [], memb
     return {
         userRoleId,
         userRoleName,
-        userLevel,              // <-- now returned
+        userLevel,
         canEditBoardValue,
         canCreateBoard,
         canCreateList,
         canViewMembers,
         canAssignTasks,
+        canDeleteBoard,
+        canDeleteList, 
+        canUpdateList, 
+        canCreateCard, 
+        canUseOCR,     
+        canViewBoards, 
         boardsFiltered,
         membersFiltered,
         listsVisible,

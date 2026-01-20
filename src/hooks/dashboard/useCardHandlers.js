@@ -1,7 +1,10 @@
 import { useCallback, useRef } from "react";
 import * as boardSvc from '../../services/boardService'
+import { clampInt } from "../../utils/dashboardUtils";
+import { computePriority } from "../../utils/prioritization";
+import { serverTimestamp } from "firebase/firestore";
 
-export function useCardHandlers({ businessId, uid, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs }) {
+export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs }) {
     const snapshotRef = useRef({});
 
     const handleCreateCardForList = useCallback(async (listId) => {
@@ -48,8 +51,43 @@ export function useCardHandlers({ businessId, uid, dispatchSet, selectedBoardId,
         }
     }, [newCardInputs, selectedBoardId, businessId, uid, cardsMap, canAssignTasks, dispatchSet]);
 
-    const handleUpdateCard = useCallback(async ({ listId, cardId, updates }) => {
-        if (!cardId || !listId || !canEditBoardValue) return dispatchSet('uiError', 'Permission denied or invalid card/list');
+    const handleUpdateCard = useCallback(async ({ listId, cardId, updates, listAssignees }) => {
+        if (!cardId || !listId) return dispatchSet('uiError', 'Invalid card/list');
+        
+        // Check if this is a subtask-only update (subtasks + progress)
+        const updateKeys = Object.keys(updates || {});
+        const isSubtaskOnlyUpdate = updateKeys.length > 0 && updateKeys.every(k => k === 'subtasks' || k === 'progress');
+        
+        // For subtask updates, check if user is an assignee
+        // For other updates, require board edit permission
+        if (!isSubtaskOnlyUpdate && !canEditBoardValue) {
+            return dispatchSet('uiError', 'Permission denied - board edit required');
+        }
+        
+        // If subtask-only update, verify user is assignee
+        if (isSubtaskOnlyUpdate) {
+            const card = (cardsMap[listId] || []).find(c => c.id === cardId);
+            if (!card) return dispatchSet('uiError', 'Card not found');
+            
+            // MERGE card + list assignees (same as UI does)
+            const allAssignees = [
+                ...(Array.isArray(card.assignees) ? card.assignees : []),
+                ...(Array.isArray(listAssignees) ? listAssignees : [])
+            ].filter(Boolean);
+
+            const assigneesNormalized = allAssignees.map(a => String(a).toLowerCase());
+
+            const normalizedUid = String(uid || '').toLowerCase();
+            const normalizedEmail = String(userEmail || '').toLowerCase();
+            
+            const isAssignee = assigneesNormalized.includes(normalizedUid) || 
+                            assigneesNormalized.includes(normalizedEmail);
+            
+            if (!isAssignee) {
+                return dispatchSet('uiError', 'Permission denied - not assigned to this card');
+            }
+        }
+                
         snapshotRef.current.cardsMap = { ...cardsMap };
         try {
             const up = { ...updates };
@@ -81,7 +119,7 @@ export function useCardHandlers({ businessId, uid, dispatchSet, selectedBoardId,
             dispatchSet('cardsMap', snapshotRef.current.cardsMap || {});
             dispatchSet('uiError', err?.message || 'Failed to update card');
         }
-    }, [businessId, uid, selectedBoardId, cardsMap, canEditBoardValue, dispatchSet]);
+    }, [businessId, uid, userEmail, selectedBoardId, cardsMap, canEditBoardValue, dispatchSet]);
 
     const handleDeleteCard = useCallback(async ({ listId, cardId }) => {
         if (!listId || !cardId || !canEditBoardValue || !window.confirm('Delete this card?')) return;

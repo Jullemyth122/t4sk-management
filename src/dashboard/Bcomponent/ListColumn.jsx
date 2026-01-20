@@ -38,7 +38,16 @@ export default function ListColumn({
     reviewerOptions = null,
     reviewerOptionsSource = '',
     roles = [], // NEW: pass roles for level computation
+
+    // Granular permissions (fallback to canEdit if not provided)
+    canUpdateList,
+    canDeleteList,
+    canCreateCard,
 }) {
+    // resolve permissions
+    const _canUpdateList = (canUpdateList !== undefined) ? canUpdateList : canEdit;
+    const _canDeleteList = (canDeleteList !== undefined) ? canDeleteList : canEdit;
+    const _canCreateCard = (canCreateCard !== undefined) ? canCreateCard : canEdit;
     const [confirmDelete, setConfirmDelete] = useState(false);
 
     // per-card expanded state (true => expanded/full details shown; false => collapsed compact)
@@ -95,7 +104,7 @@ export default function ListColumn({
     const moreCount = Math.max(0, resolvedAssignees.length - visibleCount);
     const fullTitle = resolvedAssignees.map((r) => (r.email ? `${r.name} <${r.email}>` : r.name)).join(', ');
 
-    // compute aggregated list progress: prefer list.progress if set, else sum of submitted/done cards' contributions
+    // compute aggregated list progress: prefer list.progress if set, else sum of weighted card contributions
     const listProgress = useMemo(() => {
         // prefer explicit list.progress if present
         if (list && Number.isFinite(Number(list.progress))) {
@@ -103,70 +112,68 @@ export default function ListColumn({
         }
         if (!Array.isArray(cards) || cards.length === 0) return 0;
 
-        // ignore optimistic/temp cards (they shouldn't immediately affect list %)
+        // ignore optimistic/temp cards
         const stableCards = (cards || []).filter(c => !(String(c.id || '').startsWith('tmp-')));
+        if (stableCards.length === 0) return 0;
 
-        // included only when card is done-ish (same logic as before)
-        const included = stableCards.filter((c) => {
-            const s = String(c.status || '').toLowerCase();
-            const rs = String((c.submission && c.submission.reviewStatus) || '').toLowerCase();
-            return s === 'done' || rs === 'approved';
-        });
-
-        if (included.length === 0) return 0;
-
-        // helper to extract any explicit numeric "weight" or "submission.contribution"
-        const extractWeight = (c) => {
-            if (c.submission && typeof c.submission.contribution === 'number') {
-                return Math.max(0, Math.min(100, Math.round(c.submission.contribution)));
-            }
-            if (Number.isFinite(Number(c.weight))) {
-                return Math.max(0, Math.min(100, Math.round(Number(c.weight))));
-            }
-            return null;
+        // helper to get weight
+        const getWeight = (c) => {
+            if (c.submission && typeof c.submission.contribution === 'number') return Math.max(0, Number(c.submission.contribution));
+            if (Number.isFinite(Number(c.weight))) return Math.max(0, Number(c.weight));
+            return null; // explicit null
         };
 
-        // collect explicit weights for all stable cards (null when absent)
-        const allWeightsRaw = stableCards.map(extractWeight);
-        const anyExplicit = allWeightsRaw.some((w) => w !== null);
+        // helper to get progress (0.0 to 1.0)
+        const getProgressRatio = (c) => {
+        // 1. If 'done' or 'approved', it is 100% (1.0)
+            const s = String(c.status || '').toLowerCase();
+            const rs = String((c.submission && c.submission.reviewStatus) || '').toLowerCase();
+            if (s === 'done' || rs === 'approved') return 1.0;
 
-        // if no explicit weights at all -> fallback to equal-split behaviour (original)
-        if (!anyExplicit) {
-            const defaultContribution = Math.round(100 / Math.max(1, stableCards.length));
-            const contributions = included.map(() => defaultContribution);
-            const sum = contributions.reduce((s, v) => s + v, 0);
-            return Math.round(Math.max(0, Math.min(100, sum)));
+            // 2. Otherwise use c.progress (0-100)
+            const p = Number(c.progress);
+            if (Number.isFinite(p)) return Math.max(0, Math.min(100, p)) / 100.0;
+            return 0;
+        };
+
+        const weightsRaw = stableCards.map(getWeight);
+        const hasExplicit = weightsRaw.some(w => w !== null);
+
+        // Calculate final weights
+        let finalWeights = [];
+        if (!hasExplicit) {
+            // Equal weights if no explicit weights found
+            const val = 1;
+            finalWeights = stableCards.map(() => val);
+        } else {
+            // Fill nulls with avg of explicit ones, or 1
+            const explicitVals = weightsRaw.filter(w => w !== null);
+            const sumExplicitVals = explicitVals.reduce((a, b) => a + b, 0);
+            const avg = explicitVals.length > 0 ? sumExplicitVals / explicitVals.length : 1;
+            finalWeights = weightsRaw.map(w => (w !== null ? w : avg));
         }
 
-        // If we have explicit weights (maybe mixed with nulls) we compute weights robustly:
-        // - If every card has an explicit weight AND sum(allWeights) <= 100 => treat as absolute percentages.
-        // - Otherwise treat weights as relative scores (progress = sumDone / sumAll * 100).
-        const explicitVals = allWeightsRaw.filter((w) => w !== null);
-        const sumExplicit = explicitVals.reduce((s, v) => s + v, 0);
-        const allHaveExplicit = explicitVals.length === stableCards.length && stableCards.length > 0;
+        const totalWeight = finalWeights.reduce((a, b) => a + b, 0);
+        if (totalWeight === 0) return 0;
 
-        // Build a uniform weights array for all stable cards: explicit value when present, otherwise use average explicit (or 1)
-        const defaultNull = explicitVals.length ? Math.round(sumExplicit / explicitVals.length) || 1 : 1;
-        const finalWeights = allWeightsRaw.map((w) => (w === null ? defaultNull : w));
+        // Calculate weighted progress sum
+        let weightedProgressSum = 0;
+        stableCards.forEach((c, idx) => {
+            const w = finalWeights[idx];
+            const ratio = getProgressRatio(c);
+            weightedProgressSum += (w * ratio);
+        });
 
-        // sum of weights for all cards, and for done cards
-        const sumAll = finalWeights.reduce((s, v) => s + v, 0);
-        const idToIndex = Object.fromEntries(stableCards.map((c, i) => [String(c.id), i]));
-        const sumDone = included.reduce((s, c) => {
-            const idx = idToIndex[String(c.id)];
-            const w = typeof idx === 'number' ? finalWeights[idx] : 0;
-            return s + (Number.isFinite(Number(w)) ? Number(w) : 0);
-        }, 0);
-
-        // decide absolute vs relative:
-        if (allHaveExplicit && sumExplicit <= 100) {
-            // absolute percentages: clamp to 0..100
-            return Math.round(Math.max(0, Math.min(100, sumDone)));
+        // Determine mode: "Absolute" or "Relative"
+        // If all cards have explicit weights and they sum to <= 100, treat as absolute percentages of the list.
+        const allHaveExplicit = !weightsRaw.includes(null);
+        if (allHaveExplicit && totalWeight <= 100) {
+            return Math.round(weightedProgressSum);
         }
 
-        // relative weights: compute ratio
-        if (sumAll === 0) return 0;
-        return Math.round(Math.max(0, Math.min(100, (sumDone / sumAll) * 100)));
+        // Relative mode (default): Scale result to 0-100 range based on total weight
+        return Math.round((weightedProgressSum / totalWeight) * 100);
+
     }, [cards, list]);
 
     // === New: prevent creating a new card when listProgress >= 100
@@ -430,32 +437,36 @@ export default function ListColumn({
                         ✕ Cancel
                     </button>
                 </div>
-            ) : canEdit ? (
+            ) : (_canUpdateList || _canDeleteList) ? (
                 <div className="list-actions">
-                    <button className="action-btn" onClick={startEdit} aria-label={`Edit list ${list.name}`}>
-                        ✎ Edit
-                    </button>
-                    {!confirmDelete ? (
-                        <button
-                            className="action-btn action-danger"
-                            onClick={() => setConfirmDelete(true)}
-                            aria-haspopup="true"
-                            aria-expanded="false"
-                            aria-label={`Delete list ${list.name}`}
-                            title="Delete list"
-                        >
-                            🗑 Delete
-                        </button>
-                    ) : (
-                        <div className="action-confirm" role="dialog" aria-label="Confirm delete list">
-                            <span className="confirm-label">Delete?</span>
-                            <button className="action-btn action-danger" onClick={onDeleteConfirm} aria-label="Confirm delete">
-                                Delete
+                        {_canUpdateList && (
+                            <button className="action-btn" onClick={startEdit} aria-label={`Edit list ${list.name}`}>
+                                ✎ Edit
                             </button>
-                            <button className="action-btn action-ghost" onClick={() => setConfirmDelete(false)} aria-label="Cancel delete">
-                                Cancel
-                            </button>
-                        </div>
+                        )}
+                        {_canDeleteList && (
+                            !confirmDelete ? (
+                                <button
+                                    className="action-btn action-danger"
+                                    onClick={() => setConfirmDelete(true)}
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    aria-label={`Delete list ${list.name}`}
+                                    title="Delete list"
+                                >
+                                    🗑 Delete
+                                </button>
+                            ) : (
+                                <div className="action-confirm" role="dialog" aria-label="Confirm delete list">
+                                    <span className="confirm-label">Delete?</span>
+                                    <button className="action-btn action-danger" onClick={onDeleteConfirm} aria-label="Confirm delete">
+                                        Delete
+                                    </button>
+                                    <button className="action-btn action-ghost" onClick={() => setConfirmDelete(false)} aria-label="Cancel delete">
+                                        Cancel
+                                    </button>
+                                </div>
+                                )
                     )}
                 </div>
             ) : null}
@@ -639,7 +650,7 @@ export default function ListColumn({
                         </div>
                     )}
 
-                    {canEdit && (
+                    {_canCreateCard && (
                         // quick-add: disabled when listProgress >= 100
                         <div className={`quick-add${isListComplete ? ' disabled' : ''}`} style={{ marginTop: 14 }}>
                             <input

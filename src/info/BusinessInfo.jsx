@@ -12,29 +12,57 @@ import {
 import { db } from "../config/firebase";
 import { useAuth } from "../context/useAuth";
 import {
-    createBusiness,
-    createRole,
-    inviteMember,
-    updateBusinessSettings,
-    deleteRole,
-    updateRole,
-    searchUsersByEmail,
+    createBusiness, getBusiness, updateBusinessSettings,
+    inviteMember, fetchPendingInvitesForEmail, declineInvite,
+    acceptInvite, getRoles, createRole, updateRole, deleteRole,
+    deleteBusiness, leaveBusiness, searchUsersByEmail, updateMemberRole,
 } from "../services/accountService";
 
 import "../scss/business-info.scss";
 import BusinessSkeleton from "../components/loaders/BusinessSkeleton";
 import useDebounce from "../hooks/useDebounce";
 import useRealtimeCollection from "../hooks/useRealtimeCollection";
+import { PERMISSIONS, PERMISSION_CATEGORIES } from "../config/permissions";
+import useHasPerm from "../hooks/useHasPerm";
+import CustomSelect from "../dashboard/Bcomponent/CustomSelect";
 
 /* ----------------------------- memoized rows ------------------------------ */
-const MemberRow = React.memo(function MemberRow({ m }) {
+const MemberRow = React.memo(function MemberRow({ m, onRemove, onUpdateRole, canRemove, canUpdateRole, isSelf, isOwner, roles }) {
+    const showRemove = canRemove && !isSelf && !isOwner;
+    const showUpdate = canUpdateRole && !isSelf && !isOwner; // Prevent changing own role or owner's role? Usually owner role is fixed.
+
     return (
         <li className="member-row">
             <div>
                 <strong>{m.name || m.email || "—"}</strong>
                 <div className="muted small">{m.email || m.uid}</div>
             </div>
-            <div className="muted">{m.roleName}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {showUpdate ? (
+                    <div style={{ width: 160 }}>
+                        <CustomSelect
+                            options={useMemo(() => roles.map(r => ({ value: r.id, label: r.name, subtitle: `Level ${r.level ?? 0}` })), [roles])}
+                            value={m.roleId}
+                            onChange={(val) => onUpdateRole(m.uid, val)}
+                            placeholder="Select role"
+                            searchable={false}
+                            ariaLabel="Change role"
+                        />
+                    </div>
+                ) : (
+                    <span className="muted">{m.roleName}</span>
+                )}
+
+                {showRemove && (
+                    <button
+                        className="btn small danger ghost"
+                        onClick={() => onRemove(m.uid)}
+                        title="Remove member from business"
+                    >
+                        Remove
+                    </button>
+                )}
+            </div>
         </li>
     );
 });
@@ -99,8 +127,12 @@ const initialState = {
     newRole: { name: "", level: 1, capacity: null },
 
     // editing role
-    editingRole: { id: null, name: "", level: 0, capacity: null },
+    editingRole: { id: null, name: "", level: 0, capacity: null, permissions: {} },
+
+    // owner check
+    ownerUid: null,
 };
+
 
 function reducer(state, action) {
     switch (action.type) {
@@ -185,11 +217,13 @@ export default function BusinessInfo({ simulateLoading = false }) {
                             contactPhone: d.contactPhone ?? state.form.contactPhone,
                             website: d.website ?? state.form.website,
                             location: d.location ?? state.form.location,
+                            updatedAt: d.updatedAt ? d.updatedAt.toMillis() : null,
                             logoUrl: d.logoUrl ?? state.form.logoUrl,
                             published: typeof d.published === "boolean" ? d.published : state.form.published,
                             settings: d.settings ?? state.form.settings ?? {},
                         },
                         profileExists: true,
+                        ownerUid: d.ownerUid || null, 
                     },
                 });
             } else {
@@ -219,6 +253,18 @@ export default function BusinessInfo({ simulateLoading = false }) {
     const roles = useRealtimeCollection(rolesQuery, [state.businessId]) || [];
     const rawMembers = useRealtimeCollection(membersQuery, [state.businessId]) || [];
 
+    // RBAC Hooks
+    const { can } = useHasPerm(roles, state.businessId);
+
+    const canViewRoles = can('roles.read');
+    const canManageRoles = can('roles.manage');
+    const canDeleteRoles = can('roles.manage'); // grouped under manage
+    const canViewSettings = can('settings.view');
+    const canUpdateSettings = can('settings.update');
+    const canInvite = can('members.invite');
+    const canUpdateProfile = can('business.update');
+
+
     /* ---------------------------------------------------------------------- */
     /* derive members (add roleName) using useMemo (no setState)              */
     /* ---------------------------------------------------------------------- */
@@ -243,21 +289,23 @@ export default function BusinessInfo({ simulateLoading = false }) {
     /* canEdit computed via useMemo (no setState)                             */
     /* ---------------------------------------------------------------------- */
     const canEdit = useMemo(() => {
+        // Fallback or "Owner" check - kept for legacy or high-level override if needed.
+        // But we should rely on granular perms where possible.
         const { profileExists, businessId: bid } = state;
         if (!currentUser?.profile) return false;
-        if (!profileExists) return true;
+        if (!profileExists) return true; // allow creating if not exists?
         if (!bid) return false;
 
         const aff = Array.isArray(currentUser.profile.businessAffiliations)
             ? currentUser.profile.businessAffiliations.find((a) => a.businessId === bid)
             : null;
         if (!aff) return false;
-        const affRoleId = aff.roleId;
-        if (affRoleId === "owner") return true;
-        const matchedRole = (roles || []).find((r) => r.id === affRoleId);
-        if (matchedRole && String(matchedRole.name || "").toLowerCase() === "owner") return true;
-        return false;
-    }, [currentUser?.profile, roles, state.profileExists, state.businessId]);
+        if (aff.roleId === "owner") return true;
+
+        // Also check if they have "business.update" as a proxy for "Admin"
+        // But `can` function above handles the role checks.
+        return can('business.update');
+    }, [currentUser?.profile, roles, state.profileExists, state.businessId, can]);
 
     /* ---------------------------------------------------------------------- */
     /* invite role default                                                     */
@@ -392,7 +440,16 @@ export default function BusinessInfo({ simulateLoading = false }) {
     }, [state.newRole, state.businessId, state.form?.settings]);
 
     const startEditRole = useCallback((role) => {
-        dispatch({ type: "SET_EDIT_ROLE", payload: { id: role.id, name: role.name || "", level: Number(role.level || 0), capacity: role.capacity === undefined ? null : role.capacity } });
+        dispatch({
+            type: "SET_EDIT_ROLE",
+            payload: {
+                id: role.id,
+                name: role.name || "",
+                level: Number(role.level || 0),
+                capacity: role.capacity === undefined ? null : role.capacity,
+                permissions: role.permissions || {}
+            }
+        });
     }, []);
 
     const handleUpdateRole = useCallback(async () => {
@@ -407,7 +464,12 @@ export default function BusinessInfo({ simulateLoading = false }) {
 
         if (mountedRef.current) dispatch({ type: "SET", payload: { saving: true } });
         try {
-            await updateRole(state.businessId, editingRole.id, { name: editingRole.name.trim(), level, capacity });
+            await updateRole(state.businessId, editingRole.id, {
+                name: editingRole.name.trim(),
+                level,
+                capacity,
+                permissions: editingRole.permissions
+            });
             if (!mountedRef.current) return;
             dispatch({ type: "RESET_EDIT_ROLE" });
             dispatch({ type: "SET", payload: { success: "Role updated" } });
@@ -485,6 +547,68 @@ export default function BusinessInfo({ simulateLoading = false }) {
         }
     }, [state.businessId]);
 
+    async function handleDeleteBusiness() {
+        if (!state.businessId || !uid) return; // Assuming `uid` is the current user's ID
+        if (!window.confirm("Are you sure you want to PERMANENTLY DELETE this business? This cannot be undone.")) return;
+
+        try {
+            if (mountedRef.current) dispatch({ type: "SET", payload: { saving: true } });
+            await deleteBusiness(state.businessId, uid);
+            await refreshProfile();
+            // Force redirect or let AuthGuard handle it
+            window.location.href = "/";
+        } catch (err) {
+            console.error(err);
+            if (mountedRef.current) dispatch({ type: "SET", payload: { error: "Failed to delete business: " + err.message } });
+            if (mountedRef.current) dispatch({ type: "SET", payload: { saving: false } });
+        }
+    }
+
+    async function handleLeaveBusiness() {
+        if (!state.businessId || !uid) return; // Assuming `uid` is the current user's ID
+        if (!window.confirm("Are you sure you want to leave this business?")) return;
+
+        try {
+            if (mountedRef.current) dispatch({ type: "SET", payload: { saving: true } });
+            await leaveBusiness(state.businessId, uid);
+            await refreshProfile();
+            window.location.href = "/";
+        } catch (err) {
+            console.error(err);
+            if (mountedRef.current) dispatch({ type: "SET", payload: { error: "Failed to leave business: " + err.message } });
+            if (mountedRef.current) dispatch({ type: "SET", payload: { saving: false } });
+        }
+    }
+
+    async function handleRemoveMember(targetUid) {
+        if (!state.businessId || !targetUid) return;
+        if (!window.confirm("Are you sure you want to remove this member?")) return;
+
+        try {
+            // Reusing leaveBusiness logic as it removes the user from the business
+            await leaveBusiness(state.businessId, targetUid);
+            dispatch({ type: "SET", payload: { success: "Member removed." } });
+            setTimeout(() => dispatch({ type: "SET", payload: { success: "" } }), 3000);
+        } catch (err) {
+            console.error(err);
+            dispatch({ type: "SET", payload: { error: "Failed to remove member: " + err.message } });
+        }
+    }
+
+    const handleUpdateMemberRole = useCallback(async (targetUid, newRoleId) => {
+        if (!state.businessId || !targetUid || !newRoleId) return;
+        if (!window.confirm("Change this member's role?")) return;
+
+        try {
+            await updateMemberRole({ businessId: state.businessId, uid: targetUid, roleId: newRoleId });
+            dispatch({ type: "SET", payload: { success: "Member role updated." } });
+            setTimeout(() => { if (mountedRef.current) dispatch({ type: "SET", payload: { success: "" } }); }, 2000);
+        } catch (err) {
+            console.error(err);
+            dispatch({ type: "SET", payload: { error: "Failed to update role: " + err.message } });
+        }
+    }, [state.businessId]);
+
     /* ---------------------------------------------------------------------- */
     /* UI helpers                                                              */
     /* ---------------------------------------------------------------------- */
@@ -495,12 +619,45 @@ export default function BusinessInfo({ simulateLoading = false }) {
         return (words[0][0] + words[1][0]).toUpperCase();
     }, []);
 
+    const { ownerUid } = state;
+
+    // Checks if the current user is the owner (legacy check used for strictly hiding page if needed)
+    const isOwner = useMemo(() => {
+        if (!uid) return false;
+        if (ownerUid && uid === ownerUid) return true;
+
+        // Fallback: check affiliations in profile
+        if (currentUser?.profile?.businessAffiliations) {
+            const aff = currentUser.profile.businessAffiliations.find(a => a.businessId === state.businessId);
+            if (aff?.roleId === 'owner') return true;
+        }
+        return false;
+    }, [uid, ownerUid, currentUser, state.businessId]);
+
     /* ---------------------------------------------------------------------- */
     /* Render                                                                */
     /* ---------------------------------------------------------------------- */
     if (state.loading) return <BusinessSkeleton />;
 
     const { form, tab, error, success, saving, profileExists } = state;
+
+    // Check if this is a new business user without a business yet
+    const isNewBusinessUser = !profileExists && currentUser?.profile?.accountType === 'business' && !state.businessId;
+
+    // Determine if user has ANY access to this page
+    const hasAnyAccess = isOwner || canViewRoles || canViewSettings || canUpdateProfile || canInvite || isNewBusinessUser;
+
+    // Render restricted message if no access at all
+    if (!state.loading && profileExists && !hasAnyAccess) {
+        return (
+            <main className="business-create-page">
+                <div className="container" style={{ padding: '50px', textAlign: 'center' }}>
+                    <h2>Access Denied</h2>
+                    <p className="muted">You do not have permission to view this business profile.</p>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className="business-create-page">
@@ -511,23 +668,31 @@ export default function BusinessInfo({ simulateLoading = false }) {
                 </div>
 
                 <nav className="bc-tabs" role="tablist" aria-label="Business tabs">
-                    <button className={`tab ${tab === "profile" ? "active" : ""}`} onClick={() => dispatch({ type: "SET", payload: { tab: "profile" } })}>Profile</button>
-                    <button className={`tab ${tab === "members" ? "active" : ""}`} onClick={() => dispatch({ type: "SET", payload: { tab: "members" } })}>Members</button>
-                    <button className={`tab ${tab === "roles" ? "active" : ""}`} onClick={() => dispatch({ type: "SET", payload: { tab: "roles" } })}>Roles</button>
-                    <button className={`tab ${tab === "settings" ? "active" : ""}`} onClick={() => dispatch({ type: "SET", payload: { tab: "settings" } })}>Settings</button>
+                    {(canUpdateProfile || isOwner || isNewBusinessUser) && (
+                        <button className={`tab ${tab === "profile" ? "active" : ""}`} onClick={() => dispatch({ type: "SET", payload: { tab: "profile" } })}>Profile</button>
+                    )}
+                    {(canInvite || isOwner) && (
+                        <button className={`tab ${tab === "members" ? "active" : ""}`} onClick={() => dispatch({ type: "SET", payload: { tab: "members" } })}>Members</button>
+                    )}
+                    {(canViewRoles || isOwner) && (
+                        <button className={`tab ${tab === "roles" ? "active" : ""}`} onClick={() => dispatch({ type: "SET", payload: { tab: "roles" } })}>Roles</button>
+                    )}
+                    {(canViewSettings || isOwner) && (
+                        <button className={`tab ${tab === "settings" ? "active" : ""}`} onClick={() => dispatch({ type: "SET", payload: { tab: "settings" } })}>Settings</button>
+                    )}
                 </nav>
             </header>
 
             {!canEdit && profileExists && (
                 <div className="readonly-banner card">
-                    <strong>Read-only view</strong>
-                    <span className="muted">You don't have permission to edit this company.</span>
+                    <strong>Restricted view</strong>
+                    <span className="muted">You have limited permissions for this company.</span>
                 </div>
             )}
 
             <div className="bc-body">
                 <section className="bc-form">
-                    {tab === "profile" && (
+                    {tab === "profile" && (canUpdateProfile || isOwner || isNewBusinessUser) && (
                         <>
                             <div className={`card ${!canEdit ? "read-only" : ""}`}>
                                 <h2 className="card-title">Company information</h2>
@@ -580,7 +745,7 @@ export default function BusinessInfo({ simulateLoading = false }) {
                         </>
                     )}
 
-                    {tab === "members" && (
+                    {tab === "members" && (canInvite || isOwner) && (
                         <>
                             <div className={`card ${!canEdit ? "read-only" : ""}`}>
                                 <h2 className="card-title">Invite member</h2>
@@ -621,44 +786,59 @@ export default function BusinessInfo({ simulateLoading = false }) {
                                 <h2 className="card-title">Members</h2>
                                 {members.length === 0 ? <p className="muted">No members yet.</p> : (
                                     <ul className="members-list">
-                                        {members.map(m => <MemberRow key={m.id} m={m} />)}
+                                        {members.map(m => (
+                                            <MemberRow
+                                                key={m.id}
+                                                m={m}
+                                                onRemove={handleRemoveMember}
+                                                onUpdateRole={handleUpdateMemberRole}
+                                                canRemove={can('members.remove')}
+                                                canUpdateRole={canManageRoles}
+                                                isSelf={m.uid === uid}
+                                                isOwner={m.uid === state.ownerUid}
+                                                roles={roles}
+                                            />
+                                        ))}
                                     </ul>
                                 )}
                             </div>
                         </>
                     )}
 
-                    {tab === "roles" && (
+                    {tab === "roles" && (canViewRoles || isOwner) && (
                         <>
-                            <div className={`card ${!canEdit ? "read-only" : ""}`}>
-                                <h2 className="card-title">Create role</h2>
-                                <label>Role name</label>
-                                <input value={state.newRole.name} onChange={(e) => dispatch({ type: "SET_NEW_ROLE", payload: { name: e.target.value } })} placeholder="Manager" />
+                            {canManageRoles && (
+                                <div className={`card ${!canManageRoles ? "read-only" : ""}`}>
+                                    <h2 className="card-title">Create role</h2>
+                                    <label>Role name</label>
+                                    <input value={state.newRole.name} onChange={(e) => dispatch({ type: "SET_NEW_ROLE", payload: { name: e.target.value } })} placeholder="Manager" disabled={!canManageRoles} />
 
-                                <label>Level (0 = base, higher = more authority)</label>
-                                <input type="number" value={state.newRole.level} onChange={(e) => dispatch({ type: "SET_NEW_ROLE", payload: { level: Number(e.target.value) } })} min="0" />
+                                    <label>Level (0 = base, higher = more authority)</label>
+                                    <input type="number" value={state.newRole.level} onChange={(e) => dispatch({ type: "SET_NEW_ROLE", payload: { level: Number(e.target.value) } })} min="0" disabled={!canManageRoles} />
 
-                                <label>Capacity (optional)</label>
-                                <input type="number" value={state.newRole.capacity ?? ""} onChange={(e) => dispatch({ type: "SET_NEW_ROLE", payload: { capacity: e.target.value === "" ? null : Number(e.target.value) } })} placeholder="e.g. 10" />
+                                    <label>Capacity (optional)</label>
+                                    <input type="number" value={state.newRole.capacity ?? ""} onChange={(e) => dispatch({ type: "SET_NEW_ROLE", payload: { capacity: e.target.value === "" ? null : Number(e.target.value) } })} placeholder="e.g. 10" disabled={!canManageRoles} />
 
-                                <p className="muted small">Max level allowed for this business: {(form?.settings?.maxRoleLevel) ?? 10}</p>
-                                <div className="mt">
-                                    <button onClick={handleCreateRole} className="btn primary" disabled={saving || !canEdit}>{saving ? "Working…" : "Create Role"}</button>
+                                    <p className="muted small">Max level allowed for this business: {(form?.settings?.maxRoleLevel) ?? 10}</p>
+                                    <div className="mt">
+                                        <button onClick={handleCreateRole} className="btn primary" disabled={saving || !canManageRoles}>{saving ? "Working…" : "Create Role"}</button>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             <div className="card">
                                 <h2 className="card-title">Existing Roles</h2>
                                 {roles.length === 0 ? <p className="muted">No roles yet.</p> : (
                                     <ul className="roles-list">
-                                        {roles.map(r => <RoleRow key={r.id} r={r} onEdit={startEditRole} onDelete={handleDeleteRole} canEdit={canEdit} />)}
+                                        {roles.map(r => <RoleRow key={r.id} r={r} onEdit={startEditRole} onDelete={handleDeleteRole} canEdit={canManageRoles} />)}
                                     </ul>
                                 )}
                             </div>
 
-                            {state.editingRole.id && canEdit && (
+                            {state.editingRole.id && canManageRoles && (
                                 <div className="card">
                                     <h2 className="card-title">Edit role</h2>
+
 
                                     <div className="edit-grid">
                                         <div className="field">
@@ -677,6 +857,43 @@ export default function BusinessInfo({ simulateLoading = false }) {
                                         </div>
                                     </div>
 
+                                    <div className="permissions-section">
+                                        <h3 className="card-subtitle">Permissions</h3>
+                                        <div className="perms-grid">
+                                            {PERMISSION_CATEGORIES.map(cat => {
+                                                const catPerms = PERMISSIONS.filter(p => p.key.startsWith(cat + '.'));
+                                                if (catPerms.length === 0) return null;
+                                                return (
+                                                    <div key={cat} className="perm-category">
+                                                        <div className="perm-header">
+                                                            <span>{cat}</span>
+                                                        </div>
+                                                        <div className="perm-items">
+                                                            {catPerms.map(p => {
+                                                                const isChecked = !!state.editingRole.permissions[p.key];
+                                                                return (
+                                                                    <label key={p.key} className={`perm-item ${isChecked ? 'active' : ''}`} title={p.description}>
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={isChecked}
+                                                                            onChange={(e) => {
+                                                                                const newPerms = { ...state.editingRole.permissions };
+                                                                                if (e.target.checked) newPerms[p.key] = true;
+                                                                                else delete newPerms[p.key];
+                                                                                dispatch({ type: "SET_EDIT_ROLE", payload: { permissions: newPerms } });
+                                                                            }}
+                                                                        />
+                                                                        <span className="perm-name">{p.name}</span>
+                                                                    </label>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
                                     <div className="role-edit-actions">
                                         <button onClick={handleUpdateRole} className="btn primary" disabled={saving}>{saving ? "Saving…" : "Save"}</button>
                                         <button onClick={() => dispatch({ type: "RESET_EDIT_ROLE" })} className="btn ghost" aria-label="Cancel editing role">Cancel</button>
@@ -686,13 +903,28 @@ export default function BusinessInfo({ simulateLoading = false }) {
                         </>
                     )}
 
-                    {tab === "settings" && (
-                        <div className={`card ${!canEdit ? "read-only" : ""}`}>
+                    {tab === "settings" && (canViewSettings || isOwner) && (
+                        <div className={`card ${!canUpdateSettings ? "read-only" : ""}`}>
                             <h2 className="card-title">Business settings</h2>
 
                             <label>Max team members (example setting)</label>
-                            <input placeholder="e.g., 50" onBlur={(e) => handleSaveSettings({ maxMembers: Number(e.target.value) || null })} />
+                            <input placeholder="e.g., 50" onBlur={(e) => handleSaveSettings({ maxMembers: Number(e.target.value) || null })} disabled={!canUpdateSettings} />
                             <p className="muted small">Other global settings for the business can be added here.</p>
+
+                            <div className="danger-zone" style={{ marginTop: 40, borderTop: '1px solid rgba(255,50,50,0.2)', paddingTop: 20 }}>
+                                <h3 style={{ color: 'var(--brand-danger, #ff4d4d)', marginBottom: 10 }}>Danger Zone</h3>
+                                {can('business.delete') ? (
+                                    <div className="danger-item">
+                                        <p className="muted small" style={{ marginBottom: 10 }}>Permanently delete this business and all its data. This action cannot be undone.</p>
+                                        <button onClick={handleDeleteBusiness} className="btn danger" disabled={saving}>{saving ? "Deleting..." : "Delete Business"}</button>
+                                    </div>
+                                ) : (
+                                    <div className="danger-item">
+                                        <p className="muted small" style={{ marginBottom: 10 }}>Leave this business. You will lose access to all boards and resources.</p>
+                                        <button onClick={handleLeaveBusiness} className="btn danger" disabled={saving}>{saving ? "Leaving..." : "Leave Business"}</button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
 
