@@ -12,8 +12,10 @@ import {
     where,
     getDocs,
 } from "firebase/firestore";
-import { db } from "../config/firebase";
+import { ref, onValue } from "firebase/database"; // RTDB
+import { db, dbRealtime } from "../config/firebase";
 import { useAuth } from "../context/useAuth";
+import { useTheme } from "../context/ThemeContext";
 import {
     createBusiness, deleteBusiness, leaveBusiness, searchUsersByEmail, updateMemberRole,
     inviteMember, deleteRole, updateRole, createRole, updateBusinessSettings, updateMemberStatus
@@ -27,6 +29,8 @@ import { PERMISSIONS } from "../config/permissions";
 import useHasPerm from "../hooks/useHasPerm";
 import CustomSelect from "../dashboard/Bcomponent/CustomSelect";
 import AIUsageGraph from "./AIUsageGraph";
+import AIInsightsView from "./AIInsightsView";
+import OnlineMembersDropdown from "./OnlineMembersDropdown";
 
 // --- Icons ---
 const IconSearch = () => <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>;
@@ -37,7 +41,7 @@ const IconEdit = () => <svg width="16" height="16" fill="none" stroke="currentCo
 
 
 /* ----------------------------- memoized rows ------------------------------ */
-const MemberRow = React.memo(function MemberRow({ m, stats, onRemove, onUpdateRole, onToggleStatus, canRemove, canUpdateRole, isSelf, isOwner, roles }) {
+const MemberRow = React.memo(function MemberRow({ m, stats, onRemove, onUpdateRole, onToggleStatus, canRemove, canUpdateRole, isSelf, isOwner, roles, isOnline }) {
     const showRemove = canRemove && !isSelf && !isOwner;
     const showUpdate = canUpdateRole && !isSelf && !isOwner;
 
@@ -45,7 +49,16 @@ const MemberRow = React.memo(function MemberRow({ m, stats, onRemove, onUpdateRo
         <tr className="member-row">
             <td>
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                    <strong>{m.name || "Unknown"}</strong>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <strong>{m.name || "Unknown"}</strong>
+                        {isOnline && (
+                            <span className="online-indicator" title="Online now">
+                                <span className="pulse"></span>
+                                <span className="dot"></span>
+                                <span className="text">Online</span>
+                            </span>
+                        )}
+                    </div>
                 </div>
             </td>
             <td>
@@ -188,6 +201,10 @@ function reducer(state, action) {
 }
 
 /* ---------------------------- component --------------------------------- */
+// --- Theme Toggle Icons ---
+const IconSun = () => <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>;
+const IconMoon = () => <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /></svg>;
+
 export default function BusinessInfo({ simulateLoading = false }) {
     const { currentUser, refreshProfile } = useAuth();
     const uid = currentUser?.uid ?? currentUser?.profile?.uid ?? null;
@@ -196,10 +213,25 @@ export default function BusinessInfo({ simulateLoading = false }) {
 
     const [state, dispatch] = useReducer(reducer, { ...initialState, loading: Boolean(simulateLoading) });
 
+    // --- Theme Toggle (Refactored to use Context) ---
+    const { theme, toggleTheme } = useTheme();
+
     // --- Local State for UI Enhancements (Search/Filter) ---
     const [searchTerm, setSearchTerm] = useState("");
     const [roleFilter, setRoleFilter] = useState("all");
     const [taskCounts, setTaskCounts] = useState({});
+    const [presenceData, setPresenceData] = useState({});
+
+    // --- Realtime Presence Listener ---
+    useEffect(() => {
+        if (!dbRealtime) return;
+        const statusRef = ref(dbRealtime, 'status');
+        const unsub = onValue(statusRef, (snapshot) => {
+            const data = snapshot.val() || {};
+            setPresenceData(data);
+        });
+        return () => unsub();
+    }, []);
 
     /* ---------------------------------------------------------------------- */
     /* Workload Analytics (Task Counts)                                       */
@@ -235,7 +267,8 @@ export default function BusinessInfo({ simulateLoading = false }) {
             }
         };
 
-        loadTaskCounts();
+        // 3. Legacy Task Counts (Disabled to prevent Index Error)
+        // loadTaskCounts();
 
         // Refresh every 30s or on businessId change
         const interval = setInterval(loadTaskCounts, 30000);
@@ -260,7 +293,7 @@ export default function BusinessInfo({ simulateLoading = false }) {
     /* ---------------------------------------------------------------------- */
     useEffect(() => {
         if (!simulateLoading) return;
-        const t = setTimeout(() => { if (mountedRef.current) dispatch({ type: "SET", payload: { loading: false } }); }, 5000);
+        const t = setTimeout(() => { if (mountedRef.current) dispatch({ type: "SET", payload: { loading: false } }); }, 2000);
         return () => clearTimeout(t);
     }, [simulateLoading]);
 
@@ -756,6 +789,17 @@ export default function BusinessInfo({ simulateLoading = false }) {
                         <h1>Business Settings</h1>
                         <p className="muted">Manage your organization's profile, team, and permissions.</p>
                     </div>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <OnlineMembersDropdown members={members} presenceData={presenceData} />
+                        <button
+                            className="theme-toggle-btn"
+                            onClick={toggleTheme}
+                            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                            aria-label="Toggle theme"
+                        >
+                            {theme === 'dark' ? <IconSun /> : <IconMoon />}
+                        </button>
+                    </div>
                 </div>
 
                 <nav className="bc-tabs" role="tablist" aria-label="Business tabs">
@@ -826,7 +870,7 @@ export default function BusinessInfo({ simulateLoading = false }) {
 
                     {/* --- AI INSIGHTS TAB --- */}
                     {tab === "ai" && (canViewSettings || isOwner) && (
-                        <AIUsageGraph businessId={state.businessId} />
+                        <AIInsightsView businessId={state.businessId} />
                     )}
 
                     {/* --- MEMBERS TAB --- */}
@@ -895,7 +939,8 @@ export default function BusinessInfo({ simulateLoading = false }) {
                                                     <th>Name</th>
                                                     <th>Email</th>
                                                     <th>Role</th>
-                                                    <th style={{ textAlign: "center" }}>Status</th>
+                                                        <th>Role</th>
+                                                        <th style={{ textAlign: "center" }}>Account Status</th>
                                                     <th style={{ textAlign: "center" }}>Active Tasks</th>
                                                     <th style={{ textAlign: "right" }}>Actions</th>
                                                 </tr>
@@ -914,6 +959,7 @@ export default function BusinessInfo({ simulateLoading = false }) {
                                                     isSelf={m.uid === uid}
                                                     isOwner={m.uid === state.ownerUid}
                                                     roles={roles}
+                                                        isOnline={presenceData[m.uid]?.state === 'online'}
                                                 />
                                             ))}
                                                 </tbody>

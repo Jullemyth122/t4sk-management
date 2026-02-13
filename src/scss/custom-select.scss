@@ -1,5 +1,17 @@
 /* CustomSelect styles (theme-matching) */
 .custom-select {
+  /* --- CUSTOM SELECT LOCAL VARIABLES --- */
+  --cs-bg: var(--bd-inp_list);
+  --cs-text-main: var(--sidenav-H1);
+  --cs-text-sub: var(--sidenav-ISO);
+  --cs-border: rgba(255, 255, 255, 0.03);
+  --cs-icon-bg: linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.02));
+  --cs-menu-bg: linear-gradient(180deg, var(--bg-nav-grd-darkLight), var(--bg-nav-grd-darkDark));
+  --cs-menu-shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
+  --cs-item-hover: linear-gradient(90deg, rgba(83, 143, 255, 0.05), rgba(0, 0, 0, 0.02));
+  --cs-search-bg: var(--bd-inp_list);
+  --cs-search-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+
   position: relative;
   font-family: inherit;
   width: 100%;
@@ -14,12 +26,27 @@
     gap: 12px;
     padding: 10px 12px;
     border-radius: 10px;
-    background: var(--bd-inp_list);
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: var(--cs-bg);
+    border: 1px solid var(--cs-border);
     cursor: pointer;
-    color: var(--sidenav-H1);
+    color: var(--cs-text-main);
     font-weight: 700;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    box-shadow: var(--cs-search-shadow);
+  }
+
+  /* LIGHT MODE OVERRIDES */
+  &[data-theme="light"],
+  [data-theme="light"] & {
+      --cs-bg: #ffffff;
+      --cs-text-main: #1e293b;
+      --cs-text-sub: #64748b;
+      --cs-border: rgba(0, 0, 0, 0.1);
+      --cs-icon-bg: rgba(0, 0, 0, 0.04);
+      --cs-menu-bg: #ffffff;
+      --cs-menu-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --cs-item-hover: rgba(0, 0, 0, 0.04);
+      --cs-search-bg: #f1f5f9;
+      --cs-search-shadow: none;
   }
 
   .cs-trigger:focus {
@@ -66,11 +93,7 @@
     justify-content: center;
     flex: 0 0 28px;
     border-radius: 8px;
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.02),
-      rgba(0, 0, 0, 0.02)
-    );
+    background: var(--cs-icon-bg);
   }
 
   .cs-chevron {
@@ -86,27 +109,23 @@
     z-index: 2600;
     border-radius: 10px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    background: linear-gradient(
-      180deg,
-      var(--bg-nav-grd-darkLight),
-      var(--bg-nav-grd-darkDark)
-    );
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--cs-border);
+    background: var(--cs-menu-bg);
+    box-shadow: var(--cs-menu-shadow);
   }
 
   .cs-search-row {
     padding: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--cs-border);
   }
   .cs-search {
     width: 100%;
     padding: 8px 10px;
     border-radius: 8px;
     border: none;
-    background: var(--bd-inp_list);
-    color: var(--text-color);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    background: var(--cs-search-bg);
+    color: var(--cs-text-main);
+    box-shadow: var(--cs-search-shadow);
   }
 
   .cs-list {
@@ -121,16 +140,12 @@
     padding: 10px 12px;
     cursor: pointer;
     transition: background 0.08s, transform 0.06s;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.01);
+    border-bottom: 1px solid var(--cs-border);
   }
 
   .cs-item:hover,
   .cs-item.highlight {
-    background: linear-gradient(
-      90deg,
-      rgba(83, 143, 255, 0.05),
-      rgba(0, 0, 0, 0.02)
-    );
+    background: var(--cs-item-hover);
     transform: translateY(-1px);
   }
   .cs-item.selected {

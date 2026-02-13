@@ -16,7 +16,7 @@ import {
     setDoc,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { COLLECTIONS, ensure } from "./accountService"; // Assuming cross-import if needed; otherwise, duplicate or import from a shared helpers.
+import { COLLECTIONS, ensure, sendNotification } from "./accountService"; // Assuming cross-import if needed; otherwise, duplicate or import from a shared helpers.
 
 // --- Boards Section ---
 function boardsRoot({ businessId = null, uid = null }) {
@@ -178,7 +178,7 @@ export const subscribeCardsForList = ({ businessId = null, uid = null, boardId, 
     return unsub;
 };
 
-export const createCard = async ({ businessId = null, uid = null, boardId, listId, card }) => {
+export const createCard = async ({ businessId = null, uid = null, boardId, listId, card, actorName = "A user", boardName = "Board" }) => {
     ensure(boardId && listId && card?.title, "createCard: missing args");
     const col = collection(db, businessId ? COLLECTIONS.BUSINESSES : COLLECTIONS.ACCOUNT, businessId ?? uid, "boards", boardId, "lists", listId, "cards");
 
@@ -205,6 +205,7 @@ export const createCard = async ({ businessId = null, uid = null, boardId, listI
         weight: typeof card.weight === "number" ? Math.max(0, Math.min(100, Math.round(card.weight))) : 0,
         progress: typeof card.progress === "number" ? Math.max(0, Math.min(100, Math.round(card.progress))) : 0,
         subtasks: Array.isArray(card.subtasks) ? card.subtasks : [],
+        businessId: businessId ?? null, 
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         createdBy: uid ?? null,
@@ -212,10 +213,27 @@ export const createCard = async ({ businessId = null, uid = null, boardId, listI
 
     const ref = await addDoc(col, payload);
     const snap = await getDoc(ref);
+
+    // NOTIFICATION: New Assignment
+    if (payload.assignees && payload.assignees.length > 0) {
+        payload.assignees.forEach(uidOrEmail => {
+            if (uidOrEmail && !String(uidOrEmail).includes('@')) {
+               // Don't notify self
+               if (uidOrEmail === uid) return;
+               
+               sendNotification(uidOrEmail, {
+                   title: "New Task Assigned",
+                   message: `${actorName} assigned you to task: "${card.title}" in ${boardName}`,
+                   link: `/business/${businessId}/boards/${boardId}`
+               });
+            }
+        });
+    }
+
     return { id: snap.id, ...snap.data() };
 };
 
-export const updateCard = async ({ businessId = null, uid = null, boardId, listId, cardId, updates = {} }) => {
+export const updateCard = async ({ businessId = null, uid = null, boardId, listId, cardId, updates = {}, actorName = "A user", boardName = "Board" }) => {
     ensure(boardId && listId && cardId, "updateCard: missing args");
     const ref = doc(db, businessId ? COLLECTIONS.BUSINESSES : COLLECTIONS.ACCOUNT, businessId ?? uid, "boards", boardId, "lists", listId, "cards", cardId);
 
@@ -288,6 +306,49 @@ export const updateCard = async ({ businessId = null, uid = null, boardId, listI
     await updateDoc(ref, payload);
 
     const snap = await getDoc(ref);
+
+    // NOTIFICATION LOGIC
+    try {
+        const afterDt = snap.data();
+        
+        // 1. Check for Review Status Change (Approved/Rejected)
+        if (payload.submission?.reviewStatus) {
+            const status = payload.submission.reviewStatus;
+            const submitter = afterDt.submission?.submitterUid || afterDt.submittedBy || afterDt.createdBy;
+            if (submitter && submitter !== uid) {
+                // Determine title/msg
+                const title = status === 'approved' ? "Task Approved ✅" : "Task Rejected ❌";
+                const msg = status === 'approved' 
+                    ? `${actorName} approved your submission for "${afterDt.title}"` 
+                    : `${actorName} rejected your submission for "${afterDt.title}". Check notes.`;
+                
+                sendNotification(submitter, {
+                    title,
+                    message: msg,
+                    link: `/business/${businessId}/boards/${boardId}`
+                });
+            }
+        }
+
+        // 2. Check for Review Assigment (New Submission)
+        // If we are setting reviewerUid/Email and it wasn't there before, or just if it's part of the payload.
+        // Assuming if payload has submission.reviewerUid, we should notify.
+        // To avoid spam, we might want to check if it CHANGED, but for now let's trust the caller sends it only when assigning.
+        if (payload.submission?.reviewerUid) {
+             const reviewer = payload.submission.reviewerUid;
+             if (reviewer !== uid) {
+                 sendNotification(reviewer, {
+                     title: "Task Submitted for Review 📝",
+                     message: `${actorName} submitted "${afterDt.title}" for your review.`,
+                     link: `/business/${businessId}/boards/${boardId}`
+                 });
+             }
+        }
+
+    } catch (e) {
+        console.warn("Notification trigger failed", e);
+    }
+
     return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 };
 
@@ -389,6 +450,21 @@ export async function createSubmission({
     batch.update(cardRef, cardUpdate);
 
     await batch.commit();
+
+    await batch.commit();
+
+    // NOTIFICATION: Notify Reviewer
+    if (reviewerUid) {
+        sendNotification(reviewerUid, {
+            title: "New Submission 📝",
+            message: `A task has been submitted for review.`,
+            link: `/businessDashboard`
+        });
+    } else {
+        // If no specific reviewer, maybe notify business owner?
+        // We'd need to fetch business owner UID... which assumes 'submitterUid' is NOT the owner.
+        // For now, we only notify if reviewerUid is explicit.
+    }
 
     return { ...submission, id: subDocRef.id };
 }

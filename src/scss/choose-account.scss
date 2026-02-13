@@ -3,7 +3,28 @@
 */
 
 .choose-page {
-    background: transparent;
+    /* --- CHOOSE ACCOUNT LOCAL THEME VARIABLES --- */
+    --choose-bg: transparent;
+    --choose-text-main: var(--sign-txt-6xl);
+    --choose-text-sub: var(--sign-input);
+    --choose-border: rgba(255, 255, 255, 0.06);
+    --choose-card-bg: radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.02));
+    --choose-topbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.02));
+    --choose-dropdown-bg: linear-gradient(180deg, rgba(12, 12, 12, 0.96), rgba(24, 24, 24, 0.96));
+    --choose-item-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.00));
+    --choose-item-hover: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    --choose-btn-hover: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+    --choose-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    --choose-accent: var(--home-showContent-light);
+    --choose-intro-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.02));
+    --choose-option-bg: rgba(255, 255, 255, 0.02);
+    --choose-option-border: rgba(0, 0, 0, 0.06);
+    --choose-icon-bg: rgba(255, 255, 255, 0.04);
+    --choose-badge-bg: rgba(255, 255, 255, 0.06);
+    --choose-cta-bg: linear-gradient(90deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.95));
+    --choose-cta-text: var(--home-showContent-dark);
+
+    background: var(--choose-bg);
     font-family: "Jura", sans-serif;
     position: relative;
 
@@ -15,11 +36,11 @@
         align-items: center;
         gap: 10px;
         z-index: 40;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.02));
+        background: var(--choose-topbar-bg);
         padding: 8px;
         border-radius: 12px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-shadow: var(--choose-shadow);
+        border: 1px solid var(--choose-border);
         min-width: 220px;
     }
 
@@ -54,19 +75,19 @@
 
     .btn-logout {
         background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--choose-border);
         padding: 8px 10px;
         border-radius: 8px;
         font-weight: 700;
         cursor: pointer;
-        color: var(--sign-input);
+        color: var(--choose-text-sub);
         transition: transform .12s ease, box-shadow .12s ease, background .12s;
     }
 
     .btn-logout:hover {
         transform: translateY(-2px);
         box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-        background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+        background: var(--choose-btn-hover);
     }
 
     .btn-logout:disabled {
@@ -98,8 +119,8 @@
             padding: 8px 12px;
             border-radius: 8px;
             background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            color: var(--sign-input);
+            border: 1px solid var(--choose-border);
+            color: var(--choose-text-sub);
             cursor: pointer;
             font-weight: 700;
             transition: transform .08s, background .12s;
@@ -117,9 +138,9 @@
             width: 360px;
             max-width: calc(100vw - 40px);
             max-height: 420px;
-            background: linear-gradient(180deg, rgba(12, 12, 12, 0.96), rgba(24, 24, 24, 0.96));
-            color: var(--sign-input);
-            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: var(--choose-dropdown-bg);
+            color: var(--choose-text-sub);
+            border: 1px solid var(--choose-border);
             border-radius: 12px;
             box-shadow: 0 14px 40px rgba(2, 6, 23, 0.6);
             z-index: 120;
@@ -136,17 +157,17 @@
             align-items: center;
             justify-content: space-between;
             padding: 10px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--choose-border);
         }
 
         .invite-header .title {
             font-weight: 700;
-            color: var(--sign-txt-6xl);
+            color: var(--choose-text-main);
             font-size: 14px;
         }
 
         .invite-header .muted {
-            color: var(--sign-input);
+            color: var(--choose-text-sub);
             font-size: 13px;
             opacity: 0.9;
         }
@@ -165,13 +186,13 @@
             align-items: flex-start;
             padding: 12px;
             border-radius: 10px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.00));
-            border: 1px solid rgba(255, 255, 255, 0.02);
+            background: var(--choose-item-bg);
+            border: 1px solid var(--choose-border);
             transition: background .12s, transform .08s;
         }
 
         .invite-item:hover {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            background: var(--choose-item-hover);
             transform: translateY(-2px);
         }
 
@@ -191,7 +212,7 @@
 
         .invite-title {
             font-weight: 800;
-            color: var(--sign-txt-6xl);
+            color: var(--choose-text-main);
             font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
@@ -200,22 +221,24 @@
 
         .invite-sub {
             font-size: 13px;
-            color: var(--sign-input);
+            color: var(--choose-text-sub);
         }
 
         .invite-msg {
             font-size: 13px;
-            color: rgba(255, 255, 255, 0.75);
+            color: var(--choose-text-sub);
             margin-top: 6px;
             max-height: 40px;
             overflow: hidden;
             text-overflow: ellipsis;
+            opacity: 0.75;
         }
 
         .invite-time {
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.45);
+            color: var(--choose-text-sub);
             margin-top: 6px;
+            opacity: 0.45;
         }
 
         .invite-right {
@@ -270,15 +293,16 @@
 
         .invite-actions .btn.decline {
             background: transparent;
-            color: var(--sign-input);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--choose-text-sub);
+            border: 1px solid var(--choose-border);
         }
 
         .invite-loading,
         .no-invites {
             padding: 16px;
             text-align: center;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--choose-text-sub);
+            opacity: 0.7;
         }
 
         /* slim scrollbar */
@@ -287,7 +311,7 @@
         }
 
         .invite-dropdown-topbar .invite-list::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 999px;
         }
     }
@@ -295,17 +319,54 @@
     /* end topbar-invites */
 }
 
+/* --- LIGHT MODE OVERRIDES --- */
+[data-theme="light"] .choose-page {
+    --choose-bg: #f1f5f9;
+    --choose-text-main: #1e293b;
+    --choose-text-sub: #64748b;
+    --choose-border: rgba(0, 0, 0, 0.08);
+
+    --choose-topbar-bg: #ffffff;
+    --choose-dropdown-bg: #ffffff;
+    
+    --choose-item-bg: rgba(0,0,0,0.02);
+    --choose-item-hover: rgba(0,0,0,0.04);
+    
+    --choose-card-bg: #ffffff;
+    --choose-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    
+    --choose-btn-hover: rgba(0,0,0,0.05);
+    
+    --choose-intro-bg: linear-gradient(180deg, #f8fafc, #f1f5f9);
+    --choose-option-bg: #ffffff;
+    --choose-option-border: rgba(0,0,0,0.08);
+    --choose-icon-bg: rgba(0,0,0,0.04);
+    --choose-badge-bg: rgba(0,0,0,0.05);
+    --choose-cta-bg: linear-gradient(90deg, #1e293b, #0f172a);
+    --choose-cta-text: #ffffff;
+
+    .cta {
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .topbar-avatar {
+        color: #fff; /* Invert text if needed, or keep black */
+    }
+}
+
 /* main card */
 .choose-card {
-    background: radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.02));
+    background: var(--choose-card-bg);
     padding: 6px;
     border-radius: 14px;
     box-shadow: 0 18px 44px rgba(9, 30, 66, 0.12);
 }
 
+
+
 /* Intro / left */
 .intro-block {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.02));
+    background: var(--choose-intro-bg);
     color: var(--sign-si);
     border-radius: 10px;
     height: 100%;
@@ -321,13 +382,13 @@
 
     .brand-logo {
         font-weight: 700;
-        color: var(--text-color);
+        color: var(--choose-text-main);
         letter-spacing: 2px;
         font-size: 20px;
     }
 
     .brand-sub {
-        color: var(--sign-txt-6xl);
+        color: var(--choose-text-main);
         font-weight: 600;
     }
 }
@@ -336,12 +397,12 @@
     margin-top: 8px;
     font-size: 22px;
     font-weight: 700;
-    color: var(--sign-txt-6xl);
+    color: var(--choose-text-main);
 }
 
 .intro-text {
     margin-top: 8px;
-    color: var(--sign-input);
+    color: var(--choose-text-sub);
     max-width: 95%;
     line-height: 1.45;
     font-size: 14px;
@@ -354,7 +415,7 @@
 }
 
 .feature dd {
-    color: var(--sign-input);
+    color: var(--choose-text-sub);
     font-size: 13px;
 }
 
@@ -377,8 +438,8 @@
     border-radius: 10px;
     min-height: 150px;
     text-align: left;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: var(--choose-option-bg);
+    border: 1px solid var(--choose-option-border);
     transition: transform .18s cubic-bezier(.2, .9, .3, 1), box-shadow .18s;
     cursor: pointer;
     outline: none;
@@ -404,6 +465,20 @@
     border: 1px solid rgba(83, 143, 255, 0.12);
 }
 
+[data-theme="light"] {
+    .option-card.personal {
+        background: linear-gradient(180deg, #fff, #fefefe),
+            linear-gradient(120deg, var(--bs-bg-light), var(--home-showContent-light));
+         border-color: rgba(148, 141, 66, 0.2);
+    }
+    .option-card.business {
+        background: linear-gradient(180deg, #fff, #fefefe),
+             linear-gradient(120deg, var(--bs-bg-dark), var(--home-showContent2-light));
+        border-color: rgba(83, 143, 255, 0.2);
+    }
+}
+
+
 /* card top */
 .card-top {}
 
@@ -414,8 +489,8 @@
     border-radius: 8px;
     display: grid;
     place-items: center;
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--sign-txt-6xl);
+    background: var(--choose-icon-bg);
+    color: var(--choose-text-main);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
@@ -423,12 +498,12 @@
 .card-title {
     font-size: 16px;
     font-weight: 700;
-    color: var(--sign-txt-6xl);
+    color: var(--choose-text-main);
 }
 
 .card-sub {
     font-size: 12px;
-    color: var(--sign-input);
+    color: var(--choose-text-sub);
 }
 
 /* features list */
@@ -439,7 +514,7 @@
 
     li {
         font-size: 13px;
-        color: var(--sign-input);
+        color: var(--choose-text-sub);
         margin-bottom: 6px;
     }
 }
@@ -447,14 +522,14 @@
 /* footer area */
 .card-action .muted {
     font-size: 12px;
-    color: var(--sign-input);
+    color: var(--choose-text-sub);
 }
 
 /* CTA styles */
 .cta {
     font-weight: 700;
-    color: var(--home-showContent-dark);
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.95));
+    color: var(--choose-cta-text);
+    background: var(--choose-cta-bg);
     padding: 8px 12px;
     border-radius: 8px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
@@ -466,7 +541,7 @@
     font-size: 12px;
     padding: 6px 8px;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--choose-badge-bg);
     color: var(--sign-si);
 }
 
@@ -500,7 +575,7 @@
 
 /* small note */
 .small-note {
-    color: var(--sign-input);
+    color: var(--choose-text-sub);
     opacity: 0.9;
 }
 

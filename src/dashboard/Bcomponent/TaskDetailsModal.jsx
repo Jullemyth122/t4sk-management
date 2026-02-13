@@ -7,6 +7,7 @@ export default function TaskDetailsModal({
     open,
     onClose,
     card,
+    listId,
     draft,
     setDraft,
     onSave,
@@ -133,7 +134,7 @@ export default function TaskDetailsModal({
         if (!handleReviewAction) return;
         setActionLoading(true);
         try {
-            await handleReviewAction({ cardId: card.id, action: 'approve', note: reviewNote });
+            await handleReviewAction({ listId, cardId: card.id, action: 'approve', note: reviewNote });
             onClose();
         } finally { setActionLoading(false); }
     };
@@ -141,7 +142,7 @@ export default function TaskDetailsModal({
         if (!handleReviewAction) return;
         setActionLoading(true);
         try {
-            await handleReviewAction({ cardId: card.id, action: 'reject', note: reviewNote });
+            await handleReviewAction({ listId, cardId: card.id, action: 'reject', note: reviewNote });
             onClose();
         } finally { setActionLoading(false); }
     };

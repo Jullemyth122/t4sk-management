@@ -3,7 +3,7 @@ import * as boardSvc from '../../services/boardService'
 import { arrayUnion, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "../../config/firebase";
 
-export function useSubmissionHandlers({ businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, selectedBoard, members, getMemberLevel, roles, userLevel }) {
+export function useSubmissionHandlers({ businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, selectedBoard, members, getMemberLevel, roles, userLevel, actorName }) {
     const snapshotRef = useRef({});
 
     const handleSubmitCard = useCallback(async ({ listId, cardId, note = '', type = 'for-review', qaChecked = false, reviewerUid = null, reviewerEmail = null, attachments = [], submission = {} }) => {
@@ -13,7 +13,7 @@ export function useSubmissionHandlers({ businessId, uid, userEmail, dispatchSet,
         const listDoc = lists.find(l => l.id === listId) || {};
         const mergedAssignees = Array.from(new Set([...(card.assignees || []), ...(listDoc.assignees || [])]
             .filter(Boolean)
-            .map(a => String(a).trim())  // <- Trim each item here
+            .map(a => String(a).trim()) 
         ));
         const isAssignee = mergedAssignees.some(a => a === uid || a.toLowerCase() === userEmail.toLowerCase());
         if (!isAssignee) return dispatchSet('uiError', 'Permission denied');
@@ -51,19 +51,18 @@ export function useSubmissionHandlers({ businessId, uid, userEmail, dispatchSet,
         };
         dispatchSet('cardsMap', (prev) => ({ ...prev, [listId]: prev[listId].map(c => c.id === cardId ? { ...c, ...updates, submittedAt: new Date() } : c) }));
         try {
-            await boardSvc.updateCard({ businessId, uid, boardId: selectedBoardId, listId, cardId, updates });
-            if (submissionObj.reviewerUid) {
-                const notif = {
-                    id: `notif-${Date.now()}`,
-                    type: 'assigned-review',
-                    title: `Task assigned for review`,
-                    body: `${selectedBoard?.name || 'Board'} — ${card.title}`,
-                    link: `/business/${businessId}/boards/${selectedBoardId}`,
-                    createdAt: new Date(),  // <- Use client timestamp
-                    read: false
-                };
-                await updateDoc(doc(db, 'account', submissionObj.reviewerUid), { notifications: arrayUnion(notif) });
-            } else if (submissionObj.reviewerEmail) {
+            await boardSvc.updateCard({ 
+                businessId, 
+                uid, 
+                boardId: selectedBoardId, 
+                listId, 
+                cardId, 
+                updates,
+                actorName,
+                boardName: selectedBoard?.name || 'Board'
+            });
+            // Notifications handled by service now to avoid double events.
+            if (submissionObj.reviewerEmail && !submissionObj.reviewerUid) {
                 window.alert(`Reviewer assigned: ${submissionObj.reviewerEmail}. (External email notification not implemented.)`);
             }
         } catch (err) {
@@ -71,7 +70,7 @@ export function useSubmissionHandlers({ businessId, uid, userEmail, dispatchSet,
             dispatchSet('cardsMap', snapshotRef.current.cardsMap || {});
             dispatchSet('uiError', err?.message || 'Failed to submit card');
         }
-    }, [businessId, uid, userEmail, selectedBoardId, cardsMap, lists, dispatchSet, selectedBoard, members, getMemberLevel, userLevel]);
+    }, [businessId, uid, userEmail, selectedBoardId, cardsMap, lists, dispatchSet, selectedBoard, members, getMemberLevel, userLevel, actorName]);
 
     const handleReviewAction = useCallback(async ({ listId, cardId, action, note = '' }) => {
         if (!listId || !cardId || !['approve', 'reject'].includes(action)) return dispatchSet('uiError', 'Invalid action or card/list');
@@ -93,28 +92,23 @@ export function useSubmissionHandlers({ businessId, uid, userEmail, dispatchSet,
         };
         dispatchSet('cardsMap', (prev) => ({ ...prev, [listId]: prev[listId].map(c => c.id === cardId ? { ...c, ...updates } : c) }));
         try {
-            await boardSvc.updateCard({ businessId, uid, boardId: selectedBoardId, listId, cardId, updates });
-            const submitterUid = card.submittedBy || card.createdBy;
-            if (submitterUid) {
-                const notif = {
-                    id: `notif-${Date.now()}`,
-                    type: action === 'approve' ? 'review-approved' : 'review-rejected',
-                    title: action === 'approve' ? 'Your submission was approved' : 'Your submission was rejected',
-                    body: `${selectedBoard?.name || 'Board'} — ${card.title}`,
-                    link: `/business/${businessId}/boards/${selectedBoardId}`,
-                    createdAt: new Date(),  // <- Use client timestamp
-                    read: false
-                };
-                await updateDoc(doc(db, 'account', submitterUid), { notifications: arrayUnion(notif) });
-            } else {
-                window.alert(`Review ${action === 'approve' ? 'approved' : 'rejected'} — submitter not found to notify.`);
-            }
+            await boardSvc.updateCard({ 
+                businessId, 
+                uid, 
+                boardId: selectedBoardId, 
+                listId, 
+                cardId, 
+                updates,
+                actorName,
+                boardName: selectedBoard?.name || 'Board'
+            });
+            // Notifications handled by service now.
         } catch (err) {
             console.error('review action failed', err);
             dispatchSet('cardsMap', snapshotRef.current.cardsMap || {});
             dispatchSet('uiError', err?.message || 'Failed to record review action');
         }
-    }, [businessId, uid, userEmail, selectedBoardId, cardsMap, dispatchSet, selectedBoard]);
+    }, [businessId, uid, userEmail, selectedBoardId, cardsMap, dispatchSet, selectedBoard, actorName]);
 
     return { handleSubmitCard, handleReviewAction };
 }

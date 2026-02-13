@@ -27,7 +27,7 @@ const Home = ({ simulateLoading = false }) => {
                 <div className="line"></div>
             </div>             
             <div className="content-banner w-full flex items-end justify-center"> 
-                <div className="outside-show-content w full flex items-end justify-center relative">
+                <div className="outside-show-content w-full flex items-end justify-center relative">
                     <div className="ellipse elip1"></div>
                     <div className="ellipse elip2"></div>
                     <div className="show-content flex items-center justify-evenly relative">

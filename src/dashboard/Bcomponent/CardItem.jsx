@@ -245,6 +245,7 @@ export default function CardItem({
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
                 card={card}
+                listId={listId}
                 draft={cardDrafts}
                 setDraft={setCardDrafts}
                 canEdit={canEdit}
@@ -282,7 +283,7 @@ export default function CardItem({
                 currentUser={currentUserMember}
                 onSubmit={async (data) => {
                     if (!handleSubmitCard) return;
-                    await handleSubmitCard(listId, card.id, data);
+                    await handleSubmitCard({ listId, cardId: card.id, ...data });
                 }}
                 onSubtaskToggle={async (subtaskIndex, newCompleted) => {
                     // Immediately persist subtask toggle to Firestore

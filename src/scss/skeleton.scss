@@ -1,6 +1,22 @@
+/* --- SKELETON LOCAL THEME VARIABLES (Default Dark) --- */
+:root {
+    --skel-bg-shimmer: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.09) 50%, rgba(255, 255, 255, 0.06) 100%);
+    --skel-spinner-border: rgba(255, 255, 255, 0.12);
+    --skel-spinner-top: rgba(255, 255, 255, 0.9);
+    --skel-text: #eaeaea;
+}
+
+/* --- LIGHT MODE OVERRIDES --- */
+[data-theme="light"] {
+    /* Scoped to body/root or specifically if wrapped, but generally applying to these elements */
+    --skel-bg-shimmer: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.09) 50%, rgba(0, 0, 0, 0.06) 100%);
+    --skel-spinner-border: rgba(0, 0, 0, 0.12);
+    --skel-spinner-top: rgba(0, 0, 0, 0.7);
+    --skel-text: #475569;
+}
 
 .skeleton-block {
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.09) 50%, rgba(255, 255, 255, 0.06) 100%);
+    background: var(--skel-bg-shimmer);
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.2s linear infinite;
     display: block;
@@ -43,7 +59,7 @@
     align-items: center;
     justify-content: center;
     gap: 12px;
-    color: #fff;
+    color: var(--skel-text); /* Use variable */
     text-align: center;
     padding: 24px;
 }
@@ -57,8 +73,8 @@
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    border: 4px solid rgba(255, 255, 255, 0.12);
-    border-top-color: rgba(255, 255, 255, 0.9);
+    border: 4px solid var(--skel-spinner-border);
+    border-top-color: var(--skel-spinner-top);
     animation: spin 1s linear infinite;
 }
 
@@ -71,7 +87,7 @@
 .loader-text {
     opacity: 0.95;
     font-size: 14px;
-    color: var(--text-muted, #eaeaea);
+    color: var(--skel-text);
 }
 
 /* HomeSkeleton layout tweaks - try to match your home.scss */

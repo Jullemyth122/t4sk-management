@@ -58,6 +58,7 @@ export default function ListColumn({
     // key: card.id -> boolean
     const [expandedMap, setExpandedMap] = useState({});
     const [collapsed, setCollapsed] = useState(false);
+    const [isQuickAddExpanded, setIsQuickAddExpanded] = useState(false); // Collapsible Quick Add State
 
     useEffect(() => {
         setCollapsed(false);
@@ -398,11 +399,10 @@ export default function ListColumn({
                 <div id={`list-${list.id}-name`} className="list-name">
                     {editing ? (
                         <input
-                            className="list-name-input"
+                            className="list-name-input list-name-input-edit"
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
                             aria-label="Edit list name"
-                            style={{ background:'var(--bd-inp_list)', padding:'5px' }}
                         />
                     ) : (
                         list.name
@@ -419,23 +419,22 @@ export default function ListColumn({
                         title={collapsed ? 'Expand list' : 'Collapse list'}
                     >
                         <span aria-hidden>{collapsed ? '▸' : '▾'}</span>
-                        <span style={{ marginLeft: 6, fontWeight: 700 }}>{collapsed ? 'Show' : 'Collapse'}</span>
+                        <span className="list-collapse-text">{collapsed ? 'Show' : 'Collapse'}</span>
                     </button>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="list-header-meta">
                     <div className="list-count">{(cards || []).length} cards</div>
                     <div style={{ minWidth: 140 }}>
-                        <div style={{ height: 8, background: 'rgba(0,0,0,0.06)', borderRadius: 6, overflow: 'hidden' }}>
+                        <div className="list-progress-track">
                             <div
+                                className="list-progress-fill"
                                 style={{
-                                    width: `${Math.max(0, Math.min(100, listProgress))}%`,
-                                    height: '100%',
-                                    background: 'linear-gradient(90deg,#4caf50,#8bc34a)',
+                                    width: `${Math.max(0, Math.min(100, listProgress))}%`
                                 }}
                             />
                         </div>
-                        <div style={{ fontSize: 12, color: 'var(--sidenav-ISO)', marginTop: 6 }}>{listProgress}% complete</div>
+                        <div className="list-progress-text">{listProgress}% complete</div>
                     </div>
                 </div>
             </div>
@@ -453,7 +452,7 @@ export default function ListColumn({
                                         <span className="assignee-name">{a.name}</span>
                                         {a.email ? <span className="assignee-email">{a.email}</span> : null}
                                         {isOverloaded && isOverloaded(a.key) && (
-                                            <span style={{ marginLeft: 6, fontSize: '0.8em' }} title="High Workload">🔥</span>
+                                            <span className="assignee-overloaded" title="High Workload">🔥</span>
                                         )}
                                     </span>
                                 </div>
@@ -517,41 +516,22 @@ export default function ListColumn({
             ) : null}
 
             {editing && (
-                <div style={{ marginTop: 12, position:'relative' }}>
+                <div className="edit-assignees-wrapper">
                     <label>Assign low-level members:</label>
                     <input
                         placeholder="Search low-level members..."
                         value={assigneeSearch}
-                        style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: 'none', background: 'var(--bd-inp_list)' }}
+                        className="assignee-search-input"
                         onChange={(e) => setAssigneeSearch(e.target.value)}
                     />
-                    <div style={{
-                        position: 'absolute',
-                        zIndex: 200,
-                        left: 0,
-                        right: 0,
-                        marginTop: 6,
-                        background: 'var(--task-modalBG)',
-                        border: '1px solid rgba(0,0,0,0.06)',
-                        borderRadius: 8,
-                        maxHeight: 220,
-                        overflow: 'auto',
-                        padding: 8,
-                    }}>
+                    <div className="assignee-dropdown">
                         {assigneeCandidates.map((cand) => {
                             const value = cand.uid || cand.email;
                             const checked = editAssignees.includes(value);
                             return (
                                 <div
                                     key={value} onClick={() => toggleEditAssignee(value)}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        padding: '6px 8px',
-                                        borderRadius: 6,
-                                        cursor: 'pointer'
-                                    }}
+                                    className="assignee-dropdown-item"
                                 >
                                     <input type="checkbox" checked={checked} readOnly />
                                     {cand.name || cand.email}
@@ -565,12 +545,12 @@ export default function ListColumn({
             {!collapsed && (
                 <>
                     <div style={{ marginTop: 8 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                        <div className="group-header">
                             <strong>Active</strong>
-                            <span style={{ fontSize: 12, color: 'var(--sidenav-ISO)' }}>{activeCards.length} items</span>
+                            <span>{activeCards.length} items</span>
                         </div>
 
-                        <div className="cards" style={{ marginTop: 8 }}>
+                        <div className="cards cards-list">
                             {pagedActive.map((card) => (
                                 <CardItem
                                     key={card.id}
@@ -605,12 +585,12 @@ export default function ListColumn({
 
                         {/* active pagination */}
                         {activeCards.length > 0 && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginTop: 8 }}>
-                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <div className="pagination-wrapper">
+                                <div className="pagination-controls">
                                     <button className="action-btn" onClick={() => setPageActive((p) => Math.max(1, p - 1))} disabled={pageActive === 1}>
                                         Prev
                                     </button>
-                                    <div style={{ fontSize: 13, color: 'var(--sidenav-ISO)' }}>
+                                    <div className="pagination-info">
                                         Page {pageActive} / {totalPagesActive}
                                     </div>
                                     <button className="action-btn" onClick={() => setPageActive((p) => Math.min(totalPagesActive, p + 1))} disabled={pageActive === totalPagesActive}>
@@ -618,9 +598,10 @@ export default function ListColumn({
                                     </button>
                                 </div>
 
-                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                    <div style={{ fontSize: 13, color: 'var(--sidenav-ISO)' }}>{activeCards.length} items</div>
+                                <div className="pagination-controls">
+                                    <div className="pagination-info">{activeCards.length} items</div>
                                     <select
+                                        className="pagination-select"
                                         value={pageSize}
                                         onChange={(e) => {
                                             setPageSize(Number(e.target.value));
@@ -641,12 +622,12 @@ export default function ListColumn({
                     {/* APPROVED / COMPLETED group */}
                     {approvedCards.length > 0 && (
                         <div style={{ marginTop: 18 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                            <div className="group-header">
                                 <strong>Approved / Completed</strong>
-                                <span style={{ fontSize: 12, color: 'var(--sidenav-ISO)' }}>{approvedCards.length} items</span>
+                                <span>{approvedCards.length} items</span>
                             </div>
 
-                            <div className="cards" style={{ marginTop: 8 }}>
+                            <div className="cards cards-list">
                                 {pagedApproved.map((card) => (
                                     <CardItem
                                         key={card.id}
@@ -680,12 +661,12 @@ export default function ListColumn({
                             </div>
 
                             {/* approved pagination */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginTop: 8 }}>
-                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <div className="pagination-wrapper">
+                                <div className="pagination-controls">
                                     <button className="action-btn" onClick={() => setPageApproved((p) => Math.max(1, p - 1))} disabled={pageApproved === 1}>
                                         Prev
                                     </button>
-                                    <div style={{ fontSize: 13, color: 'var(--sidenav-ISO)' }}>
+                                    <div className="pagination-info">
                                         Page {pageApproved} / {totalPagesApproved}
                                     </div>
                                     <button className="action-btn" onClick={() => setPageApproved((p) => Math.min(totalPagesApproved, p + 1))} disabled={pageApproved === totalPagesApproved}>
@@ -693,8 +674,8 @@ export default function ListColumn({
                                     </button>
                                 </div>
 
-                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                    <div style={{ fontSize: 13, color: 'var(--sidenav-ISO)' }}>{approvedCards.length} items</div>
+                                <div className="pagination-controls">
+                                    <div className="pagination-info">{approvedCards.length} items</div>
                                     {/* pageSize control shared above already */}
                                 </div>
                             </div>
@@ -703,15 +684,28 @@ export default function ListColumn({
 
                     {_canCreateCard && (
                         // quick-add: disabled when listProgress >= 100
-                        <div className={`quick-add${isListComplete ? ' disabled' : ''}`} style={{ marginTop: 14 }}>
-                            <input
-                                placeholder="Title"
+                        <div className={`quick-add-wrapper ${isListComplete ? ' disabled' : ''}`}>
+                            {/* Toggle Header */}
+                            <button
+                                className={`quick-add-toggle ${isQuickAddExpanded ? 'expanded' : ''}`}
+                                onClick={() => setIsQuickAddExpanded((prev) => !prev)}
+                                disabled={isListComplete}
+                                title={isQuickAddExpanded ? "Collapse quick add" : "Expand quick add"}
+                            >
+                                <span className="toggle-icon">{isQuickAddExpanded ? '▼' : '▶'}</span>
+                                <span className="toggle-text">Quick Add Task</span>
+                            </button>
+
+                            {isQuickAddExpanded && (
+                                <div className="quick-add-form">
+                                    <input
+                                        placeholder="Title"
                                 value={(newCardInputs[list.id] || {}).title || ''}
                                 onChange={(e) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), title: e.target.value } }))}
                             />
                             <div className="quick-meta-row">
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <label style={{ fontSize: '0.65rem', color: 'var(--sidenav-ISO)', textTransform: 'uppercase' }}>Start</label>
+                                            <label className="quick-label">Start</label>
                                     <input
                                         type="date"
                                         title="Start Date"
@@ -720,7 +714,7 @@ export default function ListColumn({
                                     />
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <label style={{ fontSize: '0.65rem', color: 'var(--sidenav-ISO)', textTransform: 'uppercase' }}>Due</label>
+                                            <label className="quick-label">Due</label>
                                     <input
                                         type="date"
                                         title="Due Date"
@@ -731,7 +725,7 @@ export default function ListColumn({
 
                                 {/* Priority selector replaced with CustomSelect */}
                                 <div style={{ minWidth: 120, flex: 1 }}>
-                                    <label style={{ fontSize: '0.65rem', color: 'var(--sidenav-ISO)', textTransform: 'uppercase', display: 'block' }}>Priority</label>
+                                            <label className="quick-label" style={{ display: 'block' }}>Priority</label>
                                     <CustomSelect
                                         options={priorityOptions}
                                         value={(newCardInputs[list.id] || {}).priority ?? 'medium'}
@@ -747,7 +741,7 @@ export default function ListColumn({
 
                                 {/* Optional: weight (contribution to list total) */}
                                 <div style={{ width: 80 }}>
-                                    <label style={{ fontSize: '0.65rem', color: 'var(--sidenav-ISO)', textTransform: 'uppercase' }}>Weight %</label>
+                                            <label className="quick-label">Weight %</label>
                                     <input
                                         type="number"
                                         min="0"
@@ -783,27 +777,28 @@ export default function ListColumn({
                                     Add
                                 </button>
                                 <button
-                                    onClick={() =>
-                                        setNewCardInputs((p) => ({ ...p, [list.id]: { title: '', dueDate: '', effort: 3, priority: 'medium', weight: '' } }))
-                                    }
+                                            onClick={() => {
+                                                setNewCardInputs((p) => ({ ...p, [list.id]: { title: '', dueDate: '', effort: 3, priority: 'medium', weight: '' } }));
+                                                setIsQuickAddExpanded(false); // Collapse on cancel
+                                            }}
                                 >
                                     Cancel
                                 </button>
                             </div>
 
                             {/* Subtask addition UI */}
-                            <div className="quick-subtasks" style={{ marginTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 8 }}>
-                                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--sidenav-ISO)', marginBottom: 6 }}>
+                                    <div className="quick-subtasks">
+                                        <div className="subtask-section-header">
                                     Subtasks ({((newCardInputs[list.id] || {}).subtasks || []).length})
                                 </div>
 
-                                <div className="subtask-mini-list" style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8, maxHeight: 120, overflowY: 'auto' }}>
+                                        <div className="subtask-mini-list">
                                     {((newCardInputs[list.id] || {}).subtasks || []).map((st, i) => (
-                                        <div key={st.id || i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', background: 'rgba(255,255,255,0.02)', padding: '2px 6px', borderRadius: 4 }}>
-                                            <span style={{ color: 'var(--sidenav-ISO)' }}>•</span>
-                                            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        <div key={st.id || i} className="mini-subtask-item">
+                                            <span className="mini-subtask-bullet">•</span>
+                                            <span className="mini-subtask-text">
                                                 {st.text}
-                                                <span style={{ opacity: 0.6, fontSize: '0.75em', marginLeft: 6 }}>
+                                                <span className="mini-subtask-meta">
                                                     ({st.weight > 0 ? st.weight : getProjectedWeight((newCardInputs[list.id] || {}).subtasks || [], i)}%)
                                                 </span>
                                             </span>
@@ -818,7 +813,7 @@ export default function ListColumn({
                                                         }
                                                     };
                                                 })}
-                                                style={{ border: 'none', background: 'transparent', color: '#ff6b6b', cursor: 'pointer', padding: 2 }}
+                                                className="mini-subtask-remove"
                                                 title="Remove subtask"
                                             >
                                                 ×
@@ -827,19 +822,10 @@ export default function ListColumn({
                                     ))}
                                 </div>
 
-                                <div style={{ display: 'flex', gap: 6 }}>
+                                        <div className="subtask-add-row">
                                     <input
                                         placeholder="Subtask..."
-                                        style={{
-                                            flex: 1,
-                                            background: 'rgba(0,0,0,0.1)',
-                                            border: 'none',
-                                            padding: '4px 8px',
-                                            borderRadius: 4,
-                                            fontSize: '0.8rem',
-                                            color: 'var(--text-color)',
-                                            minWidth: 0
-                                        }}
+                                                className="subtask-add-input"
                                         value={(newCardInputs[list.id] || {}).tempSubtaskText || ''}
                                         onChange={(e) => setNewCardInputs(p => ({
                                             ...p,
@@ -871,16 +857,7 @@ export default function ListColumn({
                                     <input
                                         type="number"
                                         placeholder={(getProjectedWeight((newCardInputs[list.id] || {}).subtasks || [], -1 /* placeholder for auto */) || 'Auto') + ''}
-                                        style={{
-                                            width: 42,
-                                            background: 'rgba(0,0,0,0.1)',
-                                            border: 'none',
-                                            padding: '4px',
-                                            borderRadius: 4,
-                                            fontSize: '0.8rem',
-                                            color: 'var(--text-color)',
-                                            textAlign: 'center'
-                                        }}
+                                                className="subtask-add-weight"
                                         min="0"
                                         max="100"
                                         value={(newCardInputs[list.id] || {}).tempSubtaskWeight || ''}
@@ -944,24 +921,18 @@ export default function ListColumn({
                                                 });
                                             }
                                         }}
-                                        style={{
-                                            border: 'none',
-                                            background: 'rgba(255,255,255,0.1)',
-                                            color: 'var(--text-color)',
-                                            borderRadius: 4,
-                                            cursor: 'pointer',
-                                            padding: '0 8px',
-                                            fontSize: '1rem',
-                                            fontWeight: 700
-                                        }}
+                                                className="subtask-add-btn"
                                     >
                                         +
                                     </button>
                                 </div>
                             </div>
 
+                                </div>
+                            )}
+
                             {isListComplete && (
-                                <div style={{ marginTop: 8, fontSize: 13, color: 'var(--sidenav-ISO)' }}>
+                                <div className="list-complete-msg">
                                     This list is 100% complete — new card creation is disabled.
                                 </div>
                             )}

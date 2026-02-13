@@ -12,6 +12,7 @@ import {
 } from "../services/accountService";
 
 import NavbarSkeleton from "../components/loaders/NavbarSkeleton";
+import NotificationDropdown from "../components/NotificationDropdown";
 
 const Navbar = ({ simulateLoading = true }) => {
     const { currentUser, signOut, refreshProfile } = useAuth();
@@ -326,6 +327,14 @@ const Navbar = ({ simulateLoading = true }) => {
                                 : currentUser.displayName || currentUser.email}
                         </h5>
                     }
+                    {currentUser && (
+                        <div className="nav-link notification-button">
+                            <NotificationDropdown
+                                notifications={notifications}
+                                uid={currentUser.uid}
+                            />
+                        </div>
+                    )}
                     {currentUser && showInvitesUI && (
                         <div
                         className="nav-link invites-button"

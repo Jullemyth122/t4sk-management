@@ -4,7 +4,7 @@ import { clampInt } from "../../utils/dashboardUtils";
 import { computePriority } from "../../utils/prioritization";
 import { serverTimestamp } from "firebase/firestore";
 
-export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs }) {
+export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs, actorName, boardName }) {
     const snapshotRef = useRef({});
 
     const handleCreateCardForList = useCallback(async (listId) => {
@@ -49,48 +49,50 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
             complexityMode: inputs.complexityMode || 'auto',
             createdAt: new Date(),
             createdBy: uid || null,
-            subtasks, // Use extracted subtasks
+            subtasks, 
         };
         snapshotRef.current.cardsMap = { ...cardsMap };
         dispatchSet('cardsMap', (prev) => ({ ...prev, [listId]: [tempCard, ...(prev[listId] || [])] }));
         try {
-            const created = await boardSvc.createCard({ businessId, uid, boardId: selectedBoardId, listId, card: tempCard });
+            const created = await boardSvc.createCard({ 
+                businessId, 
+                uid, 
+                boardId: selectedBoardId, 
+                listId, 
+                card: tempCard,
+                actorName,
+                boardName
+            });
             dispatchSet('cardsMap', (prev) => ({ ...prev, [listId]: prev[listId].map((c) => c.id === tempId ? created : c) }));
-            // Reset form, including subtasks
+            // Reset form
             dispatchSet('newCardInputs', (p) => ({ ...p, [listId]: { title: '', dueDate: '', effort: 3, priority: 'medium', weight: '', subtasks: [] } }));
         } catch (err) {
             console.error('createCard failed', err);
             dispatchSet('cardsMap', snapshotRef.current.cardsMap || {});
             dispatchSet('uiError', err?.message || 'Failed to create card');
         }
-    }, [newCardInputs, selectedBoardId, businessId, uid, cardsMap, canAssignTasks, dispatchSet]);
+    }, [newCardInputs, selectedBoardId, businessId, uid, cardsMap, canAssignTasks, dispatchSet, actorName, boardName]);
 
     const handleUpdateCard = useCallback(async ({ listId, cardId, updates, listAssignees }) => {
         if (!cardId || !listId) return dispatchSet('uiError', 'Invalid card/list');
         
-        // Check if this is a subtask-only update (subtasks + progress)
         const updateKeys = Object.keys(updates || {});
         const isSubtaskOnlyUpdate = updateKeys.length > 0 && updateKeys.every(k => k === 'subtasks' || k === 'progress');
         
-        // For subtask updates, check if user is an assignee
-        // For other updates, require board edit permission
         if (!isSubtaskOnlyUpdate && !canEditBoardValue) {
             return dispatchSet('uiError', 'Permission denied - board edit required');
         }
         
-        // If subtask-only update, verify user is assignee
         if (isSubtaskOnlyUpdate) {
             const card = (cardsMap[listId] || []).find(c => c.id === cardId);
             if (!card) return dispatchSet('uiError', 'Card not found');
             
-            // MERGE card + list assignees (same as UI does)
             const allAssignees = [
                 ...(Array.isArray(card.assignees) ? card.assignees : []),
                 ...(Array.isArray(listAssignees) ? listAssignees : [])
             ].filter(Boolean);
 
             const assigneesNormalized = allAssignees.map(a => String(a).toLowerCase());
-
             const normalizedUid = String(uid || '').toLowerCase();
             const normalizedEmail = String(userEmail || '').toLowerCase();
             
@@ -107,7 +109,6 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
             const up = { ...updates };
             if (up.progress !== undefined) {
                 up.progress = clampInt(up.progress, 0, 100);
-                // Removed auto-completion logic for 100% progress
             }
             const needRank = up.priority !== undefined || up.dueDate !== undefined || up.effort !== undefined || up.complexity !== undefined || up.complexityMode !== undefined || up.startDate !== undefined;
             if (needRank) {
@@ -123,7 +124,16 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
                 up.priorityRank = cp.priorityRank;
                 if (!up.complexity && cp.complexity) up.complexity = cp.complexity;
             }
-            await boardSvc.updateCard({ businessId, uid, boardId: selectedBoardId, listId, cardId, updates: up });
+            await boardSvc.updateCard({ 
+                businessId, 
+                uid, 
+                boardId: selectedBoardId, 
+                listId, 
+                cardId, 
+                updates: up,
+                actorName,
+                boardName
+            });
             dispatchSet('cardsMap', (prev) => ({ ...prev, [listId]: prev[listId].map((c) => c.id === cardId ? { ...c, ...up } : c) }));
             dispatchSet('cardEditing', (p) => ({ ...p, [cardId]: false }));
         } catch (err) {
@@ -131,7 +141,7 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
             dispatchSet('cardsMap', snapshotRef.current.cardsMap || {});
             dispatchSet('uiError', err?.message || 'Failed to update card');
         }
-    }, [businessId, uid, userEmail, selectedBoardId, cardsMap, canEditBoardValue, dispatchSet]);
+    }, [businessId, uid, userEmail, selectedBoardId, cardsMap, canEditBoardValue, dispatchSet, actorName, boardName]);
 
     const handleDeleteCard = useCallback(async ({ listId, cardId }) => {
         if (!listId || !cardId || !canEditBoardValue || !window.confirm('Delete this card?')) return;

@@ -12,6 +12,7 @@ import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../config/firebase";
 // import { fetchAccountProfile, saveUserData } from "../utilities/accountService";
 import { fetchAccountProfile, saveUserData } from "../services/accountService";
+import { usePresence } from "../hooks/usePresence";
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -71,6 +72,9 @@ export const AuthProvider = ({ children }) => {
       }
     };
   }, []);
+
+  // Track presence for the current user
+  usePresence(currentUser?.uid);
 
   const refreshProfile = async () => {
     const uid = currentUser?.uid;

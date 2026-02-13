@@ -2,116 +2,168 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jura:wght@300..700&family=Kodchasan:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&family=Kode+Mono:wght@400..700&family=Krona+One&family=Liu+Jian+Mao+Cao&family=Sevillana&display=swap');
 
-/* :root  */
-/* [data-theme="light"] */
-[data-theme="dark"]
-{
+/* Light mode overrides */
+/* Light mode overrides */
+[data-theme="light"] {
   --bg-color: #f8fafc;
-    --text-color: #1e293b;
+  --text-color: #1e293b;
+  --text-muted: #64748b;
+  
+    /* Skeleton */
+    --skeleton-bg: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.09) 50%, rgba(0, 0, 0, 0.06) 100%);
+    --loader-text: #475569;
+    --spinner-border: rgba(0, 0, 0, 0.12);
+    --spinner-top: rgba(0, 0, 0, 0.7);
+  
+    /* Task Modal */
+    --modal-overlay: rgba(0, 0, 0, 0.4);
+    --modal-bg: #ffffff;
+    --modal-text: #1e293b;
+    --modal-border: rgba(0, 0, 0, 0.08);
+    --modal-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    --modal-header-bg: linear-gradient(to right, rgba(0, 0, 0, 0.01), transparent);
+    --modal-sidebar-bg: rgba(0, 0, 0, 0.02);
+    --modal-inp-bg: rgba(0, 0, 0, 0.03);
+    --modal-inp-border: rgba(0, 0, 0, 0.08);
 
   /* Navside bg-light */
   --bg-nav-grd-darkLight: #e2e8f0;
-    --bg-nav-grd-darkDark: #cbd5e1;
+  --bg-nav-grd-darkDark: #cbd5e1;
     --notif-textColor: #334155;
     --notif-grd-light: #e2e8f0;
     --notif-grd-dark: #94a3b8;
 
   /* Home */
   --home-elip1-grd-light: #f1f5f9;
-    --home-elip1-grd-dark: #cbd5e1;
+  --home-elip1-grd-dark: #cbd5e1;
 
   --home-elip2-grd-light: #f1f5f9;
-    --home-elip2-grd-dark: #94a3b8;
+  --home-elip2-grd-dark: #94a3b8;
     --home-elipBoxShadow: 0px 2px 10px rgba(148, 163, 184, 0.3);
 
-  --home-showContent-light: #e2e8f0;
-    --home-showContent-dark: #cbd5e1;
+  /* --home-showContent-light: #e2e8f0; */
+    /* --home-showContent-dark: #cbd5e1; */
 
   --home-showContent2-light: #f8fafc;
-    --home-showContent2-dark: #e2e8f0;
+  --home-showContent2-dark: #e2e8f0;
 
+  --home-card-bg: linear-gradient(180deg, #ffffff, #f8fafc);
+    --home-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --home-card-text: #1e293b;
 
   /* Dashboard */
   --dash-sbar-light: #e2e8f0;
-    --dash-sbar-dark: #cbd5e1;
+  --dash-sbar-dark: #cbd5e1;
     --dash-tSbar: #64748b;
     --dash-MsbarT: #334155;
 
   --sidenav-H1: #1e293b;
-    --sidenav-slash: #94a3b8;
+  --sidenav-slash: #94a3b8;
     --sidenav-ISO: #475569;
-
 
   --sidenav-hoverBoardTitle: #94a3b880;
 
   /* Board of Dashboard */
+  --bd-bg-root: linear-gradient(135deg, #f8fafc, #f1f5f9);
   --bd-head_b: #64748b;
-    --bd-head_b2: #475569;
+  --bd-head_b2: #475569;
+  --bd-header-bg: linear-gradient(to right, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.08));
+    --bd-header-border: rgba(0, 0, 0, 0.06);
 
   --bd-inp_list: #f1f5f9;
 
   --bd-cat-l1: #94a3b8;
-    --bd-cat-l2: #cbd5e180;
+  --bd-cat-l2: #cbd5e180;
     --bd-cat-l3: #e2e8f080;
 
+  --bd-card-bg: rgba(255, 255, 255, 0.9);
+    --bd-card-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    --bd-text-main: #1e293b;
+    --bd-text-sub: #64748b;
   /* Board Task Modal */
   --task-modalBG: #475569;
-    --task-modalbtnBG: #64748b;
+  --task-modalbtnBG: #64748b;
     --task-modalbtnBG1: #475569;
   --task-modalColor1: #fff;
   --task-modalColor2: #f1f5f9;
 
   /* Board Select */
   --chat-svg: #475569;
-    --chat-box: #1e293b;
+  --chat-box: #1e293b;
 
   --bs-bg-light: #e2e8f0;
-    --bs-bg-dark: #cbd5e1;
+  --bs-bg-dark: #cbd5e1;
 
   --bs-hdl-bg: #94a3b8;
-    --bs-hdl-bg2: #64748b;
+  --bs-hdl-bg2: #64748b;
 
   /* Settings */
   --settings-darkLight: #e2e8f0;
-    --settings-darkDark: #cbd5e1;
+  --settings-darkDark: #cbd5e1;
 
   --setting-pH1: #1e293b;
-    --setting-pH2: #334155;
+  --setting-pH2: #334155;
 
+  /* Choose Account */
+    --choose-bg: rgba(255, 255, 255, 0.6);
+    --choose-topbar-bg: rgba(255, 255, 255, 0.9);
+    --choose-text: #1e293b;
+    --choose-border: rgba(0, 0, 0, 0.08);
+  
+    /* Custom Select */
+    --select-bg: #ffffff;
+    --select-border: rgba(0, 0, 0, 0.08);
+    --select-hover: rgba(0, 0, 0, 0.03);
+    --select-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
 
   /* Signup */
   --signup-comp: #f8fafc;
 
   --signup-shape-light: #cbd5e1;
-    --signup-shape-dark: #94a3b880;
+  --signup-shape-dark: #94a3b880;
 
   --signup-shape2-light: #64748b;
-    --signup-shape2-dark: #94a3b880;
+  --signup-shape2-dark: #94a3b880;
 
   --sign-otc-light: #cbd5e180;
-    --sign-otc-dark: #94a3b880;
+  --sign-otc-dark: #94a3b880;
     --sign-bx-otc-light: #e2e8f0;
 
   --sign-txt-6xl: #334155;
-    --sign-highlight: #e2e8f0;
+  --sign-highlight: #e2e8f0;
 
   --sign-dashline: #94a3b8;
-    --sign-dashline2: #64748b;
+  --sign-dashline2: #64748b;
     --sign-sct: #1e293b;
 
   --sign-si: #64748b;
 
   --sign-labels: #475569;
-    --sign-input: #1e293b;
-
-
+  --sign-input: #1e293b;
 }
 
-:root
-/* [data-theme="dark"]  */
-{
+:root,
+[data-theme="dark"] {
   --bg-color: #252525;
   --text-color: #fff;
+  --text-muted: #eaeaea;
+  
+    /* Skeleton */
+    --skeleton-bg: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.09) 50%, rgba(255, 255, 255, 0.06) 100%);
+    --loader-text: #eaeaea;
+    --spinner-border: rgba(255, 255, 255, 0.12);
+    --spinner-top: rgba(255, 255, 255, 0.9);
+  
+    /* Task Modal */
+    --modal-overlay: rgba(0, 0, 0, 0.6);
+    --modal-bg: #1e1e1e;
+    --modal-text: #fff;
+    --modal-border: rgba(255, 255, 255, 0.08);
+    --modal-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    --modal-header-bg: linear-gradient(to right, rgba(255, 255, 255, 0.02), transparent);
+    --modal-sidebar-bg: rgba(0, 0, 0, 0.2);
+    --modal-inp-bg: rgba(255, 255, 255, 0.05);
+    --modal-inp-border: rgba(255, 255, 255, 0.1);
 
   /* Navside bg-dark */
   --bg-nav-grd-darkLight: #454545;
@@ -128,12 +180,15 @@
   --home-elip2-grd-dark: #424242;
   --home-elipBoxShadow: 0px 2px 10px #212121;
 
-  --home-showContent-light: #212121;
-  --home-showContent-dark: #424242;
+  /* --home-showContent-light: #212121; */
+    /* --home-showContent-dark: #424242; */
 
   --home-showContent2-light: #222222;
   --home-showContent2-dark: #6a6a6a;
 
+  --home-card-bg: linear-gradient(180deg, #242424, #323232);
+    --home-card-shadow: 0 6px 20px rgba(0, 0, 0, 0.85);
+    --home-card-text: #f0f0f0;
   /* Dashboard */
   --dash-sbar-light: #4b4b4b;
   --dash-sbar-dark: #3f3f3f;
@@ -144,12 +199,14 @@
   --sidenav-slash: #35353597;
   --sidenav-ISO: #cfcfcf;
 
-
   --sidenav-hoverBoardTitle: #68748097;
 
   /* Board of Dashboard */
+  --bd-bg-root: var(--bg-color);
   --bd-head_b: #686868;
   --bd-head_b2: #484848;
+  --bd-header-bg: rgba(18, 18, 18, 0.8);
+    --bd-header-border: rgba(255, 255, 255, 0.06);
 
   --bd-inp_list: #2121219f;
 
@@ -157,6 +214,10 @@
   --bd-cat-l2: #7474744f;
   --bd-cat-l3: #49494945;
 
+  --bd-card-bg: #1e1e1e;
+    --bd-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    --bd-text-main: #fff;
+    --bd-text-sub: #94a3b8;
   /* Board Task Modal */
   --task-modalBG: #373737;
   --task-modalbtnBG: #212121;
@@ -172,7 +233,6 @@
   --bs-hdl-bg: #b0c2e4c7;
   --chat-svg: #ffffff;
 
-
   /* Settings */
   --settings-darkLight: #4b4b4b;
   --settings-darkDark: #3f3f3f;
@@ -180,10 +240,20 @@
   --setting-pH1: #dadada;
   --setting-pH2: #232323;
 
+  /* Choose Account */
+    --choose-bg: rgba(30, 30, 30, 0.8);
+    --choose-topbar-bg: rgba(20, 20, 20, 0.9);
+    --choose-text: #fff;
+    --choose-border: rgba(255, 255, 255, 0.1);
+  
+    /* Custom Select */
+    --select-bg: #2d2d2d;
+    --select-border: rgba(255, 255, 255, 0.1);
+    --select-hover: rgba(255, 255, 255, 0.05);
+    --select-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
 
   /* Signup */
   --signup-comp: #232323;
-
 
   --signup-shape-light: #565656;
   --signup-shape-dark: #282828d0;
@@ -206,13 +276,10 @@
 
   --sign-labels: #787878;
   --sign-input: #fff;
-
 }
 
 body,
 * {
-  /* margin: 0; */
-  /* padding: 0; */
   box-sizing: border-box;
 }
 

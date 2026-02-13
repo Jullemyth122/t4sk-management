@@ -101,6 +101,41 @@ export const searchUsersByEmail = async (emailQuery) => {
     return filtered.map((u) => ({ uid: u.uid || u.id, email: u.email, name: u.username || u.email }));
 };
 
+// --- Notifications Section ---
+export const sendNotification = async (recipientUid, { title, message, link = null, type = "info" }) => {
+    if (!recipientUid) return;
+    const accountRef = doc(db, COLLECTIONS.ACCOUNT, recipientUid);
+    
+    const notification = {
+        id: doc(collection(db, "dummy")).id, // Generate a random ID
+        title,
+        message,
+        link,
+        type,
+        read: false,
+        createdAt: Timestamp.now()
+    };
+
+    try {
+        await updateDoc(accountRef, {
+            notifications: arrayUnion(notification), // Add to end (we can sort client-side or use unshift logic if we read-modify-write)
+            updatedAt: serverTimestamp()
+        });
+    } catch (err) {
+        console.warn("Failed to send notification:", err);
+        // Fallback: setDoc if account doesn't exist? (Unlikely for valid recipientUid)
+    }
+};
+
+export const clearNotifications = async (uid) => {
+    if (!uid) return;
+    const accountRef = doc(db, COLLECTIONS.ACCOUNT, uid);
+    await updateDoc(accountRef, {
+        notifications: [],
+        updatedAt: serverTimestamp()
+    });
+};
+
 // --- Business Section ---
 export const createBusiness = async ({ ownerUid, businessName, payload = {} }) => {
     ensure(ownerUid, "createBusiness: ownerUid required");

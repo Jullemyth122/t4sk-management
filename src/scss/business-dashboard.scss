@@ -5,18 +5,75 @@
 */
 
 /* Root layout - main board always full width */
+/* Root layout - main board always full width */
 .bd-root {
+    /* --- BUSINESS DASHBOARD LOCAL THEME VARIABLES (Default Dark) --- */
+    --bd-bg: var(--bg-color); /* Main background */
+    --bd-header-bg: radial-gradient(circle at 10% 0%, var(--bg-nav-grd-darkLight), var(--bg-nav-grd-darkDark));
+    --bd-text-main: var(--sidenav-H1);
+    --bd-text-sub: var(--sidenav-ISO);
+    --bd-input-bg: var(--bd-inp_list);
+    --bd-input-pg: rgba(var(--sign-input, 255), 0.5); /* Placeholder color */
+    
+    --bd-panel-bg: rgba(0, 0, 0, 0.2);
+    --bd-card-bg: rgba(255, 255, 255, 0.035);
+    --bd-card-border: rgba(255, 255, 255, 0.06);
+    --bd-card-hover: rgba(255, 255, 255, 0.05);
+    
+    --bd-btn-bg: rgba(255, 255, 255, 0.02);
+    --bd-btn-border: rgba(255, 255, 255, 0.04);
+    --bd-btn-hover: rgba(255, 255, 255, 0.05);
+
+    --bd-border-subtle: rgba(255, 255, 255, 0.04);
+    --bd-border-light: rgba(255, 255, 255, 0.1);
+    --bd-shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.2);
+    --quick-add-toggle-bg: rgba(81, 165, 255, 0.896);
+    --quick-add-toggle-text: #fff;
+
+    /* Sidebar & Tabs */
+    --bd-sidebar-bg: rgba(0, 0, 0, 0.8);
+    --bd-tab-bg: rgba(0,0,0,0.03);
+    --bd-tab-hover: rgba(255,255,255,0.02);
+
     display: grid;
     /* Single column - main board uses full width */
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
     gap: 0;
     min-height: 100vh;
-    background: var(--bg-color);
-    color: var(--text-color);
+    background: var(--bd-bg);
+    color: var(--bd-text-main);
     font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- LIGHT MODE OVERRIDES --- */
+[data-theme="light"] .bd-root {
+    --bd-bg: #f8fafc;
+    --bd-header-bg: #ffffff; /* Or a light gradient */
+    --bd-text-main: #1e293b;
+    --bd-text-sub: #64748b;
+    --bd-input-bg: #ffffff;
+    --bd-input-pg: #94a3b8;
+
+    --bd-panel-bg: #ffffff;
+    --bd-card-bg: #ffffff;
+    --bd-card-border: #e2e8f0;
+    --bd-card-hover: #f1f5f9;
+
+    --bd-btn-bg: #ffffff;
+    --bd-btn-border: #e2e8f0;
+    --bd-btn-hover: #f1f5f9;
+
+    --bd-border-subtle: #e2e8f0;
+    --bd-border-light: #cbd5e1;
+    --bd-shadow-subtle: 0 4px 12px rgba(148, 163, 184, 0.1);
+    --quick-add-toggle-bg: #2176cb;
+
+    --bd-sidebar-bg: #f1f5f9;
+    --bd-tab-bg: #e2e8f0;
+    --bd-tab-hover: #cbd5e1;
 }
 
 /* >>> Small helpers for when aside is intentionally hidden for low-level users */
@@ -52,13 +109,12 @@
     height: 72px;
 
     /* Glassmorphism / Modern Gradient */
-    background: rgba(15, 23, 42, 0.6); // fallback
-    background: radial-gradient(circle at 10% 0%, var(--bg-nav-grd-darkLight), var(--bg-nav-grd-darkDark));
+    background: var(--bd-header-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: var(--bd-shadow-subtle);
+    border-bottom: 1px solid var(--bd-border-subtle);
     z-index: 30;
     gap: 12px;
 
@@ -79,14 +135,14 @@
     font-size: 1.15rem;
     font-weight: 700;
     line-height: 1;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     letter-spacing: -0.2px;
 }
 
 .bd-sub {
     margin-top: 6px;
     font-size: 0.85rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     opacity: 0.95;
 }
 
@@ -98,30 +154,34 @@
     cursor: pointer;
     font-weight: 600;
     font-size: 0.9rem;
-    display: inline-flex;
+    transition: all 0.2s;
+    background: var(--bd-btn-bg);
+    color: var(--bd-text-main);
+    border: 1px solid var(--bd-btn-border);
+    display: flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
-    transition: transform .08s ease, box-shadow .12s ease, opacity .12s;
-    background: linear-gradient(90deg, var(--task-modalbtnBG), var(--task-modalbtnBG1));
+
+    &:hover {
+        background: var(--bd-btn-hover);
+        transform: translateY(-1px);
+    }
+    
+    svg {
+        font-size: 1.1em;
+    }
+}
+
+.bd-btn-primary {
+    background: linear-gradient(135deg, var(--task-modalbtnBG), var(--task-modalbtnBG1));
     color: var(--task-modalColor2);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    border: none;
+    box-shadow: 0 4px 15px rgba(83, 143, 255, 0.2);
 
-    &:active {
-        transform: translateY(1px);
-    }
-
-    &:disabled {
-        opacity: .6;
-        cursor: not-allowed;
-        box-shadow: none;
-    }
-
-    &.plain {
-        background: transparent;
-        box-shadow: none;
-        color: var(--sidenav-H1);
-        border: 1px solid rgba(255, 255, 255, 0.03);
+    &:hover {
+        box-shadow: 0 6px 20px rgba(83, 143, 255, 0.3);
+        background: linear-gradient(135deg, var(--task-modalbtnBG), var(--task-modalbtnBG1));
+        filter: brightness(1.1);
     }
 }
 
@@ -149,8 +209,14 @@
     gap: 8px;
     align-items: center;
     justify-content: flex-end;
-
     transition: opacity .18s ease, transform .18s ease, max-height .25s ease;
+
+    /* Make all icons inside .bd-actions smaller */
+    .bd-btn .btn-icon svg {
+        path {
+            fill: var(--bd-text-main);
+        }
+    }
 }
 
 /* Mobile toggle (hidden on desktop) */
@@ -161,7 +227,7 @@
     padding: 8px;
     border-radius: 8px;
     cursor: pointer;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
 }
 
@@ -199,8 +265,8 @@
 
         padding: 10px;
         border-radius: 12px;
-        background: linear-gradient(180deg, var(--bg-nav-grd-darkLight), var(--bg-nav-grd-darkDark));
-        border: 1px solid rgba(255, 255, 255, 0.03);
+        background: var(--bd-header-bg); /* Use header bg for consistency */
+        border: 1px solid var(--bd-border-subtle);
         box-shadow: 0 12px 40px rgba(6, 8, 12, 0.6);
         max-height: 0;
         overflow: hidden;
@@ -291,8 +357,8 @@
     height: calc(100vh - 72px);
     z-index: 50;
     padding: 28px 24px;
-    background: var(--bg-color);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--bd-sidebar-bg); /* updated */
+    border-right: 1px solid var(--bd-border-subtle);
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
     overflow-y: auto;
     
@@ -451,8 +517,8 @@
                 padding: 10px 12px;
                 border-radius: 10px;
                 border: none;
-                background: rgba(0, 0, 0, 0.03);
-                color: var(--text-color);
+                background: var(--bd-input-bg);
+                color: var(--bd-text-main);
                 font-size: 0.87rem;
                 box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
                 transition: background 0.2s ease, box-shadow 0.2s ease;
@@ -475,8 +541,8 @@
         .boards-perpage select {
             padding: 6px 8px;
             border-radius: 8px;
-            background: var(--bd-inp_list);
-            color: var(--text-color);
+            background: var(--bd-input-bg);
+            color: var(--bd-text-main);
             border: none;
             font-size: 0.8rem;
         }
@@ -486,7 +552,7 @@
             border-radius: 8px;
             overflow: hidden;
             background: rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--bd-border-subtle);
 
             .view-btn {
                 padding: 6px 8px;
@@ -494,7 +560,7 @@
                 border: none;
                 cursor: pointer;
                 font-weight: 700;
-                color: var(--sidenav-H1);
+                color: var(--bd-text-main);
                 opacity: 0.8;
                 line-height: 1;
 
@@ -532,23 +598,31 @@
                 padding: 12px;
                 border-radius: 10px;
                 min-height: 72px;
-                background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.02));
-                border: 1px solid rgba(0, 0, 0, 0.03);
+                background: var(--bd-card-bg);
+                border: 1px solid var(--bd-card-border);
                 cursor: pointer;
                 text-align: left;
+                transition: transform 0.2s, box-shadow 0.2s;
 
                 .card-title {
                     font-weight: 700;
-                    color: var(--sidenav-H1);
+                    color: var(--bd-text-main);
                     font-size: 0.9rem;
                 }
 
                 .card-desc {
                     font-size: 0.77rem;
-                    color: var(--sidenav-ISO);
+                    color: var(--bd-text-sub);
                     opacity: 0.95;
                 }
 
+                &:hover {
+                    box-shadow: 0 10px 28px rgba(83, 143, 255, 0.08);
+                    border-color: rgba(83, 143, 255, 0.14);
+                    background: var(--bd-card-hover);
+                    transform: translateY(-3px);
+                }
+                
                 &.active {
                     box-shadow: 0 10px 28px rgba(83, 143, 255, 0.08);
                     border-color: rgba(83, 143, 255, 0.14);
@@ -557,7 +631,7 @@
             }
         }
 
-        /* list view already has .boards-list .board-item — small polish */
+        /* list view */
         .boards-list {
             display: flex;
             flex-direction: column;
@@ -572,24 +646,20 @@
                 align-items: center;
                 justify-content: center;
                 gap: 7.5px;
-                /* padding: 8px 10px; */
                 border-radius: 10px;
-                background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(0, 0, 0, 0.02));
-                border: 1px solid rgba(255, 255, 255, 0.03);
+                background: var(--bd-card-bg);
+                border: 1px solid var(--bd-card-border);
                 cursor: pointer;
                 text-align: left;
                 transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease;
                 font-size: 0.87rem;
-                /* line-height: 1.15; */
                 box-sizing: border-box;
                 min-height: 50px;
-                /* compact but comfortable */
 
                 /* subtle left "avatar / icon" — decorative */
                 &::before {
                     content: "->";
                     left: 2.5%;
-                    /* top: 50%; */
                     position: absolute;
                     display: inline-flex;
                     align-items: center;
@@ -597,32 +667,26 @@
                     width: 40px;
                     height: 40px;
                     border-radius: 8px;
-                    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.04));
+                    background: rgba(77, 77, 77, 0.569);
                     color: var(--task-modalColor1);
                     font-weight: 800;
                     font-size: 0.9rem;
                     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.02);
-                    /* flex-shrink: 0; */
                 }
 
                 /* main content area (name + desc) */
                 .board-name {
-                    /* font-weight: 700; */
                     font-size: 0.9rem;
-                    /* slightly smaller */
-                    color: var(--sidenav-H1);
+                    color: var(--bd-text-main);
                     margin: 0;
                 }
 
                 .board-desc {
                     font-size: 0.75rem;
-                    /* more compact secondary text */
-                    color: var(--sidenav-ISO);
+                    color: var(--bd-text-sub);
                     margin-top: 4px;
                     display: block;
                     max-width: calc(100% - 160px);
-                    /* leave room for meta on the right */
-                    /* white-space: nowrap; */
                     overflow: hidden;
                     text-overflow: ellipsis;
                     opacity: 0.95;
@@ -644,7 +708,7 @@
                     display: flex;
                     align-items: center;
                     gap: 10px;
-                    color: var(--sidenav-ISO);
+                    color: var(--bd-text-sub);
                     font-size: 0.77rem;
 
                     .card-count {
@@ -652,7 +716,7 @@
                         padding: 4px 8px;
                         border-radius: 999px;
                         font-weight: 700;
-                        color: var(--sidenav-H1);
+                        color: var(--bd-text-main);
                         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
                     }
 
@@ -667,7 +731,7 @@
                         background: transparent;
                         border: 1px solid rgba(255, 255, 255, 0.02);
                         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
-                        color: var(--sidenav-H1);
+                        color: var(--bd-text-main);
                         font-size: 0.83rem;
                     }
                 }
@@ -676,7 +740,7 @@
                     transform: translateY(-3px);
                     box-shadow: 0 14px 36px rgba(20, 40, 70, 0.08);
                     border-color: rgba(83, 143, 255, 0.12);
-                    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.03));
+                    background: var(--bd-card-hover);
                 }
 
                 &.active {
@@ -687,12 +751,10 @@
                 }
             }
 
-            /* .board-item */
-
             /* empty / muted fallback styling */
             .muted.small {
                 padding: 8px 10px;
-                color: var(--sidenav-ISO);
+                color: var(--bd-text-sub);
                 font-size: 0.85rem;
             }
         }
@@ -712,8 +774,8 @@
                 padding: 6px 10px;
                 border-radius: 8px;
                 background: transparent;
-                border: 1px solid rgba(255, 255, 255, 0.03);
-                color: var(--sidenav-H1);
+                border: 1px solid var(--bd-border-subtle);
+                color: var(--bd-text-main);
                 cursor: pointer;
                 font-weight: 600;
             }
@@ -749,12 +811,12 @@
         margin: 0;
         font-size: 0.95rem;
         font-weight: 700;
-        color: var(--sidenav-H1);
+        color: var(--bd-text-main);
     }
 
     .count {
         font-size: 0.83rem;
-        color: var(--sidenav-ISO);
+        color: var(--bd-text-sub);
         background: rgba(0, 0, 0, 0.04);
         padding: 4px 8px;
         border-radius: 999px;
@@ -800,13 +862,14 @@
     padding: 12px;
     border-radius: 10px;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--bd-card-border);
     cursor: pointer;
     transition: transform .08s, background .12s, box-shadow .12s;
 
     &:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+        background: var(--bd-card-hover);
     }
 
     &.active {
@@ -819,12 +882,12 @@
 .board-name {
     font-weight: 700;
     font-size: 0.93rem;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
 }
 
 .board-desc {
     font-size: 0.8rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     margin-top: 6px;
 }
 
@@ -841,15 +904,15 @@
     padding: 11px 14px;
     border-radius: 10px;
     border: none;
-    background: var(--bd-inp_list);
-    color: var(--text-color);
+    background: var(--bd-input-bg);
+    color: var(--bd-text-main);
     font-size: 0.9rem;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
     width: 80%;
     transition: background 0.2s ease, box-shadow 0.2s ease;
 
     &::placeholder {
-        color: rgba(var(--sign-input, 255), .5);
+        color: var(--bd-input-pg);
     }
     
     &:focus {
@@ -866,10 +929,10 @@
     display: flex;
     gap: 4px;
     padding: 6px;
-    background: rgba(0, 0, 0, 0.03);
+    background: var(--bd-tab-bg);
     border-radius: 12px;
     margin-bottom: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--bd-border-subtle);
 }
 
 .tab-btn {
@@ -877,7 +940,7 @@
     padding: 8px 12px;
     border: none;
     background: transparent;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     font-weight: 600;
     font-size: 0.9rem;
     border-radius: 8px;
@@ -886,8 +949,8 @@
     text-align: center;
 
     &:hover {
-        color: var(--sidenav-H1);
-        background: rgba(255, 255, 255, 0.02);
+        color: var(--bd-text-main);
+        background: var(--bd-tab-hover);
     }
 
 
@@ -913,8 +976,8 @@
         padding: 6px 10px;
         border-radius: 8px;
         background: rgba(0, 0, 0, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.03);
-        color: var(--sidenav-H1);
+        border: 1px solid var(--bd-border-subtle);
+        color: var(--bd-text-main);
         font-size: 0.85rem;
         cursor: pointer;
         opacity: 0.9;
@@ -943,7 +1006,7 @@
         justify-content: center;
         align-items: center;
         gap: 16px;
-        background: rgba(0, 0, 0, 0.03);
+        background: var(--bd-tab-bg);
         padding: 6px 12px;
         border-radius: 12px;
         width: fit-content;
@@ -959,7 +1022,7 @@
         border-radius: 8px;
         background: transparent;
         border: 1px solid transparent;
-        color: var(--sidenav-H1);
+        color: var(--bd-text-main);
         cursor: pointer;
         transition: all 0.2s;
 
@@ -986,10 +1049,10 @@
         font-variant-numeric: tabular-nums;
         font-size: 0.9rem;
         font-weight: 600;
-        color: var(--sidenav-ISO);
+        color: var(--bd-text-sub);
 
         .current {
-            color: var(--sidenav-H1);
+            color: var(--bd-text-main);
         }
         
         .sep {
@@ -1024,12 +1087,12 @@
     gap: 12px;
     padding: 12px;
     border-radius: 12px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.01));
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: var(--bd-card-bg);
+    border: 1px solid var(--bd-card-border);
     transition: transform 0.1s, box-shadow 0.1s;
     
     &:hover {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.02));
+        background: var(--bd-card-hover);
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         transform: translateY(-1px);
     }
@@ -1046,7 +1109,7 @@
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     font-size: 1rem;
     position: relative;
     border: 1px solid rgba(255, 255, 255, 0.04);
@@ -1059,7 +1122,7 @@
     width: 12px;
     height: 12px;
     background: #00E676; /* Bright Green */
-    border: 2px solid var(--bg-color); /* match bg to cut out */
+    border: 2px solid var(--bd-bg); /* match bg to cut out */
     border-radius: 50%;
     box-shadow: 0 0 8px rgba(0, 230, 118, 0.6);
 }
@@ -1082,7 +1145,7 @@
 .m-name {
     font-size: 0.95rem;
     font-weight: 700;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1105,14 +1168,14 @@
 }
 
 .status-idle {
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .m-sub {
     font-size: 0.8rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     opacity: 0.9;
 }
 
@@ -1125,7 +1188,7 @@
 
 .m-email {
     font-size: 0.75rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     opacity: 0.7;
     white-space: nowrap;
     overflow: hidden;
@@ -1136,7 +1199,7 @@
 .m-copy-btn {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     font-size: 0.7rem;
     padding: 3px 8px;
     border-radius: 6px;
@@ -1174,7 +1237,7 @@
     padding: 28px;
     background: radial-gradient(circle at 0% 0%, var(--home-showContent-light), var(--home-showContent-dark));
     box-shadow: 0 9px 20px rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--bd-border-subtle);
     overflow: hidden;
     z-index: 2;
 
@@ -1226,13 +1289,13 @@
 
     /* make the columns slightly translucent to feel like cards placed on the show-content canvas */
     .list-col {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.03));
-        border: 1px solid rgba(0, 0, 0, 0.04);
+        background: var(--bd-card-bg); /* was linear-gradient */
+        border: 1px solid var(--bd-card-border);
     }
 
     /* board empty state */
     .bd-empty {
-        color: var(--sidenav-ISO);
+        color: var(--bd-text-sub);
         font-size: 0.95rem;
         padding: 40px;
         text-align: center;
@@ -1247,7 +1310,7 @@
     .board-editor {
         margin: 8px 0;
         padding: 12px;
-        background: var(--bd-inp_list);
+        background: var(--bd-input-bg);
         border-radius: 8px;
         position: relative;
         z-index: 3;
@@ -1265,13 +1328,13 @@
         margin: 0;
         font-size: 1.3rem;
         font-weight: 800;
-        color: var(--sidenav-H1);
+        color: var(--bd-text-main);
         letter-spacing: -0.3px;
     }
 
     .bd-sub {
         font-size: 0.9rem;
-        color: var(--sidenav-ISO);
+        color: var(--bd-text-sub);
     }
 }
 
@@ -1293,13 +1356,13 @@
     max-width: 380px; // reduced from 400px
     width: 100%; // ensures box-sizing works reliably
 
-    background: linear-gradient(180deg, var(--bd-inp_list), rgba(0, 0, 0, 0.02));
+    background: var(--bd-card-bg);
     border-radius: 12px;
     padding: 12px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--bd-card-border);
     transition: transform .12s ease, box-shadow .12s ease;
 
     &:hover {
@@ -1320,8 +1383,8 @@
         padding: 8px 10px;
         border-radius: 8px;
         border: none;
-        background: rgba(0, 0, 0, 0.03);
-        color: var(--text-color);
+        background: var(--bd-input-bg);
+        color: var(--bd-text-main);
         font-weight: 700;
         max-width: 220px;
     }
@@ -1332,8 +1395,8 @@
         gap: 8px;
         padding: 6px 10px;
         border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.03);
-        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--bd-btn-border);
+        background: var(--bd-btn-bg);
         font-weight: 700;
         font-size: 0.8rem;
         cursor: pointer;
@@ -1354,8 +1417,8 @@
 
     .action-ghost {
         background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.03);
-        color: var(--sidenav-H1);
+        border: 1px solid var(--bd-btn-border);
+        color: var(--bd-text-main);
     }
 
     .action-danger {
@@ -1368,17 +1431,367 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: rgba(255, 255, 255, 0.02);
+        background: var(--bd-btn-bg);
         padding: 6px;
         border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--bd-btn-border);
     }
 
     .confirm-label {
         font-weight: 700;
-        color: var(--sidenav-ISO);
+        color: var(--bd-text-sub);
         padding: 0 6px;
     }
+}
+
+/* --- LIST COLUMN REFACTOR STYLES (for ListColumn.jsx) --- */
+.list-col {
+    /* Local variables for ListColumn */
+    --lc-progress-bg: rgba(0, 0, 0, 0.06);
+    --lc-progress-fill: linear-gradient(90deg, #4caf50, #8bc34a);
+    --lc-meta-text: var(--sidenav-ISO);
+    --lc-edit-bg: var(--bd-inp_list);
+    --lc-dropdown-bg: var(--task-modalBG, #202020);
+    --lc-dropdown-border: rgba(0, 0, 0, 0.06);
+    --lc-subtask-bg: rgba(255, 255, 255, 0.02);
+    --lc-subtask-remove: #ff6b6b;
+    --lc-quick-label: var(--sidenav-ISO);
+}
+
+[data-theme="light"] .list-col {
+    --lc-progress-bg: rgba(0, 0, 0, 0.06);
+    --lc-meta-text: var(--bd-text-sub);
+    --lc-edit-bg: #ffffff;
+    --lc-dropdown-bg: #ffffff;
+    --lc-dropdown-border: rgba(0, 0, 0, 0.1);
+    --lc-subtask-bg: rgba(0, 0, 0, 0.04);
+}
+
+/* New reusable classes for ListColumn */
+.list-name-input-edit {
+    background: var(--lc-edit-bg) !important; /* override inline if needed, but we will remove inline */
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    color: var(--bd-text-main);
+    width: 100%;
+    
+    &:focus {
+        border-color: var(--bd-border-subtle);
+        outline: none;
+    }
+}
+
+.list-collapse-text {
+    margin-left: 6px;
+    font-weight: 700;
+    color: var(--bd-text-main);
+}
+
+.list-header-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.list-progress-track {
+    height: 8px;
+    background: var(--lc-progress-bg);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.list-progress-fill {
+    height: 100%;
+    background: var(--lc-progress-fill);
+    transition: width 0.3s ease;
+}
+
+.list-progress-text {
+    font-size: 12px;
+    color: var(--lc-meta-text);
+    margin-top: 6px;
+}
+
+.assignee-overloaded {
+    margin-left: 6px;
+    font-size: 0.8em;
+}
+
+.edit-assignees-wrapper {
+    margin-top: 12px;
+    position: relative;
+    
+    label {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--bd-text-sub);
+        font-size: 0.85rem;
+    }
+}
+
+.assignee-search-input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: none;
+    background: var(--lc-edit-bg) !important;
+    color: var(--bd-text-main);
+    
+    &:focus {
+        outline: 2px solid var(--bd-btn-border);
+    }
+}
+
+.assignee-dropdown {
+    position: absolute;
+    z-index: 200;
+    left: 0;
+    right: 0;
+    margin-top: 6px;
+    background: var(--lc-dropdown-bg);
+    border: 1px solid var(--lc-dropdown-border);
+    border-radius: 8px;
+    max-height: 220px;
+    overflow: auto;
+    padding: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.assignee-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--bd-text-main);
+    
+    &:hover {
+        background: var(--lc-subtask-bg);
+    }
+}
+
+.group-header {
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    
+    strong {
+        color: var(--bd-text-main);
+    }
+    span {
+        font-size: 12px;
+        color: var(--lc-meta-text);
+    }
+}
+
+.cards-list {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.pagination-info {
+    font-size: 13px;
+    color: var(--lc-meta-text);
+}
+
+.pagination-select {
+    background: var(--bd-input-bg);
+    color: var(--bd-text-main);
+    border: 1px solid var(--bd-border-subtle);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+
+/* Removed conflicting quick-add-container and quick-meta-row styles to restore legacy layout */
+
+.quick-add-toggle {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    background: var(--quick-add-toggle-bg);
+    color: var(--quick-add-toggle-text);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    
+    svg {
+        font-size: 1.2em;
+    }
+}
+
+.quick-label {
+    font-size: 0.65rem;
+    color: var(--lc-quick-label);
+    text-transform: uppercase;
+    display: block;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    justify-content: flex-end;
+    
+    button {
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--bd-btn-border);
+        background: var(--bd-btn-bg);
+        color: var(--bd-text-main);
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.85rem;
+        
+        &:hover {
+            background: var(--bd-btn-hover);
+        }
+        
+        &:first-child {
+            background: linear-gradient(90deg, var(--task-modalbtnBG), var(--task-modalbtnBG1));
+            color: #fff;
+            border: none;
+        }
+    }
+}
+
+.quick-subtasks {
+    margin-top: 10px;
+    border-top: 1px solid var(--bd-border-subtle);
+    padding-top: 8px;
+}
+
+.subtask-section-header {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--lc-meta-text);
+    margin-bottom: 6px;
+}
+
+.subtask-mini-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.mini-subtask-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    background: var(--lc-subtask-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--bd-text-main);
+}
+
+.mini-subtask-bullet {
+    color: var(--lc-meta-text);
+}
+
+.mini-subtask-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mini-subtask-meta {
+    opacity: 0.6;
+    font-size: 0.75em;
+    margin-left: 6px;
+}
+
+.mini-subtask-remove {
+    border: none;
+    background: transparent;
+    color: var(--lc-subtask-remove);
+    cursor: pointer;
+    padding: 2px;
+    font-size: 1.1em;
+    line-height: 1;
+    
+    &:hover {
+        opacity: 0.8;
+    }
+}
+
+.subtask-add-row {
+    display: flex;
+    gap: 6px;
+}
+
+.subtask-add-input {
+    flex: 1;
+    background: var(--bd-input-bg);
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: var(--bd-text-main);
+    min-width: 0;
+    
+    &::placeholder {
+        color: var(--bd-text-sub);
+        opacity: 0.5;
+    }
+}
+
+.subtask-add-weight {
+    width: 42px;
+    background: var(--bd-input-bg);
+    border: none;
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: var(--bd-text-main);
+    text-align: center;
+}
+
+.subtask-add-btn {
+    border: none;
+    background: var(--bd-btn-bg);
+    color: var(--bd-text-main);
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    
+    &:hover {
+        background: var(--bd-btn-hover);
+    }
+}
+
+.list-complete-msg {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--lc-meta-text);
 }
 
 
@@ -1414,8 +1827,8 @@
     font-size:13px;
     padding: 6px 10px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--bd-btn-border);
+    background: var(--bd-btn-bg);
     font-weight: 300;
     cursor: pointer;
     transition: transform .08s ease, box-shadow .12s ease;
@@ -1430,12 +1843,12 @@
 .list-name {
     font-weight: 800;
     font-size: 1rem;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
 }
 
 .list-count {
     font-size: 0.8rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     opacity: 0.95;
 }
 
@@ -1447,11 +1860,11 @@
     gap: 12px;
     padding: 8px 10px;
     border-radius: 10px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(0, 0, 0, 0.01));
-    border: 1px solid rgba(255, 255, 255, 0.02);
+    background: var(--bd-card-bg);
+    border: 1px solid var(--bd-card-border);
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.04);
     font-size: 0.87rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     min-height: 48px;
 
     .assignees-left {
@@ -1463,7 +1876,7 @@
 
     .assignees-label {
         font-weight: 700;
-        color: var(--sidenav-H1);
+        color: var(--bd-text-main);
         font-size: 0.83rem;
         flex: 0 0 auto;
         padding-right: 6px;
@@ -1516,7 +1929,7 @@
         .assignee-name {
             font-weight: 700;
             font-size: 0.83rem;
-            color: var(--sidenav-H1);
+            color: var(--bd-text-main);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -1524,7 +1937,7 @@
 
         .assignee-email {
             font-size: 0.73rem;
-            color: var(--sidenav-ISO);
+            color: var(--bd-text-sub);
             opacity: 0.95;
             white-space: nowrap;
             overflow: hidden;
@@ -1540,9 +1953,9 @@
         height: 34px;
         padding: 0 10px;
         border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.03);
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(255, 255, 255, 0.005));
-        color: var(--sidenav-H1);
+        border: 1px solid var(--bd-btn-border);
+        background: var(--bd-btn-bg);
+        color: var(--bd-text-main);
         font-weight: 700;
         cursor: pointer;
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.04);
@@ -1591,8 +2004,8 @@
     position: relative;
     padding: 8px 10px;
     border-radius: 8px;
-    background: linear-gradient(180deg, var(--signup-comp), rgba(0, 0, 0, 0.01));
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--bd-card-bg);
+    border: 1px solid var(--bd-card-border);
     box-shadow: 0 4px 12px rgba(10, 20, 40, 0.04);
     transition: transform .12s ease, box-shadow .14s ease, border-color .12s ease;
     display: flex;
@@ -1606,13 +2019,14 @@
         transform: translateY(-2px);
         box-shadow: 0 8px 24px rgba(8, 16, 32, 0.08);
         border-color: rgba(102, 126, 234, 0.2);
+        background: var(--bd-card-hover);
     }
 
     &.optimistic {
         opacity: 0.98;
         border-style: dashed;
         transform: translateY(-4px) scale(1.01);
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.01));
+        background: var(--bd-card-bg);
     }
 
     /* Subtle top accent on hover */
@@ -1656,7 +2070,7 @@
 .card-item.compact {
     padding: 6px 8px;
     border-radius: 8px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(0, 0, 0, 0.01));
+    background: var(--bd-card-bg);
     box-shadow: none;
     transition: padding .12s ease, box-shadow .12s ease;
     transform: none;
@@ -1728,7 +2142,7 @@
 
 .card-title {
     font-weight: 700;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     font-size: 0.95rem;
     line-height: 1.2;
     min-width: 0;
@@ -1825,16 +2239,16 @@
     justify-content: space-between;
     align-items: center;
     font-size: 0.81rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     gap: 8px;
 }
 
 .card-due {
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
 }
 
 .card-score {
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     font-weight: 600;
 }
 
@@ -1853,7 +2267,7 @@
     background: rgba(0, 0, 0, 0.04);
     font-weight: 700;
     font-size: 0.81rem;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
@@ -1873,9 +2287,9 @@
     gap: 8px;
     padding: 6px 10px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    background: rgba(255, 255, 255, 0.02);
-    color: var(--sidenav-H1);
+    border: 1px solid var(--bd-btn-border);
+    background: var(--bd-btn-bg);
+    color: var(--bd-text-main);
     font-weight: 700;
     cursor: pointer;
     transition: transform .08s ease, box-shadow .12s ease, background .12s ease;
@@ -1884,6 +2298,7 @@
 .card-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    background: var(--bd-btn-hover);
 }
 
 /* primary / ghost / danger variations */
@@ -1896,7 +2311,7 @@
 
 .card-btn-ghost {
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--bd-btn-border);
 }
 
 .card-btn-danger {
@@ -1909,9 +2324,9 @@
 .card-select {
     padding: 6px 10px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    background: rgba(255, 255, 255, 0.02);
-    color: var(--sidenav-H1);
+    border: 1px solid var(--bd-btn-border);
+    background: var(--bd-btn-bg);
+    color: var(--bd-text-main);
     font-weight: 700;
     width: 50%;
 }
@@ -1922,8 +2337,8 @@
     padding: 8px 10px;
     border-radius: 8px;
     border: none;
-    background: rgba(0, 0, 0, 0.03);
-    color: var(--text-color);
+    background: var(--bd-input-bg);
+    color: var(--bd-text-main);
     box-sizing: border-box;
 }
 
@@ -2126,12 +2541,12 @@
     width: 1024px; /* Widened from 880px */
     max-width: calc(100% - 48px);
     border-radius: 20px;
-    background: linear-gradient(180deg, var(--bg-nav-grd-darkDark), var(--bg-nav-grd-darkLight));
+    background: var(--bd-header-bg); /* Reusing header variable for modal bg consistency */
     box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04);
     padding: 32px; /* Increased padding from 18px */
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     display: block;
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--bd-border-subtle);
 }
 
 /* grid split: left summary + right form */
@@ -2143,11 +2558,12 @@
 }
 
 /* LEFT */
+/* LEFT */
 .sd-left {
     padding: 24px; /* Increased padding */
     border-radius: 16px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.01));
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: var(--bd-tab-bg);
+    border: 1px solid var(--bd-border-subtle);
     display: flex;
     flex-direction: column;
     gap: 20px; /* Increased gap */
@@ -2177,14 +2593,14 @@
     margin: 0;
     font-size: 1.15rem; /* Larger title */
     font-weight: 800;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     letter-spacing: -0.3px;
 }
 
 .sd-left-sub {
     margin-top: 4px;
     font-size: 0.9rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     line-height: 1.4;
 }
 
@@ -2195,7 +2611,7 @@
     gap: 12px;
     margin-top: 8px;
     padding-top: 16px; 
-    border-top: 1px solid rgba(255,255,255,0.04);
+    border-top: 1px solid var(--bd-border-subtle);
 }
 
 .sd-meta-row {
@@ -2204,12 +2620,12 @@
     align-items: center;
     gap: 10px;
     font-size: 0.9rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
 }
 
 .sd-meta-row strong {
     font-weight: 600;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     font-size: 0.9rem;
 }
 
@@ -2221,7 +2637,7 @@
     display: block;
     margin-bottom: 12px;
     font-weight: 700;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     font-size: 0.9rem;
 }
 
@@ -2271,7 +2687,7 @@
 .sd-av-name {
     font-weight: 700;
     font-size: 0.9rem;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2279,7 +2695,7 @@
 
 .sd-av-email {
     font-size: 0.8rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     opacity: 0.8;
 }
 
@@ -2288,7 +2704,7 @@
     margin-top: auto;
     padding-top: 20px;
     font-size: 0.8rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -2297,7 +2713,7 @@
 
 .sd-server-time {
     font-weight: 500;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     font-family: monospace;
 }
 
@@ -2326,7 +2742,7 @@
 
 .sd-label {
     font-weight: 700;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     font-size: 0.9rem;
     margin-bottom: 2px;
 }
@@ -2338,9 +2754,9 @@
 .sd-drop {
     border-radius: 12px;
     padding: 14px 16px; /* More padding inside inputs */
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    background: var(--bd-inp_list); /* Ensure this var is dark enough, or overrides: rgba(0,0,0,0.2) */
-    color: var(--text-color);
+    border: 1px solid var(--bd-border-subtle);
+    background: var(--bd-input-bg); /* Ensure this var is dark enough, or overrides: rgba(0,0,0,0.2) */
+    color: var(--bd-text-main);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
     font-size: 0.95rem;
     line-height: 1.5;
@@ -2375,8 +2791,8 @@
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0.005));
-    border: 1px dashed rgba(255, 255, 255, 0.1);
+    background: var(--bd-tab-bg);
+    border: 1px dashed var(--bd-border-subtle);
 }
 
 .sd-drop-inner {
@@ -2385,7 +2801,7 @@
     gap: 8px;
     align-items: center;
     justify-content: center;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     font-weight: 500;
 }
 
@@ -2427,8 +2843,8 @@
     align-items: center;
     padding: 10px 14px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: var(--bd-tab-bg);
+    border: 1px solid var(--bd-border-subtle);
 }
 
 .sd-attach-name {
@@ -2436,7 +2852,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 70%;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     font-weight: 600;
     font-size: 0.9rem;
 }
@@ -2447,7 +2863,7 @@
     align-items: center;
     gap: 12px;
     font-weight: 600;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     cursor: pointer;
     font-size: 0.95rem;
     padding: 8px 0;
@@ -2475,7 +2891,7 @@
     gap: 16px;
     margin-top: 12px;
     padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    border-top: 1px solid var(--bd-border-subtle);
     align-items: center;
 }
 
@@ -2499,11 +2915,11 @@
 
 .sd-btn-ghost {
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--sidenav-H1);
+    border: 1px solid var(--bd-btn-border);
+    color: var(--bd-text-main);
 }
 .sd-btn-ghost:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bd-btn-hover);
 }
 
 .sd-btn-primary {
@@ -2548,8 +2964,8 @@
     border-radius: 8px;
     padding: 8px 10px;
     border: none;
-    background: rgba(0, 0, 0, 0.03);
-    color: var(--text-color);
+    background: var(--bd-input-bg);
+    color: var(--bd-text-main);
 }
 
 /* quick-add */
@@ -2557,11 +2973,11 @@
     margin-top: 12px;
     padding: 12px;
     border-radius: 10px;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.01), rgba(0, 0, 0, 0.02));
+    background: var(--bd-tab-bg);
     display: flex;
     flex-direction: column;
     gap: 8px;
-    border: 1px dashed rgba(0, 0, 0, 0.03);
+    border: 1px dashed var(--bd-border-subtle);
 }
 
 .quick-add.disabled {
@@ -2603,13 +3019,13 @@
     gap: 10px;
     align-items: center;
     justify-content: center;
-    border: 1px dashed rgba(255, 255, 255, 0.03);
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.01), transparent);
+    border: 1px dashed var(--bd-border-subtle);
+    background: var(--bd-card-bg);
 }
 
 .add-list-head {
     font-weight: 800;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
 }
 
 /* Scrollbar polishing */
@@ -2701,8 +3117,8 @@ select:focus {
 /* 1. Main Card Container */
 .card-item {
     position: relative;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015));
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--bd-card-bg);
+    border: 1px solid var(--bd-card-border);
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 10px;
@@ -2714,7 +3130,7 @@ select:focus {
         transform: translateY(-2px);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
         border-color: rgba(255, 255, 255, 0.12);
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+        background: var(--bd-card-hover);
     }
 
     /* Optimistic / Temp State */
@@ -2746,7 +3162,7 @@ select:focus {
 .card-title {
     font-size: 0.95rem;
     font-weight: 600;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     line-height: 1.4;
     word-break: break-word;
 }
@@ -2761,7 +3177,7 @@ select:focus {
 
 .card-dates .date-tag {
     font-size: 0.75rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     background: rgba(255, 255, 255, 0.04);
     padding: 3px 8px;
     border-radius: 6px;
@@ -2780,7 +3196,7 @@ select:focus {
 .collapse-arrow {
     background: transparent;
     border: none;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     padding: 6px;
     border-radius: 50%;
     cursor: pointer;
@@ -2841,11 +3257,11 @@ select:focus {
         align-items: center;
         font-size: 0.75rem;
         margin-bottom: 6px;
-        color: var(--sidenav-ISO);
+        color: var(--bd-text-sub);
 
         .progress-pct {
             font-weight: 700;
-            color: var(--sidenav-H1);
+            color: var(--bd-text-main);
         }
     }
 
@@ -2890,7 +3306,7 @@ select:focus {
     .checkbox {
         width: 16px;
         height: 16px;
-        border: 2px solid var(--sidenav-ISO);
+        border: 2px solid var(--bd-text-sub);
         border-radius: 4px;
         display: flex;
         align-items: center;
@@ -2909,14 +3325,14 @@ select:focus {
         }
         span {
             text-decoration: line-through;
-            color: var(--sidenav-ISO);
+            color: var(--bd-text-sub);
             opacity: 0.7;
         }
     }
     
     span {
         font-size: 0.85rem;
-        color: var(--text-color);
+        color: var(--bd-text-main);
     }
 }
 
@@ -2929,9 +3345,9 @@ select:focus {
 }
 
 .card-edit-input {
-    background: rgba(0, 0, 0, 0.2) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    color: var(--text-color) !important;
+    background: var(--bd-input-bg) !important;
+    border: 1px solid var(--bd-border-subtle) !important;
+    color: var(--bd-text-main) !important;
     border-radius: 8px !important;
     padding: 10px 12px !important;
     font-size: 0.9rem !important;
@@ -2962,7 +3378,7 @@ select:focus {
         gap: 6px;
         label {
             font-size: 0.7rem;
-            color: var(--sidenav-ISO);
+            color: var(--bd-text-sub);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -2975,12 +3391,12 @@ select:focus {
     background: rgba(0, 0, 0, 0.15);
     border-radius: 8px;
     padding: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--bd-border-subtle);
 
     .section-label {
         font-size: 0.75rem;
         font-weight: 700;
-        color: var(--sidenav-ISO);
+        color: var(--bd-text-sub);
         text-transform: uppercase;
         margin-bottom: 8px;
         display: block;
@@ -3004,11 +3420,11 @@ select:focus {
         flex: 1;
         background: transparent !important;
         border: none !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-bottom: 1px solid var(--bd-border-subtle) !important;
         border-radius: 0 !important;
         padding: 4px 0 !important;
         font-size: 0.9rem !important;
-        color: var(--text-color) !important;
+        color: var(--bd-text-main) !important;
         
         &:focus {
             border-bottom-color: var(--task-modalbtnBG) !important;
@@ -3020,17 +3436,17 @@ select:focus {
 .add-subtask-row input {
     width: 100%;
     background: rgba(255, 255, 255, 0.03);
-    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border: 1px dashed var(--bd-border-subtle);
     border-radius: 6px;
     padding: 8px 12px;
     font-size: 0.85rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     transition: all 0.2s;
     
     &:hover, &:focus {
         background: rgba(255, 255, 255, 0.06);
         border-color: var(--task-modalbtnBG);
-        color: var(--text-color);
+        color: var(--bd-text-main);
         outline: none;
     }
 }
@@ -3041,7 +3457,7 @@ select:focus {
     gap: 10px;
     margin-top: 16px;
     padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--bd-border-subtle);
     justify-content: flex-end; /* right align actions */
 }
 
@@ -3086,8 +3502,8 @@ select:focus {
 .action-btn:not(.primary):not(.danger), 
 .card-btn-ghost {
     background: rgba(255, 255, 255, 0.05);
-    color: var(--sidenav-H1);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--bd-text-main);
+    border: 1px solid var(--bd-btn-border);
     
     &:hover {
         background: rgba(255, 255, 255, 0.1);
@@ -3110,8 +3526,8 @@ select:focus {
 
 /* 8. Quick Add Bar (Refined) */
 .quick-add {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
-    border: 1px dashed rgba(255, 255, 255, 0.1);
+    background: var(--bd-tab-bg);
+    border: 1px dashed var(--bd-border-subtle);
     border-radius: 12px;
     padding: 12px;
     margin-top: 12px;
@@ -3137,11 +3553,11 @@ select:focus {
         width: 100%;
         background: transparent;
         border: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid var(--bd-border-subtle);
         font-size: 0.95rem;
         font-weight: 600;
         padding: 8px 0;
-        color: white;
+        color: var(--bd-text-main);
 
         &:focus {
             border-bottom-color: var(--task-modalbtnBG);
@@ -3160,13 +3576,13 @@ select:focus {
     input[type="date"], 
     input[type="number"], 
     .custom-select-trigger {
-        background: rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--bd-input-bg);
+        border: 1px solid var(--bd-border-subtle);
         border-radius: 8px;
         font-size: 0.8rem;
         padding: 6px 10px;
         height: 36px; /* align heights */
-        color: var(--sidenav-ISO);
+        color: var(--bd-text-sub);
         
         &:focus {
             border-color: var(--task-modalbtnBG);
@@ -3198,8 +3614,8 @@ select:focus {
 
         button:last-child { /* Cancel */
             background: transparent;
-            color: var(--sidenav-ISO);
-             &:hover { color: white; background: rgba(255,255,255,0.05); }
+            color: var(--bd-text-sub);
+             &:hover { color: var(--bd-text-main); background: var(--bd-btn-hover, rgba(255,255,255,0.05)); }
         }
     }
 }
@@ -3214,8 +3630,8 @@ select:focus {
     margin-top: 16px;
     padding: 16px;
     border-radius: 12px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.02));
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--bd-tab-bg);
+    border: 1px solid var(--bd-border-subtle);
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -3268,7 +3684,7 @@ select:focus {
 
 .submission-meta-simple {
     font-size: 0.75rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     opacity: 0.8;
 }
 
@@ -3277,12 +3693,12 @@ select:focus {
     flex-direction: column;
     gap: 10px;
     padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid var(--bd-border-subtle);
 }
 
 .reviewer-info {
     font-size: 0.85rem;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     display: flex;
     align-items: center;
     background: rgba(0, 0, 0, 0.2);
@@ -3307,12 +3723,12 @@ select:focus {
     padding: 10px 14px;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.02);
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     border-left: 3px solid transparent;
 }
 
 .status-note strong {
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     font-weight: 600;
     margin-right: 4px;
 }
@@ -3330,7 +3746,7 @@ select:focus {
 .card-actions-footer {
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid var(--bd-border-subtle);
     display: flex;
     justify-content: flex-end;
     gap: 10px;
@@ -3343,9 +3759,9 @@ select:focus {
     border-radius: 8px;
     font-weight: 600;
     font-size: 0.85rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--bd-btn-border);
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.08); /* Increased visibility */
+    background: var(--bd-btn-bg); /* Increased visibility */
     color: white;
     transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
     display: inline-flex;
@@ -3356,7 +3772,7 @@ select:focus {
 }
 
 .action-btn:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--bd-btn-hover);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -3453,7 +3869,7 @@ select:focus {
 .modal-title {
     margin: 0;
     font-size: 1.25rem;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
     font-weight: 700;
 }
 
@@ -3528,9 +3944,8 @@ select:focus {
 }
 
 .sd-modal {
-    background: #1e1e1e; /* Fallback */
-    background: linear-gradient(135deg, #1e1e1e 0%, #121212 100%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bd-header-bg);
+    border: 1px solid var(--bd-border-subtle);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     border-radius: 16px;
     width: 900px;
@@ -3550,7 +3965,7 @@ select:focus {
 
 .sd-left {
     background: rgba(0, 0, 0, 0.2);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid var(--bd-border-subtle);
     padding: 24px;
     display: flex;
     flex-direction: column;
@@ -3587,12 +4002,12 @@ select:focus {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
 }
 
 .sd-left-sub {
     font-size: 0.85rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
     opacity: 0.8;
 }
 
@@ -3606,147 +4021,332 @@ select:focus {
     display: flex;
     justify-content: space-between;
     font-size: 0.85rem;
-    color: var(--sidenav-ISO);
+    color: var(--bd-text-sub);
 }
 
 .sd-meta-row strong {
-    color: var(--sidenav-H1);
+    color: var(--bd-text-main);
 }
 
-/* ========================================
-   LIGHT MODE OVERRIDES
-   ======================================== */
-[data-theme="light"] {
-    .business-dashboard-comp {
-        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+/* --- ADD LIST SECTION (BusinessDashboard.jsx) --- */
+.list-col.add-list {
+    display: flex;
+    flex-direction: column;
+
+    .add-list-head {
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: var(--bd-text-main);
+        font-size: 1rem;
     }
 
-    .bd-header {
-        background: linear-gradient(to right, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.08));
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        border-color: rgba(0, 0, 0, 0.06);
+    .add-list-name-input {
+        width: 100%;
+        border-radius: 8px;
+        padding: 10px;
+        background: var(--lc-edit-bg); 
+        border: 1px solid transparent;
+        color: var(--bd-text-main);
+        font-size: 0.9rem;
 
-        .header-title {
-            color: #1e293b;
+        &:focus {
+            border-color: var(--bd-border-subtle);
+            outline: none;
         }
-
-        .header-subtitle {
-            color: #64748b;
-        }
-    }
-
-    .bd-sidebar {
-        background: rgba(255, 255, 255, 0.95);
-        border-color: rgba(0, 0, 0, 0.08);
-        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
-
-        .sidebar-item {
-            color: #475569;
-
-            &:hover {
-                background: rgba(245, 158, 11, 0.08);
-                color: #f59e0b;
-            }
-
-            &.active {
-                background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.1));
-                color: #d97706;
-            }
-        }
-
-        .sidebar-section-title {
-            color: #94a3b8;
+        
+        &::placeholder {
+            color: var(--bd-text-sub);
+            opacity: 0.6;
         }
     }
 
-    .bd-main {
-        .card,
-        .board-card,
-        .list-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-color: rgba(0, 0, 0, 0.08);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    .assignee-search-wrapper {
+        width: 100%;
+        position: relative;
+        margin-top: 8px;
+    }
 
-            .card-header,
-            .card-title {
-                color: #1e293b;
-            }
+    .add-list-assignee-input {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: none;
+        background: var(--lc-edit-bg);
+        color: var(--bd-text-main);
+        font-size: 0.9rem;
 
-            .card-body {
-                color: #475569;
-            }
+        &:focus {
+            outline: 2px solid var(--bd-btn-border);
         }
-
-        input,
-        select,
-        textarea {
-            background: rgba(0, 0, 0, 0.03);
-            border-color: rgba(0, 0, 0, 0.1);
-            color: #1e293b;
-
-            &::placeholder {
-                color: #94a3b8;
-            }
-
-            &:focus {
-                border-color: #f59e0b;
-                background: #fff;
-            }
+        
+        &::placeholder {
+            color: var(--bd-text-sub);
+            opacity: 0.6;
         }
     }
 
-    .sd-modal-backdrop {
-        background: rgba(0, 0, 0, 0.4);
+    .add-list-dropdown {
+        position: absolute;
+        z-index: 200;
+        left: 0;
+        right: 0;
+        margin-top: 6px;
+        background: var(--lc-dropdown-bg);
+        border: 1px solid var(--lc-dropdown-border);
+        border-radius: 8px;
+        max-height: 220px;
+        overflow: auto;
+        padding: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .add-list-no-members {
+        padding: 8px;
+        color: var(--lc-meta-text);
+        font-size: 0.9rem;
+        text-align: center;
     }
 
-    .sd-modal-content,
-    .modal-content {
-        background: rgba(255, 255, 255, 0.98);
-        border-color: rgba(0, 0, 0, 0.08);
-        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2);
+    .add-list-dropdown-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: var(--bd-text-main);
 
-        .modal-header {
-            color: #1e293b;
-            border-color: rgba(0, 0, 0, 0.08);
+        &:hover {
+            background: var(--lc-subtask-bg);
         }
-
-        .modal-body {
-            color: #475569;
+        
+        &[aria-selected="true"] {
+            background: var(--lc-subtask-bg);
         }
-
-        .modal-footer {
-            border-color: rgba(0, 0, 0, 0.08);
+    }
+    
+    .assignee-avatar-small {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.05);
+        font-weight: 700;
+        color: var(--bd-text-main);
+        flex-shrink: 0;
+    }
+    
+    [data-theme="light"] .assignee-avatar-small {
+         background: rgba(0, 0, 0, 0.05);
+    }
+    
+    .assignee-info {
+        font-size: 14px;
+        
+        .assignee-name {
+            font-weight: 700;
+            color: var(--bd-text-main);
+        }
+        .assignee-email {
+            font-size: 12px;
+            color: var(--lc-meta-text);
         }
     }
 
-    .btn-primary {
-        background: linear-gradient(135deg, #f59e0b, #d97706);
-        color: #fff;
+    .selected-assignees-container {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
     }
 
-    .btn-secondary {
-        background: rgba(0, 0, 0, 0.05);
-        color: #334155;
-        border-color: rgba(0, 0, 0, 0.1);
+    .assignee-pill {
+        background: var(--lc-subtask-bg);
+        padding: 6px 10px;
+        border-radius: 999px;
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
     }
 
-    .sidenav-holder {
-        background: rgba(255, 255, 255, 0.95);
-        border-color: rgba(0, 0, 0, 0.08);
+    .assignee-pill-label {
+        font-weight: 700;
+        color: var(--bd-text-main);
+        font-size: 0.85rem;
+    }
 
-        .sidenav-title {
-            color: #1e293b;
+    .assignee-remove-btn {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        color: var(--bd-text-sub);
+        padding: 0;
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        
+        &:hover {
+            color: var(--lc-subtask-remove);
         }
+    }
 
-        .sidenav-item {
-            color: #475569;
-
-            &:hover,
-            &.active {
-                background: rgba(245, 158, 11, 0.1);
-                color: #d97706;
-            }
+    .create-list-btn {
+        margin-top: 12px;
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid var(--bd-btn-border);
+        background: var(--bd-btn-bg);
+        color: var(--bd-text-main);
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+        
+        &:hover {
+            background: var(--bd-btn-hover);
         }
     }
+}
+
+/* --- SUBTASKS (ListColumn.jsx) --- */
+.quick-subtasks {
+    margin-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 8px;
+    
+    [data-theme="light"] & {
+        border-top-color: rgba(0, 0, 0, 0.05);
+    }
+}
+
+.subtask-section-header {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--lc-meta-text);
+    margin-bottom: 6px;
+}
+
+.subtask-mini-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.mini-subtask-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    background: var(--lc-subtask-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--bd-text-main);
+}
+
+.mini-subtask-bullet {
+    color: var(--lc-meta-text);
+}
+
+.mini-subtask-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mini-subtask-meta {
+    opacity: 0.6;
+    font-size: 0.75em;
+    margin-left: 6px;
+}
+
+.mini-subtask-remove {
+    border: none;
+    background: transparent;
+    color: var(--lc-subtask-remove);
+    cursor: pointer;
+    padding: 2px;
+    line-height: 1;
+    
+    &:hover {
+        opacity: 0.8;
+    }
+}
+
+.subtask-add-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.subtask-add-input {
+    flex: 1;
+    background: var(--bd-input-bg);
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: var(--bd-text-main);
+    min-width: 0; /* Crucial for flex */
+    
+    &:focus {
+        outline: 1px solid var(--bd-border-subtle);
+    }
+    
+    &::placeholder {
+        color: var(--bd-text-sub);
+        opacity: 0.6;
+    }
+}
+
+.subtask-add-weight {
+    width: 42px !important; /* Override .quick-add input[type="number"] width: 100% */
+    background: var(--bd-input-bg);
+    border: none;
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: var(--bd-text-main);
+    text-align: center;
+    
+    &:focus {
+        outline: 1px solid var(--bd-border-subtle);
+    }
+    
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+}
+
+.subtask-add-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--bd-text-main);
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    
+    [data-theme="light"] & {
+        background: rgba(0, 0, 0, 0.1);
+    }
+    
+    &:hover {
+        background: var(--bd-btn-hover);
+    }
+}
+
+.list-complete-msg {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--lc-meta-text);
 }
 
