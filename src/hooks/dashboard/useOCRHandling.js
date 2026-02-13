@@ -3,8 +3,9 @@ import { processImageForTasks } from "../../config/ocr";
 import { tryParseEmbeddedJson } from "../../utils/dashboardUtils";
 
 export function useOCRHandling({ dispatchSet, members, getMemberLevel, roles, businessOwnerUid, candidateEmails, excludedEmails }) {
-    const handleUpload = useCallback(async (e) => {
-        const file = e?.target?.files?.[0];
+    const handleUpload = useCallback(async (input) => {
+        // Support both Event (from input) and direct File (from confirm modal)
+        const file = (input instanceof File) ? input : input?.target?.files?.[0];
         if (!file) return;
         dispatchSet('loading', true);
         dispatchSet('ocrError', null);

@@ -248,26 +248,13 @@ const Navbar = ({ simulateLoading = true }) => {
             return;
         }
 
-        let mounted = true;
-        (async () => {
-            // Find the primary business ID from profile
-            const aff = currentUser.profile.businessAffiliations;
-            if (!aff || aff.length === 0) return;
-            const businessId = aff[0].businessId;
-            if (!businessId) return;
+        // Optimisation: Check local profile data instead of fetching business doc
+        // This handles cases where user has multiple affiliations and ensuring we check all of them
+        // The creator of a business is always assigned roleId: 'owner'
+        const aff = currentUser.profile.businessAffiliations;
+        const isOwner = Array.isArray(aff) && aff.some(a => a.roleId === 'owner');
+        setIsBusinessOwner(isOwner);
 
-            try {
-                // We use getBusiness from accountService, which fetches the doc
-                const biz = await getBusiness(businessId);
-                if (mounted && biz) {
-                    setIsBusinessOwner(biz.ownerUid === currentUser.uid);
-                }
-            } catch (err) {
-                console.error("Navbar check owner err:", err);
-            }
-        })();
-
-        return () => { mounted = false; };
     }, [currentUser, accountType, hasAffiliations]);
 
     useEffect(() => {
@@ -297,7 +284,8 @@ const Navbar = ({ simulateLoading = true }) => {
                         {currentUser && dashboardPath ? (
                             <>
                                 {/* Only show Business Info link if user is owner of the business (for business accounts) */}
-                                {(accountType !== 'business' || isBusinessOwner) && (
+                                {/* Also show if account is business but has NO affiliations yet (new created account needs to setup) */}
+                                {(accountType !== 'business' || isBusinessOwner || !hasAffiliations) && (
                                     <Link className='nav-link' to={dashboardPath}>
                                         <svg width="21" height="22" viewBox="0 0 21 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M10.5008 0.5C13.2857 0.5 15.9566 1.60633 17.9259 3.5756C19.8952 5.54487 21.0015 8.21578 21.0015 11.0007C21.0015 13.7857 19.8952 16.4566 17.9259 18.4259C15.9566 20.3952 13.2857 21.5015 10.5008 21.5015C7.71578 21.5015 5.04487 20.3952 3.0756 18.4259C1.10633 16.4566 0 13.7857 0 11.0007C0 8.21578 1.10633 5.54487 3.0756 3.5756C5.04487 1.60633 7.71578 0.5 10.5008 0.5ZM12.0758 6.947C12.8558 6.947 13.4887 6.4055 13.4887 5.603C13.4887 4.8005 12.8543 4.259 12.0758 4.259C11.2958 4.259 10.6657 4.8005 10.6657 5.603C10.6657 6.4055 11.2958 6.947 12.0758 6.947ZM12.3502 15.3875C12.3502 15.227 12.4057 14.81 12.3742 14.573L11.1413 15.992C10.8863 16.2605 10.5667 16.4465 10.4167 16.397C10.3487 16.372 10.2918 16.3235 10.2563 16.2602C10.2209 16.197 10.2091 16.1231 10.2233 16.052L12.2782 9.56C12.4462 8.7365 11.9843 7.985 11.0048 7.889C9.97125 7.889 8.45025 8.9375 7.52475 10.268C7.52475 10.427 7.49475 10.823 7.52625 11.06L8.75775 9.6395C9.01275 9.374 9.30975 9.1865 9.45975 9.2375C9.53365 9.26402 9.59421 9.31847 9.62842 9.38914C9.66264 9.45981 9.66778 9.54108 9.64275 9.6155L7.60575 16.076C7.37025 16.832 7.81575 17.573 8.89575 17.741C10.4857 17.741 11.4247 16.718 12.3517 15.3875H12.3502Z" />

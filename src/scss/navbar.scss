@@ -383,3 +383,130 @@
         display: none;
     }
 }
+
+/* ========================================
+   LIGHT MODE OVERRIDES
+   ======================================== */
+[data-theme="light"] {
+    .navigator-comp {
+        background: linear-gradient(to right, #e2e8f0, #cbd5e1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+        .text_nav {
+            color: #1e293b;
+        }
+
+        ul {
+            .nav-side {
+                h3.txt1 {
+                    color: #1e293b;
+                }
+                h3.txt2 {
+                    color: #92400e;
+                }
+            }
+
+            .acc_name {
+                color: #1e293b;
+            }
+
+            .nav-side-links {
+                .nav-link {
+                    color: #334155;
+
+                    svg {
+                        fill: #334155;
+                    }
+
+                    h5 {
+                        color: #334155;
+                    }
+                }
+
+                .btn_logout {
+                    color: #334155;
+
+                    &:hover {
+                        background: rgba(0, 0, 0, 0.05);
+                    }
+                }
+            }
+
+            .nav-link.invites-button {
+                .invite-dropdown {
+                    background: linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.98));
+                    border-color: rgba(0, 0, 0, 0.08);
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+
+                    .no-invites {
+                        color: #475569;
+                    }
+
+                    .invite-item {
+                        background: rgba(0, 0, 0, 0.02);
+
+                        &:hover {
+                            background: rgba(0, 0, 0, 0.04);
+                        }
+
+                        .invite-meta {
+                            .invite-title {
+                                color: #1e293b;
+                            }
+
+                            .invite-sub {
+                                color: #64748b;
+                            }
+
+                            .invite-msg {
+                                color: #475569;
+                            }
+
+                            .invite-time {
+                                color: #94a3b8;
+                            }
+                        }
+
+                        .invite-actions {
+                            .btn.small {
+                                background: #1e293b;
+                                color: #fff;
+                            }
+
+                            .btn.small.ghost {
+                                background: transparent;
+                                border-color: rgba(0, 0, 0, 0.1);
+                                color: #475569;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .mobile-menu-button div {
+                background: #1e293b;
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .navigator-comp .nav-side-links.open {
+            background: rgba(241, 245, 249, 0.95);
+            backdrop-filter: blur(8px);
+
+            .nav-link,
+            .btn_logout {
+                color: #1e293b;
+                border-color: rgba(0, 0, 0, 0.08);
+
+                svg {
+                    fill: #1e293b;
+                }
+
+                h5 {
+                    color: #1e293b;
+                }
+            }
+        }
+    }
+}

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 
 export default function MembersPanel({
     members,
@@ -15,81 +15,17 @@ export default function MembersPanel({
     roles,
     copyEmail,
     copiedEmailId,
+    workloadMap = {},
     canViewMembers = true,
+    memberRoleFilter = 'all',
+    setMemberRoleFilter,
 }) {
-    // persisted height (px)
-    const DEFAULT_HEIGHT = 360;
-    const MIN_HEIGHT = 120;
-    const MAX_HEIGHT = 900;
-    const LS_KEY = 'membersPanelHeight';
-
-    const initialHeight = (() => {
-        try {
-            const v = Number(localStorage.getItem(LS_KEY));
-            return v && !Number.isNaN(v) ? v : DEFAULT_HEIGHT;
-        } catch {
-            return DEFAULT_HEIGHT;
-        }
-    })();
-
-    const [panelHeight, setPanelHeight] = useState(initialHeight);
-    const [collapsed, setCollapsed] = useState(true);
-    const draggingRef = useRef(false);
-    const startYRef = useRef(0);
-    const startHeightRef = useRef(panelHeight);
-    const containerRef = useRef(null);
-
-    useEffect(() => {
-        localStorage.setItem(LS_KEY, String(panelHeight));
-    }, [panelHeight]);
-
-    useEffect(() => {
-        function handleMouseMove(e) {
-            if (!draggingRef.current) return;
-            const clientY = e.clientY ?? (e.touches && e.touches[0].clientY);
-            const delta = startYRef.current - clientY; // dragging up increases height
-            let newH = Math.round(startHeightRef.current + delta);
-            newH = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, newH));
-            setPanelHeight(newH);
-        }
-        function handleMouseUp() {
-            if (draggingRef.current) {
-                draggingRef.current = false;
-                document.body.style.userSelect = '';
-                // store already handled by effect
-            }
-        }
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('touchmove', handleMouseMove, { passive: false });
-        window.addEventListener('mouseup', handleMouseUp);
-        window.addEventListener('touchend', handleMouseUp);
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('touchmove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
-            window.removeEventListener('touchend', handleMouseUp);
-        };
-    }, []);
-
-    function startDrag(e) {
-        draggingRef.current = true;
-        startYRef.current = e.clientY ?? (e.touches && e.touches[0].clientY);
-        startHeightRef.current = panelHeight;
-        // prevent text selection while dragging
-        document.body.style.userSelect = 'none';
-        e.preventDefault?.();
-    }
-
-    function toggleCollapse() {
-        setCollapsed((c) => {
-            const next = !c;
-            // if expanding and panelHeight is very small (e.g. 0), restore default
-            if (!next && panelHeight < MIN_HEIGHT + 10) {
-                setPanelHeight(DEFAULT_HEIGHT);
-            }
-            return next;
-        });
-    }
+    // Determine status color/text helper
+    const getStatus = (uid) => {
+        const count = workloadMap[String(uid)] || 0;
+        if (count > 0) return { label: 'Active', className: 'status-active', count };
+        return { label: 'Idle', className: 'status-idle', count: 0 };
+    };
 
     if (!canViewMembers) {
         return (
@@ -103,146 +39,125 @@ export default function MembersPanel({
         );
     }
 
-    // helpers
-    const headerLabel = `${members.length} members`;
-
     return (
-        <div
-            className={`bd-section members-panel ${collapsed ? 'collapsed' : ''}`}
-            ref={containerRef}
-            aria-expanded={!collapsed}
-        >
-            <div className="members-head">
-                <h4>Members</h4>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <span className="count" title={headerLabel}>{members.length}</span>
-                    <button
-                        className="bd-btn plain"
-                        onClick={toggleCollapse}
-                        aria-label={collapsed ? 'Expand members panel' : 'Collapse members panel'}
-                        title={collapsed ? 'Expand' : 'Collapse'}
-                        style={{ padding: '6px 8px' }}
-                    >
-                        {collapsed ? '▾' : '▴'}
-                    </button>
-                </div>
-            </div>
-
+        <div className="bd-section members-panel-full">
             <div className="members-controls">
                 <input
                     className="members-search"
-                    placeholder="Search members by name, email or role..."
+                    placeholder="Search members..."
                     value={memberQuery}
-                    onChange={(e) => {
-                        setMemberQuery(e.target.value);
-                    }}
+                    onChange={(e) => setMemberQuery(e.target.value)}
                     aria-label="Search members"
                 />
-                <div className="members-perpage-below">
-                    <label>
-                        Per view
-                        <select
-                        value={membersPerPage}
-                        onChange={(e) => {
-                            setMembersPerPage(Number(e.target.value));
-                        }}
-                        >
-                            <option value={3}>3</option>
-                            <option value={6}>6</option>
-                            <option value={9}>9</option>
-                        </select>
-                    </label>
-                </div>
+            </div>
+
+            <div className="members-filters">
+                <select
+                    className="filter-select"
+                    value={memberRoleFilter}
+                    onChange={(e) => {
+                        setMemberRoleFilter(e.target.value);
+                        gotoMemberPage(1);
+                    }}
+                    aria-label="Filter members by role"
+                >
+                    <option value="all">All Roles</option>
+                    <option value="active">Status: Active</option>
+                    <option value="idle">Status: Idle</option>
+                    <option disabled>──────────</option>
+                    {roles.map(r => (
+                        <option key={r.id} value={r.id}>{r.name}</option>
+                    ))}
+                </select>
+
+                <select
+                    className="filter-select mini"
+                    value={membersPerPage}
+                    onChange={(e) => {
+                        setMembersPerPage(Number(e.target.value));
+                        gotoMemberPage(1);
+                    }}
+                    title="Items per page"
+                >
+                    <option value={6}>6</option>
+                    <option value={12}>12</option>
+                    <option value={20}>20</option>
+                </select>
             </div>
 
             {membersLoading ? (
-                <div className="muted">Loading members...</div>
+                <div className="muted" style={{ padding: '0 10px' }}>Loading...</div>
             ) : membersError ? (
                 <div className="bd-uierror">{membersError}</div>
             ) : members.length === 0 ? (
-                <div className="muted">No members found.</div>
+                        <div className="muted" style={{ padding: '0 10px' }}>No members found.</div>
             ) : (
                 <>
-                {/* members-list: controlled max-height (resizable). If collapsed, we hide by CSS. */}
-                <ul
-                    className="members-list members-single"
-                    style={
-                    collapsed
-                        ? { maxHeight: 0, overflow: 'hidden', transition: 'max-height .22s ease' }
-                        : { maxHeight: `${panelHeight}px`, overflowY: 'auto', transition: 'max-height .16s ease' }
-                    }
-                    aria-label="Members list"
-                >
-                    {visibleMembers.map((m) => {
-                    const roleFromList = roles.find((r) => r.id === m.roleId);
-                    const resolvedRoleName = m.roleName || (roleFromList ? roleFromList.name : m.roleId || 'Member');
-                    const joinedDate = m.joinedAt
-                        ? m.joinedAt.seconds
-                        ? new Date(m.joinedAt.seconds * 1000).toLocaleDateString()
-                        : new Date(m.joinedAt).toLocaleDateString()
-                        : '—';
-                    return (
-                        <li key={m.id} className="member-row member-card">
-                        <div className="member-avatar" aria-hidden>
-                            {(m.name || m.email || 'U')
-                            .split(' ')
-                            .map((s) => s[0])
-                            .slice(0, 2)
-                            .join('')
-                            .toUpperCase()}
-                        </div>
-                        <div className="member-content">
-                            <div className="member-meta">
-                            <div className="member-name">{m.name || '—'}</div>
-                            <div className="member-email" title={m.email || m.uid || ''}>
-                                <span className="email-text">{m.email || m.uid || '—'}</span>
-                            </div>
-                            </div>
-                            <div className="member-side">
-                            <div className="member-role">{resolvedRoleName}</div>
-                            <div className="member-joined">Joined: {joinedDate}</div>
-                            <button
-                                className="member-copy"
-                                aria-label={`Copy email of ${m.email || m.uid || m.name}`}
-                                onClick={() => copyEmail(m.id, m.email || m.uid || '')}
-                            >
-                                {copiedEmailId === m.id ? 'Copied' : 'Copy'}
-                            </button>
-                            </div>
-                        </div>
-                        </li>
-                    );
-                    })}
-                </ul>
+                                <ul className="members-list-full">
+                                    {visibleMembers.map((m) => {
+                                        const uid = String(m.uid || m.id);
+                                        const { label, className, count } = getStatus(uid);
+                                        const roleName = m.roleName || (roles.find((r) => r.id === m.roleId)?.name || 'Member');
 
-                {/* resizer handle - hidden when collapsed */}
-                {!collapsed && (
-                    <div
-                        className="members-resizer"
-                        onMouseDown={startDrag}
-                        onTouchStart={(e) => startDrag(e.touches ? e.touches[0] : e)}
-                        role="separator"
-                        aria-orientation="vertical"
-                        aria-label="Resize members panel"
-                        title="Drag to resize members panel"
-                    />
-                )}
+                                        return (
+                                <li key={m.id || uid} className="member-row-full">
+                                    <div className="m-left">
+                                        <div className="member-avatar-medium">
+                                            {(m.name || m.email || 'U').substring(0, 2).toUpperCase()}
+                                            {count > 0 && <span className="active-badge-dot" />}
+                                        </div>
+                                    </div>
+                                    <div className="m-right">
+                                        <div className="m-head">
+                                            <span className="m-name">{m.name || m.email?.split('@')[0]}</span>
+                                            <span className={`m-status ${className}`}>{label}</span>
+                                        </div>
+                                                    <div className="m-sub">
+                                                        {roleName} • {count > 0 ? `Workload: ${count}` : 'No active tasks'}
+                                                    </div>
+                                                    <div className="m-actions">
+                                                        <div className="m-email" title={m.email}>{m.email}</div>
+                                                        <button className="m-copy-btn" onClick={() => copyEmail(m.id, m.email || m.uid)}>
+                                                            {copiedEmailId === m.id ? 'Copied' : 'Copy Email'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
 
-                <div className="members-pagination" aria-label="Members pagination">
-                    <button className="pag-btn" onClick={() => gotoMemberPage(memberPage - 1)} disabled={memberPage === 1}>
-                        Prev
-                    </button>
-                    <div className="pag-info">
-                        Page {memberPage} / {membersTotalPages}
-                    </div>
-                    <button
-                        className="pag-btn"
-                        onClick={() => gotoMemberPage(memberPage + 1)}
-                        disabled={memberPage === membersTotalPages}
-                    >
-                        Next
-                    </button>
-                </div>
+                                <div className="members-pagination">
+                                    <div className="pagination-controls">
+                                        <button
+                                            className="pag-icon-btn"
+                                            onClick={() => gotoMemberPage(memberPage - 1)}
+                                            disabled={memberPage === 1}
+                                            title="Previous Page"
+                                        >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                        </button>
+
+                                        <span className="pag-info">
+                                            <span className="current">{memberPage}</span>
+                                            <span className="sep">/</span>
+                                            <span className="total">{membersTotalPages}</span>
+                                        </span>
+
+                                        <button 
+                                            className="pag-icon-btn"
+                                            onClick={() => gotoMemberPage(memberPage + 1)}
+                                            disabled={memberPage === membersTotalPages}
+                                            title="Next Page"
+                                        >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
                 </>
             )}
         </div>

@@ -58,17 +58,8 @@ export const saveUserData = async (user, username, options = {}) => {
         email: emailToStore,
         lowerEmail: lower,
         uid: user.uid,
-        islinks: true,
-        istagging: true,
-        cardLimits: 6,
-        taskLimits: 6,
         notifications: [],
         ...(options.accountType !== undefined ? { accountType: options.accountType } : {}),
-        updates: "",
-        requests: [],
-        isPremiumUser: false,
-        ratePremium: 0,
-        PremiumPrice: 0,
         invitesEmail: [],
         updatedAt: serverTimestamp(),
         createdAt: serverTimestamp(),
@@ -539,11 +530,7 @@ export const declineInvite = async ({ businessId, inviteId, uid = null, reason =
     ensure(businessId && inviteId, "declineInvite: missing args");
 
     const inviteRef = doc(db, COLLECTIONS.BUSINESSES, businessId, "invites", inviteId);
-    await updateDoc(inviteRef, {
-        status: "declined",
-        declinedAt: serverTimestamp(),
-        declinedReason: reason || null,
-    });
+    await deleteDoc(inviteRef);
 
     if (uid) {
         try {
@@ -569,11 +556,7 @@ export const acceptInvite = async ({ businessId, inviteId, uid, name, email }) =
 
     await addMemberToBusiness({ businessId, uid, email, name, roleId: invite.roleId });
 
-    await updateDoc(inviteRef, {
-        status: "accepted",
-        acceptedAt: serverTimestamp(),
-        acceptedByUid: uid,
-    });
+    await deleteDoc(inviteRef);
 
     try {
         await removeAllInvitesFromAccount(uid);
@@ -764,4 +747,16 @@ export const updateMemberRole = async ({ businessId, uid, roleId }) => {
 
     await batch.commit();
     return true;
+};
+
+export const updateMemberStatus = async ({ businessId, uid, status }) => {
+    ensure(businessId && uid && status, "updateMemberStatus: missing args");
+    const membersCol = collection(db, COLLECTIONS.BUSINESSES, businessId, "members");
+    const q = fsQuery(membersCol, where("uid", "==", uid), limit(1));
+    const snaps = await getDocs(q);
+    if (!snaps.empty) {
+        await updateDoc(snaps.docs[0].ref, { status, updatedAt: serverTimestamp() });
+        return true;
+    }
+    return false;
 };

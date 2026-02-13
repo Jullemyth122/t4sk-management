@@ -23,6 +23,7 @@ import { useCardHandlers } from '../hooks/dashboard/useCardHandlers';
 import { useSubmissionHandlers } from '../hooks/dashboard/useSubmissionHandlers';
 import { useOCRHandling } from '../hooks/dashboard/useOCRHandling';
 import { useApplyOCR } from '../hooks/dashboard/useApplyOCR';
+import { useMemberWorkload } from '../hooks/dashboard/useMemberWorkload';
 
 
 // Extracted initial state for clarity
@@ -70,14 +71,25 @@ const initialState = {
   ocrRaw: null,
   ocrResult: null,
   ocrError: null,
-  showHeaderActions: false
+  showHeaderActions: false,
+
+  // Sidebar collapse state
+  sidebarCollapsed: false,
+  sidebarTab: 'boards',
+  memberRoleFilter: 'all',
+  memberRoleFilter: 'all',
+  boardSort: 'recent',
+
+  // OCR Preview
+  previewFile: null,
+  previewUrl: null
 };
 
 export default function BusinessDashboard({ businessId: propBusinessId = null }) {
 
   const { state, dispatchSet, uid, userEmail, profile, currentUser } = useUserData(propBusinessId, initialState);
 
-  const { businessId, businessName, businessOwnerUid, boards, selectedBoardId, lists, cardsMap, roles, members, membersLoading, membersError, uiError, boardQuery, boardView, memberQuery, editingBoard, boardDraft, newBoardName, newListName, newListAssignees, assigneeSearch, assigneeDropdownOpen, listNameEditing, listNameDrafts, cardEditing, cardDrafts, newCardInputs, copiedEmailId, loading, ocrRaw, ocrResult, ocrError, showHeaderActions } = state;
+  const { businessId, businessName, businessOwnerUid, boards, selectedBoardId, lists, cardsMap, roles, members, membersLoading, membersError, uiError, boardQuery, boardView, memberQuery, editingBoard, boardDraft, newBoardName, newListName, newListAssignees, assigneeSearch, assigneeDropdownOpen, listNameEditing, listNameDrafts, cardEditing, cardDrafts, newCardInputs, copiedEmailId, loading, ocrRaw, ocrResult, ocrError, showHeaderActions, sidebarCollapsed, sidebarTab, previewFile, previewUrl } = state;
 
   const getMemberLevel = useCallback((m, rolesList = roles) => {
     if (typeof m.level === 'number') return m.level;
@@ -96,9 +108,56 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
   useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards });
   useCards({ businessId, selectedBoardId, lists, dispatchSet });
 
+  const { workloadMap, isOverloaded } = useMemberWorkload({ cardsMap, lists });
 
-  const { page: boardPage, perPage: boardsPerPage, setPerPage: setBoardsPerPage, totalPages: boardsTotalPages, visible: visibleBoards, goto: gotoBoardPage, setPage: setBoardPage } = usePagination(boardsFiltered, 6);
-  const { page: memberPage, perPage: membersPerPage, setPerPage: setMembersPerPage, totalPages: membersTotalPages, visible: visibleMembers, goto: gotoMemberPage } = usePagination(membersFiltered, 6);
+
+  // State for advanced filtering
+  const [memberRoleFilter, setMemberRoleFilter] = useMemo(() => {
+    // We'll manage this via dispatchSet to keep it consistent if needed, 
+    // but a simpler local useState or just adding to initialState is better.
+    // Since everything else is in 'state' via useUserData reducer, let's just add to initial state there?
+    // Actually, useUserData merges propBusinessId changes. 
+    // Let's use local state for UI-only filters to avoid reducer complexity for now, or add to initialState.
+    // The previous pattern used 'state' monolithic object. We should stick to it.
+    return [state.memberRoleFilter || 'all', (v) => dispatchSet('memberRoleFilter', v)];
+  }, [state.memberRoleFilter, dispatchSet]);
+
+  const [boardSort, setBoardSort] = useMemo(() => {
+    return [state.boardSort || 'recent', (v) => dispatchSet('boardSort', v)];
+  }, [state.boardSort, dispatchSet]);
+
+
+  // Apply Extra Filtering (Role / Sort) on top of usePermissionsAndDerived results
+  const finalMembersFiltered = useMemo(() => {
+    if (!memberRoleFilter || memberRoleFilter === 'all') return membersFiltered;
+    // Filter by role name or status
+    if (memberRoleFilter === 'active') { // pseudo-role for status
+      return membersFiltered.filter(m => (workloadMap[String(m.uid || m.id)] || 0) > 0);
+    }
+    if (memberRoleFilter === 'idle') {
+      return membersFiltered.filter(m => (workloadMap[String(m.uid || m.id)] || 0) === 0);
+    }
+    // Otherwise match role id or name
+    return membersFiltered.filter(m => {
+      const rName = m.roleName || (roles.find(r => r.id === m.roleId)?.name);
+      return String(rName) === String(memberRoleFilter) || String(m.roleId) === String(memberRoleFilter);
+    });
+  }, [membersFiltered, memberRoleFilter, workloadMap, roles]);
+
+  const finalBoardsFiltered = useMemo(() => {
+    let res = [...boardsFiltered];
+    if (boardSort === 'alpha') {
+      res.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    } else {
+      // default 'recent' or other: keep original order (assuming API returns recent first) or sort by id/date if available
+      // If no date, maybe just keep as is.
+    }
+    return res;
+  }, [boardsFiltered, boardSort]);
+
+
+  const { page: boardPage, perPage: boardsPerPage, setPerPage: setBoardsPerPage, totalPages: boardsTotalPages, visible: visibleBoards, goto: gotoBoardPage, setPage: setBoardPage } = usePagination(finalBoardsFiltered, 6);
+  const { page: memberPage, perPage: membersPerPage, setPerPage: setMembersPerPage, totalPages: membersTotalPages, visible: visibleMembers, goto: gotoMemberPage } = usePagination(finalMembersFiltered, 6);
 
   const assigneeRef = useAssigneeDropdown({ dispatchSet })
 
@@ -133,10 +192,14 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
 
   const { handleApplyOCRToBoard } = useApplyOCR({ selectedBoardId, canCreateList, ocrResult, lists, businessId, uid, dispatchSet, cardsMap, emailMap, members, membersMap, getMemberLevel, roles, businessOwnerUid });
 
+
+
   // assignee dropdown candidates
   const assigneeCandidates = useMemo(() => {
     const q = (assigneeSearch || '').toLowerCase().trim();
-    const list = (members || []).map(m => ({
+    const list = (members || [])
+      .filter(m => String(m.uid || m.id) !== String(businessOwnerUid))
+      .map(m => ({
       id: m.uid || m.id,
       email: (m.email || '').toLowerCase(),
       name: m.name || m.username || '',
@@ -148,6 +211,38 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
       (it.id || '').toLowerCase().includes(q)
     );
   }, [members, assigneeSearch]);
+
+  // Secure Upload Logic
+  const handleFileSelect = useCallback((e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Create preview URL
+    const url = URL.createObjectURL(file);
+    dispatchSet('previewFile', file);
+    dispatchSet('previewUrl', url);
+    // Hide actions dropdown
+    dispatchSet('showHeaderActions', false);
+
+    // Reset file input value so same file can be selected again
+    e.target.value = null;
+  }, [dispatchSet]);
+
+  const confirmUpload = useCallback(() => {
+    if (state.previewFile) {
+      handleUpload(state.previewFile);
+      // Clear preview
+      if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+      dispatchSet('previewFile', null);
+      dispatchSet('previewUrl', null);
+    }
+  }, [state.previewFile, state.previewUrl, handleUpload, dispatchSet]);
+
+  const cancelUpload = useCallback(() => {
+    if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+    dispatchSet('previewFile', null);
+    dispatchSet('previewUrl', null);
+  }, [state.previewUrl, dispatchSet]);
 
   // replace toggleAssignee in BusinessDashboard.jsx with this:
   const toggleAssignee = useCallback((value) => {
@@ -169,7 +264,27 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
   const showAside = canViewBoards || canViewMembers;
 
   return (
-    <main className={`bd-root p-4 ${showAside ? '' : 'no-aside'}`}>
+    <main className={`bd-root p-4 ${showAside ? '' : 'no-aside'} ${sidebarCollapsed ? 'collapsed-sidebar' : ''}`}>
+      {/* Sidebar Toggle Button - Fixed position */}
+      {showAside && (
+        <button
+          className="bd-sidebar-toggle"
+          onClick={() => dispatchSet('sidebarCollapsed', prev => !prev)}
+          aria-label={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+          title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {sidebarCollapsed ? (
+              // Chevron right (expand)
+              <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            ) : (
+              // Chevron left (collapse)
+              <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            )}
+          </svg>
+        </button>
+      )}
+
       <div className="bd-header" onClick={() => { if (showHeaderActions) dispatchSet('showHeaderActions', false); }}>
         {/* LEFT: title + subtitle */}
         <div className="bd-head-left" role="banner">
@@ -202,7 +317,13 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
               <>
                 {canUseOCR && (
                   <label className={`bd-btn inline-flex items-center gap-2 px-3 py-2 rounded text-sm ${loading ? 'opacity-60' : 'hover:bg-gray-800'}`}>
-                    <input type="file" accept="image/*" onChange={handleUpload} className="hidden" disabled={loading} />
+                    <input
+                      type="file"
+                      accept="image/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      disabled={loading}
+                    />
                     <span className="btn-icon" aria-hidden>
                       {loading ? '⏳' :
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -263,57 +384,105 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
         </div>
       </div>
 
+      {/* OCR Preview Modal */}
+      {previewFile && (
+        <div className="ocr-preview-overlay">
+          <div className="ocr-preview-modal">
+            <h3 className="modal-title">Confirm Upload</h3>
+            <p className="modal-desc">
+              Please review the image before processing. <br />
+              <strong>Security Warning:</strong> Ensure this image does not contain sensitive data like passwords or PI keys.
+            </p>
+
+            <div className="preview-container">
+              {previewUrl && <img src={previewUrl} alt="Preview" className="preview-img" />}
+            </div>
+
+            <div className="modal-actions">
+              <button className="bd-btn plain" onClick={cancelUpload}>Cancel</button>
+              <button className="bd-btn primary" onClick={confirmUpload}>
+                Confirm Upload
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {uiError && <div className="bd-uierror">{uiError}</div>}
 
       <div className="bd-grid">
         {showAside ? (
+          <div className="bd-aside">
+            <div className="sidebar-tabs">
+              <button
+                className={`tab-btn ${sidebarTab === 'boards' ? 'active' : ''}`}
+                onClick={() => dispatchSet('sidebarTab', 'boards')}
+              >
+                Boards
+              </button>
+              <button
+                className={`tab-btn ${sidebarTab === 'members' ? 'active' : ''}`}
+                onClick={() => dispatchSet('sidebarTab', 'members')}
+              >
+                Members
+              </button>
+            </div>
 
-          <aside className="bd-aside">
-            <BoardSidebar
-              boards={boards}
-              boardQuery={boardQuery}
-              setBoardQuery={(v) => dispatchSet('boardQuery', v)}
-              boardView={boardView}
-              setBoardView={(v) => dispatchSet('boardView', v)}
-              visibleBoards={visibleBoards}
-              boardPage={boardPage}
-              boardsTotalPages={boardsTotalPages}
-              boardsPerPage={boardsPerPage}
-              setBoardsPerPage={setBoardsPerPage}
-              gotoBoardPage={gotoBoardPage}
-              selectedBoardId={selectedBoardId}
-              setSelectedBoardId={(id) => dispatchSet('selectedBoardId', id)}
-              newBoardName={newBoardName}
-              setNewBoardName={(v) => dispatchSet('newBoardName', v)}
-              handleCreateBoard={handleCreateBoard}
-              canEditBoardValue={canEditBoardValue}
-              canCreateBoard={canCreateBoard}
-            />
-            {canViewMembers ? (
-              <MembersPanel
-                members={members}
-                membersLoading={membersLoading}
-                membersError={membersError}
-                memberQuery={memberQuery}
-                setMemberQuery={(v) => dispatchSet('memberQuery', v)}
-                membersPerPage={membersPerPage}
-                setMembersPerPage={setMembersPerPage}
-                visibleMembers={visibleMembers}
-                memberPage={memberPage}
-                membersTotalPages={membersTotalPages}
-                gotoMemberPage={gotoMemberPage}
-                roles={roles}
-                copyEmail={copyEmail}
-                copiedEmailId={copiedEmailId}
+            {sidebarTab === 'boards' && (
+              <BoardSidebar
+                boards={boards}
+                boardQuery={boardQuery}
+                setBoardQuery={(v) => dispatchSet('boardQuery', v)}
+                boardView={boardView}
+                setBoardView={(v) => dispatchSet('boardView', v)}
+                // NEW: sorting
+                boardSort={boardSort}
+                setBoardSort={setBoardSort}
+                visibleBoards={visibleBoards}
+                boardPage={boardPage}
+                boardsTotalPages={boardsTotalPages}
+                boardsPerPage={boardsPerPage}
+                setBoardsPerPage={setBoardsPerPage}
+                gotoBoardPage={gotoBoardPage}
+                selectedBoardId={selectedBoardId}
+                setSelectedBoardId={(id) => dispatchSet('selectedBoardId', id)}
+                newBoardName={newBoardName}
+                setNewBoardName={(v) => dispatchSet('newBoardName', v)}
+                handleCreateBoard={handleCreateBoard}
+                canEditBoardValue={canEditBoardValue}
+                canCreateBoard={canCreateBoard}
               />
-            ) : (
-                // <div className="bd-section members-panel restricted">
-                //   <div className="members-head"><h4>Members</h4><span className="count">{members.length}</span></div>
-                //   <div className="muted">Members list is restricted for your role.</div>
-                // </div>
-                <></>
             )}
-          </aside>
+
+            {sidebarTab === 'members' && (
+              canViewMembers ? (
+                <MembersPanel
+                  members={members}
+                  membersLoading={membersLoading}
+                  membersError={membersError}
+                  memberQuery={memberQuery}
+                  setMemberQuery={(v) => dispatchSet('memberQuery', v)}
+                  // NEW: filtering
+                  memberRoleFilter={memberRoleFilter}
+                  setMemberRoleFilter={setMemberRoleFilter}
+                  membersPerPage={membersPerPage}
+                  setMembersPerPage={setMembersPerPage}
+                  visibleMembers={visibleMembers}
+                  memberPage={memberPage}
+                  membersTotalPages={membersTotalPages}
+                  gotoMemberPage={gotoMemberPage}
+                  roles={roles}
+                  copyEmail={copyEmail}
+                  copiedEmailId={copiedEmailId}
+                  workloadMap={workloadMap}
+                />
+              ) : (
+                  <div className="bd-section members-panel restricted">
+                    <div className="muted" style={{ padding: 20 }}>Members list is restricted for your role.</div>
+                  </div>
+                )
+            )}
+          </div>
         ) : null}
 
         <section className="bd-main">
@@ -372,7 +541,9 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                       reviewerOptions={reviewerOptions}
                       reviewerOptionsSource="higher"
                       roles={roles} // NEW: pass roles to ListColumn
-
+                      workloadMap={workloadMap}
+                      isOverloaded={isOverloaded}
+                      businessOwnerUid={businessOwnerUid}
                     />
                   ))}
 

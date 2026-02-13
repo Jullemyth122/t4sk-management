@@ -198,11 +198,13 @@ export const createCard = async ({ businessId = null, uid = null, boardId, listI
         priorityRank: Number.isFinite(card.priorityRank) ? Number(card.priorityRank) : defaultPriorityRank(card.priority),
         status: card.status ?? "todo",
         dueDate: card.dueDate ?? null,
+        startDate: card.startDate ?? null,
         effort: card.effort ?? 1,
         dependencies: card.dependencies ?? [],
         workflowStage: card.workflowStage ?? null,
         weight: typeof card.weight === "number" ? Math.max(0, Math.min(100, Math.round(card.weight))) : 0,
         progress: typeof card.progress === "number" ? Math.max(0, Math.min(100, Math.round(card.progress))) : 0,
+        subtasks: Array.isArray(card.subtasks) ? card.subtasks : [],
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         createdBy: uid ?? null,
@@ -221,9 +223,8 @@ export const updateCard = async ({ businessId = null, uid = null, boardId, listI
 
     if (payload.progress !== undefined) {
         payload.progress = Math.max(0, Math.min(100, Math.round(Number(payload.progress) ?? 0)));
-        if (payload.progress >= 100 && !payload.status) {
-            payload.status = "done";
-        }
+        // Removed auto-completion logic. 100% progress does NOT mean done.
+        // if (payload.progress >= 100 && !payload.status) { payload.status = "done"; }
     }
 
     if (payload.status === "pending" && payload.submittedAt === undefined) {

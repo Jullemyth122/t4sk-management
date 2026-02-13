@@ -8,6 +8,7 @@ export default function SubmissionModal({
     open,
     onClose,
     onSubmit,     // async ({ note, type, attachments, qaChecked, reviewerUid })
+    onSubtaskToggle, // async (subtaskIndex, newCompletedState) => void - saves immediately to Firestore
     defaultNote = '',
     card,
     assignees = [],
@@ -139,9 +140,16 @@ export default function SubmissionModal({
 
     if (!open) return null;
 
+    const isHighLevel = currentUser && (
+        String(currentUser.role || '').toLowerCase() === 'owner' ||
+        String(currentUser.role || '').toLowerCase() === 'admin' ||
+        String(currentUser.role || '').toLowerCase() === 'manager'
+    );
+
     const typeOptions = [
       { value: 'for-review', label: 'For review', subtitle: 'Ready for QA / review' },
-      { value: 'complete', label: 'Mark complete', subtitle: 'Done — ready to close' },
+        // Only high-level staff can mark complete directly
+        ...(isHighLevel ? [{ value: 'complete', label: 'Mark complete', subtitle: 'Done — ready to close' }] : []),
       { value: 'request-feedback', label: 'Request feedback', subtitle: 'Need input from reviewer' },
     ];
 
@@ -188,32 +196,46 @@ export default function SubmissionModal({
                             </div>
                         </div>
 
-                        {/* Subtasks section */}
+                        {/* Subtasks section - clickable to toggle */}
                         {card?.subtasks && card.subtasks.length > 0 && (
                             <div className="sd-assignees" style={{ marginTop: 16 }}>
                                 <strong>Tasks · {card.subtasks.filter(s => s.completed).length} of {card.subtasks.length} complete</strong>
                                 <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
                                     {card.subtasks.map((st, idx) => (
-                                        <div key={st.id || idx} style={{
-                                            display: 'flex',
-                                            gap: 8,
-                                            alignItems: 'center',
-                                            padding: '6px 8px',
-                                            borderRadius: 6,
-                                            background: st.completed ? 'rgba(76, 175, 80, 0.08)' : 'rgba(0,0,0,0.03)'
-                                        }}>
+                                        <div
+                                            key={st.id || idx}
+                                            onClick={() => onSubtaskToggle?.(idx, !st.completed)}
+                                            style={{
+                                                display: 'flex',
+                                                gap: 8,
+                                                alignItems: 'center',
+                                                padding: '6px 8px',
+                                                borderRadius: 6,
+                                                background: st.completed ? 'rgba(76, 175, 80, 0.08)' : 'rgba(0,0,0,0.03)',
+                                                cursor: onSubtaskToggle ? 'pointer' : 'default',
+                                                transition: 'background 0.15s ease'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (onSubtaskToggle) e.currentTarget.style.background = st.completed ? 'rgba(76, 175, 80, 0.15)' : 'rgba(0,0,0,0.06)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.background = st.completed ? 'rgba(76, 175, 80, 0.08)' : 'rgba(0,0,0,0.03)';
+                                            }}
+                                        >
+                                            {/* Checkbox visual */}
                                             <div style={{
-                                                minWidth: 16,
-                                                height: 16,
-                                                borderRadius: 3,
-                                                border: `2px solid ${st.completed ? '#4caf50' : '#ccc'}`,
-                                                background: st.completed ? '#4caf50' : 'white',
+                                                minWidth: 18,
+                                                height: 18,
+                                                borderRadius: 4,
+                                                border: `2px solid ${st.completed ? '#4caf50' : '#888'}`,
+                                                background: st.completed ? '#4caf50' : 'transparent',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
                                                 color: 'white',
-                                                fontSize: 10,
-                                                fontWeight: 'bold'
+                                                fontSize: 11,
+                                                fontWeight: 'bold',
+                                                transition: 'all 0.15s ease'
                                             }}>
                                                 {st.completed && '✓'}
                                             </div>

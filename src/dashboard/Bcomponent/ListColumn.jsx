@@ -4,6 +4,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import CardItem from './CardItem';
 import CustomSelect from './CustomSelect';
+import { getProjectedWeight, validateTotalWeight } from '../utils/subtaskUtils';
 
 export default function ListColumn({
     boardId,
@@ -43,6 +44,9 @@ export default function ListColumn({
     canUpdateList,
     canDeleteList,
     canCreateCard,
+    workloadMap,
+    isOverloaded,
+    businessOwnerUid,
 }) {
     // resolve permissions
     const _canUpdateList = (canUpdateList !== undefined) ? canUpdateList : canEdit;
@@ -60,9 +64,40 @@ export default function ListColumn({
         setExpandedMap({}); // optional: reset per-card expansion when the list switches
     }, [list.id]);
 
-    const assignees = Array.isArray(list.assignees) ? list.assignees : [];
+    // Robust deduplication: resolve to member UID if possible, else use string.
+    const uniqueAssignees = useMemo(() => {
+        const raw = Array.isArray(list.assignees) ? list.assignees : [];
+        const seen = new Set();
+        const result = [];
 
-    const prettyAssignees = assignees.map((a) => (a ? String(a) : null)).filter(Boolean);
+        for (const a of raw) {
+            if (!a) continue;
+            const s = String(a).trim();
+            // Exclude owner if present
+            if (businessOwnerUid && s === String(businessOwnerUid)) continue;
+
+            // Resolve to member
+            let member = membersMap[s];
+            if (!member && s.includes('@')) {
+                member = emailMap[s.toLowerCase()];
+            }
+
+            // If found member, check if matches owner by UID or Email
+            if (member && businessOwnerUid && String(member.uid || member.id) === String(businessOwnerUid)) continue;
+
+            // Canonical ID (uid or normalized string)
+            const canonical = member ? (member.uid || member.id) : (s.includes('@') ? s.toLowerCase() : s);
+
+            if (!seen.has(canonical)) {
+                seen.add(canonical);
+                // Prefer passing the UID if we have a member, so downstream lookups work consistently
+                result.push(canonical);
+            }
+        }
+        return result;
+    }, [list.assignees, membersMap, emailMap, businessOwnerUid]);
+
+    const prettyAssignees = uniqueAssignees;
 
     function hashCode(str) {
         let h = 0;
@@ -104,13 +139,14 @@ export default function ListColumn({
     const moreCount = Math.max(0, resolvedAssignees.length - visibleCount);
     const fullTitle = resolvedAssignees.map((r) => (r.email ? `${r.name} <${r.email}>` : r.name)).join(', ');
 
-    // compute aggregated list progress: prefer list.progress if set, else sum of weighted card contributions
+    // compute aggregated list progress: prefer explicit list.progress ONLY if no cards
     const listProgress = useMemo(() => {
-        // prefer explicit list.progress if present
-        if (list && Number.isFinite(Number(list.progress))) {
-            return Math.max(0, Math.min(100, Math.round(Number(list.progress))));
+        if (!Array.isArray(cards) || cards.length === 0) {
+            if (list && Number.isFinite(Number(list.progress))) {
+                return Math.max(0, Math.min(100, Math.round(Number(list.progress))));
+            }
+            return 0;
         }
-        if (!Array.isArray(cards) || cards.length === 0) return 0;
 
         // ignore optimistic/temp cards
         const stableCards = (cards || []).filter(c => !(String(c.id || '').startsWith('tmp-')));
@@ -118,7 +154,11 @@ export default function ListColumn({
 
         // helper to get weight
         const getWeight = (c) => {
-            if (c.submission && typeof c.submission.contribution === 'number') return Math.max(0, Number(c.submission.contribution));
+            // Fix: Only use contribution if it's > 0 (explicitly set). 
+            // If contribution is 0 (default/unset), fallback to card.weight so we don't lose the planned weight.
+            if (c.submission && typeof c.submission.contribution === 'number' && c.submission.contribution > 0) {
+                return Math.max(0, Number(c.submission.contribution));
+            }
             if (Number.isFinite(Number(c.weight))) return Math.max(0, Number(c.weight));
             return null; // explicit null
         };
@@ -323,11 +363,13 @@ export default function ListColumn({
         const q = (assigneeSearch || '').toLowerCase().trim();
         const candidates = [];
         Object.values(membersMap || {}).forEach((m) => {
+            const uidKey = m.uid || m.id || null;
+            if (businessOwnerUid && String(uidKey) === String(businessOwnerUid)) return; // Exclude owner
+
             const level = getMemberLevel(m);
             if (level > 2) return; // low-level only
             const name = m.name || m.displayName || '';
             const email = m.email || '';
-            const uidKey = m.uid || m.id || null;
             if (q && !(name.toLowerCase().includes(q) || email.toLowerCase().includes(q) || String(uidKey).toLowerCase().includes(q))) return;
             candidates.push({ name, email, uid: uidKey });
         });
@@ -410,6 +452,9 @@ export default function ListColumn({
                                     <span className="assignee-meta">
                                         <span className="assignee-name">{a.name}</span>
                                         {a.email ? <span className="assignee-email">{a.email}</span> : null}
+                                        {isOverloaded && isOverloaded(a.key) && (
+                                            <span style={{ marginLeft: 6, fontSize: '0.8em' }} title="High Workload">🔥</span>
+                                        )}
                                     </span>
                                 </div>
                             ))}
@@ -549,6 +594,9 @@ export default function ListColumn({
                                     listCardCount={(cards || []).length}
                                     reviewerOptions={reviewerOptions}
                                     reviewerOptionsSource={reviewerOptionsSource}
+                                    workloadMap={workloadMap}
+                                    isOverloaded={isOverloaded}
+                                    businessOwnerUid={businessOwnerUid}
                                     compactExpanded={!!expandedMap[card.id]}
                                     setCompactExpanded={() => setExpandedMap((p) => ({ ...(p || {}), [card.id]: !p?.[card.id] }))}
                                 />
@@ -622,8 +670,11 @@ export default function ListColumn({
                                         listCardCount={(cards || []).length}
                                         reviewerOptions={reviewerOptions}
                                         reviewerOptionsSource={reviewerOptionsSource}
+                                        workloadMap={workloadMap}
+                                        isOverloaded={isOverloaded}
                                         compactExpanded={!!expandedMap[card.id]}
                                         setCompactExpanded={() => setExpandedMap((p) => ({ ...(p || {}), [card.id]: !p?.[card.id] }))}
+                                        businessOwnerUid={businessOwnerUid}
                                     />
                                 ))}
                             </div>
@@ -658,37 +709,57 @@ export default function ListColumn({
                                 value={(newCardInputs[list.id] || {}).title || ''}
                                 onChange={(e) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), title: e.target.value } }))}
                             />
-                            <input
-                                type="date"
-                                value={(newCardInputs[list.id] || {}).dueDate || ''}
-                                onChange={(e) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), dueDate: e.target.value } }))}
-                            />
+                            <div className="quick-meta-row">
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    <label style={{ fontSize: '0.65rem', color: 'var(--sidenav-ISO)', textTransform: 'uppercase' }}>Start</label>
+                                    <input
+                                        type="date"
+                                        title="Start Date"
+                                        value={(newCardInputs[list.id] || {}).startDate || ''}
+                                        onChange={(e) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), startDate: e.target.value } }))}
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    <label style={{ fontSize: '0.65rem', color: 'var(--sidenav-ISO)', textTransform: 'uppercase' }}>Due</label>
+                                    <input
+                                        type="date"
+                                        title="Due Date"
+                                        value={(newCardInputs[list.id] || {}).dueDate || ''}
+                                        onChange={(e) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), dueDate: e.target.value } }))}
+                                    />
+                                </div>
 
-                            {/* Priority selector replaced with CustomSelect */}
-                            <div style={{ minWidth: 160 }}>
-                                <CustomSelect
-                                    options={priorityOptions}
-                                    value={(newCardInputs[list.id] || {}).priority ?? 'medium'}
-                                    onChange={(val) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), priority: val } }))}
-                                    placeholder="Priority"
-                                    searchable={false}
-                                    ariaLabel="Card priority"
-                                    width="160px"
-                                    // Some CustomSelect implementations ignore `disabled`, so also prevent pointer events when list is complete
-                                    style={isListComplete ? { pointerEvents: 'none' } : undefined}
-                                />
+                                {/* Priority selector replaced with CustomSelect */}
+                                <div style={{ minWidth: 120, flex: 1 }}>
+                                    <label style={{ fontSize: '0.65rem', color: 'var(--sidenav-ISO)', textTransform: 'uppercase', display: 'block' }}>Priority</label>
+                                    <CustomSelect
+                                        options={priorityOptions}
+                                        value={(newCardInputs[list.id] || {}).priority ?? 'medium'}
+                                        onChange={(val) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), priority: val } }))}
+                                        placeholder="Priority"
+                                        searchable={false}
+                                        ariaLabel="Card priority"
+                                        width="100%"
+                                        // Some CustomSelect implementations ignore `disabled`, so also prevent pointer events when list is complete
+                                        style={isListComplete ? { pointerEvents: 'none' } : undefined}
+                                    />
+                                </div>
+
+                                {/* Optional: weight (contribution to list total) */}
+                                <div style={{ width: 80 }}>
+                                    <label style={{ fontSize: '0.65rem', color: 'var(--sidenav-ISO)', textTransform: 'uppercase' }}>Weight %</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        placeholder="%"
+                                        className="weight-input"
+                                        value={(newCardInputs[list.id] || {}).weight ?? ''}
+                                        onChange={(e) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), weight: e.target.value } }))}
+                                        aria-label="Card weight"
+                                    />
+                                </div>
                             </div>
-
-                            {/* Optional: weight (contribution to list total) */}
-                            <input
-                                type="number"
-                                min="0"
-                                max="100"
-                                placeholder="weight %"
-                                value={(newCardInputs[list.id] || {}).weight ?? ''}
-                                onChange={(e) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), weight: e.target.value } }))}
-                                aria-label="Card weight"
-                            />
 
                             <div className="quick-actions">
                                 <button
@@ -696,7 +767,7 @@ export default function ListColumn({
                                         try {
                                             await safeCreateCardForList(list.id);
                                             // clear quick-add on success
-                                            setNewCardInputs((p) => ({ ...p, [list.id]: { title: '', dueDate: '', effort: 3, priority: 'medium', weight: '' } }));
+                                            setNewCardInputs((p) => ({ ...p, [list.id]: { title: '', startDate: '', dueDate: '', effort: 3, priority: 'medium', weight: '' } }));
                                         } catch (err) {
                                             // user-visible feedback when blocked (or handler failed)
                                             try {
@@ -718,6 +789,175 @@ export default function ListColumn({
                                 >
                                     Cancel
                                 </button>
+                            </div>
+
+                            {/* Subtask addition UI */}
+                            <div className="quick-subtasks" style={{ marginTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 8 }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--sidenav-ISO)', marginBottom: 6 }}>
+                                    Subtasks ({((newCardInputs[list.id] || {}).subtasks || []).length})
+                                </div>
+
+                                <div className="subtask-mini-list" style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8, maxHeight: 120, overflowY: 'auto' }}>
+                                    {((newCardInputs[list.id] || {}).subtasks || []).map((st, i) => (
+                                        <div key={st.id || i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', background: 'rgba(255,255,255,0.02)', padding: '2px 6px', borderRadius: 4 }}>
+                                            <span style={{ color: 'var(--sidenav-ISO)' }}>•</span>
+                                            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {st.text}
+                                                <span style={{ opacity: 0.6, fontSize: '0.75em', marginLeft: 6 }}>
+                                                    ({st.weight > 0 ? st.weight : getProjectedWeight((newCardInputs[list.id] || {}).subtasks || [], i)}%)
+                                                </span>
+                                            </span>
+                                            <button
+                                                onClick={() => setNewCardInputs(p => {
+                                                    const prevSub = (p[list.id] || {}).subtasks || [];
+                                                    return {
+                                                        ...p,
+                                                        [list.id]: {
+                                                            ...(p[list.id] || {}),
+                                                            subtasks: prevSub.filter((_, idx) => idx !== i)
+                                                        }
+                                                    };
+                                                })}
+                                                style={{ border: 'none', background: 'transparent', color: '#ff6b6b', cursor: 'pointer', padding: 2 }}
+                                                title="Remove subtask"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                    <input
+                                        placeholder="Subtask..."
+                                        style={{
+                                            flex: 1,
+                                            background: 'rgba(0,0,0,0.1)',
+                                            border: 'none',
+                                            padding: '4px 8px',
+                                            borderRadius: 4,
+                                            fontSize: '0.8rem',
+                                            color: 'var(--text-color)',
+                                            minWidth: 0
+                                        }}
+                                        value={(newCardInputs[list.id] || {}).tempSubtaskText || ''}
+                                        onChange={(e) => setNewCardInputs(p => ({
+                                            ...p,
+                                            [list.id]: { ...(p[list.id] || {}), tempSubtaskText: e.target.value }
+                                        }))}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                const text = ((newCardInputs[list.id] || {}).tempSubtaskText || '').trim();
+                                                const weight = Number((newCardInputs[list.id] || {}).tempSubtaskWeight) || 0;
+                                                if (text) {
+                                                    setNewCardInputs(p => {
+                                                        const prevSub = (p[list.id] || {}).subtasks || [];
+                                                        return {
+                                                            ...p,
+                                                            [list.id]: {
+                                                                ...(p[list.id] || {}),
+                                                                subtasks: [...prevSub, { id: Date.now(), text, weight, completed: false }],
+                                                                tempSubtaskText: '',
+                                                                tempSubtaskWeight: ''
+                                                            }
+                                                        };
+                                                    });
+                                                    // Optional: focus back to text input? It's already there.
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder={(getProjectedWeight((newCardInputs[list.id] || {}).subtasks || [], -1 /* placeholder for auto */) || 'Auto') + ''}
+                                        style={{
+                                            width: 42,
+                                            background: 'rgba(0,0,0,0.1)',
+                                            border: 'none',
+                                            padding: '4px',
+                                            borderRadius: 4,
+                                            fontSize: '0.8rem',
+                                            color: 'var(--text-color)',
+                                            textAlign: 'center'
+                                        }}
+                                        min="0"
+                                        max="100"
+                                        value={(newCardInputs[list.id] || {}).tempSubtaskWeight || ''}
+                                        onChange={(e) => setNewCardInputs(p => ({
+                                            ...p,
+                                            [list.id]: { ...(p[list.id] || {}), tempSubtaskWeight: e.target.value }
+                                        }))}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                const text = ((newCardInputs[list.id] || {}).tempSubtaskText || '').trim();
+                                                const weight = Number((newCardInputs[list.id] || {}).tempSubtaskWeight) || 0;
+                                                if (text) {
+                                                    setNewCardInputs(p => {
+                                                        const prevSub = (p[list.id] || {}).subtasks || [];
+                                                        const newSubList = [...prevSub, { id: Date.now(), text, weight, completed: false }];
+
+                                                        const validCheck = validateTotalWeight(newSubList);
+                                                        // "also have a warning"
+                                                        if (!validCheck.valid) {
+                                                            alert(validCheck.message);
+                                                        }
+
+                                                        return {
+                                                            ...p,
+                                                            [list.id]: {
+                                                                ...(p[list.id] || {}),
+                                                                subtasks: newSubList,
+                                                                tempSubtaskText: '',
+                                                                tempSubtaskWeight: ''
+                                                            }
+                                                        };
+                                                    });
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            const text = ((newCardInputs[list.id] || {}).tempSubtaskText || '').trim();
+                                            const weight = Number((newCardInputs[list.id] || {}).tempSubtaskWeight) || 0;
+                                            if (text) {
+                                                setNewCardInputs(p => {
+                                                    const prevSub = (p[list.id] || {}).subtasks || [];
+                                                    const newSubList = [...prevSub, { id: Date.now(), text, weight, completed: false }];
+
+                                                    const validCheck = validateTotalWeight(newSubList);
+                                                    if (!validCheck.valid) {
+                                                        alert(validCheck.message);
+                                                    }
+
+                                                    return {
+                                                        ...p,
+                                                        [list.id]: {
+                                                            ...(p[list.id] || {}),
+                                                            subtasks: newSubList,
+                                                            tempSubtaskText: '',
+                                                            tempSubtaskWeight: ''
+                                                        }
+                                                    };
+                                                });
+                                            }
+                                        }}
+                                        style={{
+                                            border: 'none',
+                                            background: 'rgba(255,255,255,0.1)',
+                                            color: 'var(--text-color)',
+                                            borderRadius: 4,
+                                            cursor: 'pointer',
+                                            padding: '0 8px',
+                                            fontSize: '1rem',
+                                            fontWeight: 700
+                                        }}
+                                    >
+                                        +
+                                    </button>
+                                </div>
                             </div>
 
                             {isListComplete && (

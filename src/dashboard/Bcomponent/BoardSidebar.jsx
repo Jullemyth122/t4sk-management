@@ -19,7 +19,8 @@ export default function BoardSidebar({
     handleCreateBoard,
     canEditBoardValue,
     canCreateBoard = false, // new prop (fallback false)
-
+    boardSort,
+    setBoardSort,
 }) {
 
     useEffect(() => {
@@ -28,20 +29,23 @@ export default function BoardSidebar({
 
     return (
         <div className="bd-section bd-boards-pane">
-            <div className="bd-boards-head"><h3>Boards</h3><span className="count">{boards.length}</span></div>
+            {/* <div className="bd-boards-head"><h3>Boards</h3><span className="count">{boards.length}</span></div> */}
+
 
             <div className="boards-controls">
                 <input className="boards-search" placeholder="Search boards..." value={boardQuery} onChange={(e)=>{ setBoardQuery(e.target.value); gotoBoardPage(1); }} aria-label="Search boards" />
             </div>
 
-            <div className="boards-controls-right">
-                <label className="boards-perpage">
-                    <select value={boardsPerPage} onChange={(e)=>{ setBoardsPerPage(Number(e.target.value)); gotoBoardPage(1); }}>
-                        <option value={4}>4 / page</option>
-                        <option value={6}>6 / page</option>
-                        <option value={9}>9 / page</option>
-                    </select>
-                </label>
+            <div className="boards-filters">
+                <select
+                    className="filter-select"
+                    value={boardSort}
+                    onChange={(e) => setBoardSort(e.target.value)}
+                    aria-label="Sort boards"
+                >
+                    <option value="recent">Recent</option>
+                    <option value="alpha">A-Z</option>
+                </select>
 
                 <div className="view-toggle" role="tablist" aria-label="Board view">
                     <button className={`view-btn ${boardView==="list"?"active":""}`} title="List view" onClick={()=>setBoardView("list")}>☰</button>
@@ -70,15 +74,36 @@ export default function BoardSidebar({
                 </div>
             )}
 
-            <div className="boards-pagination" aria-label="Boards pagination">
-                <button className="pag-btn" onClick={()=>gotoBoardPage(boardPage-1)} disabled={boardPage===1}>Prev</button>
-                    {Array.from({ length: Math.min(5, boardsTotalPages) }).map((_, idx)=>{
-                        const half = Math.floor(Math.min(5, boardsTotalPages)/2);
-                        let start = Math.max(1, Math.min(boardPage-half, boardsTotalPages - Math.min(5, boardsTotalPages) + 1));
-                        const pageNum = start + idx;
-                        return (<button key={pageNum} className={`pag-page ${pageNum===boardPage?"active":""}`} onClick={()=>gotoBoardPage(pageNum)}>{pageNum}</button>);
-                    })}
-                <button className="pag-btn" onClick={()=>gotoBoardPage(boardPage+1)} disabled={boardPage===boardsTotalPages}>Next</button>
+            <div className="boards-pagination">
+                <div className="pagination-controls">
+                    <button
+                        className="pag-icon-btn"
+                        onClick={() => gotoBoardPage(boardPage - 1)}
+                        disabled={boardPage === 1}
+                        title="Previous Page"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </button>
+
+                    <span className="pag-info">
+                        <span className="current">{boardPage}</span>
+                        <span className="sep">/</span>
+                        <span className="total">{boardsTotalPages || 1}</span>
+                    </span>
+
+                    <button
+                        className="pag-icon-btn"
+                        onClick={() => gotoBoardPage(boardPage + 1)}
+                        disabled={boardPage === boardsTotalPages || boardsTotalPages === 0}
+                        title="Next Page"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div className="bd-create">

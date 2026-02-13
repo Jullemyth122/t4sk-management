@@ -382,3 +382,87 @@
 
 
 }
+
+/* ========================================
+   LIGHT MODE OVERRIDES
+   ======================================== */
+[data-theme="light"] {
+    .signup-comp,
+    .signup-in-comp {
+        .circle {
+            background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.15), transparent);
+        }
+
+        .form-holder {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.95));
+            border-color: rgba(0, 0, 0, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+            h1 {
+                color: #1e293b;
+            }
+
+            p {
+                color: #64748b;
+            }
+
+            input {
+                background: rgba(0, 0, 0, 0.03);
+                border-color: rgba(0, 0, 0, 0.1);
+                color: #1e293b;
+
+                &::placeholder {
+                    color: #94a3b8;
+                }
+
+                &:focus {
+                    border-color: #f59e0b;
+                    background: #fff;
+                }
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #f59e0b, #d97706);
+                color: #fff;
+                box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+
+                &:hover {
+                    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+                }
+            }
+
+            .divider {
+                color: #94a3b8;
+
+                &::before,
+                &::after {
+                    background: rgba(0, 0, 0, 0.1);
+                }
+            }
+
+            .social-login {
+                .social-btn {
+                    background: rgba(0, 0, 0, 0.03);
+                    border-color: rgba(0, 0, 0, 0.1);
+                    color: #334155;
+
+                    &:hover {
+                        background: rgba(0, 0, 0, 0.06);
+                    }
+                }
+            }
+
+            .footer-text {
+                color: #64748b;
+
+                a {
+                    color: #f59e0b;
+
+                    &:hover {
+                        color: #d97706;
+                    }
+                }
+            }
+        }
+    }
+}

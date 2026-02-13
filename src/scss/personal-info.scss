@@ -505,3 +505,101 @@
         /* Light text for options */
     }
 }
+
+/* ========================================
+   LIGHT MODE OVERRIDES
+   ======================================== */
+[data-theme="light"] {
+    .personal-info-comp {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+
+        .pi-header {
+            h1 {
+                color: #1e293b;
+            }
+
+            p {
+                color: #64748b;
+            }
+        }
+
+        .pi-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+            .card-header {
+                color: #1e293b;
+                border-color: rgba(0, 0, 0, 0.08);
+            }
+
+            .card-body {
+                label {
+                    color: #475569;
+                }
+
+                input,
+                select,
+                textarea {
+                    background: rgba(0, 0, 0, 0.03);
+                    border-color: rgba(0, 0, 0, 0.1);
+                    color: #1e293b;
+
+                    &::placeholder {
+                        color: #94a3b8;
+                    }
+
+                    &:focus {
+                        border-color: #f59e0b;
+                        background: #fff;
+                    }
+                }
+
+                .chip {
+                    background: rgba(0, 0, 0, 0.05);
+                    color: #475569;
+                    border-color: rgba(0, 0, 0, 0.1);
+
+                    &.on,
+                    &.active {
+                        background: linear-gradient(135deg, #f59e0b, #d97706);
+                        color: #fff;
+                    }
+                }
+            }
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: rgba(0, 0, 0, 0.05);
+            color: #334155;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    .custom-timezone-select {
+        .selected-option {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: #1e293b;
+        }
+
+        .options-list {
+            background: #fff;
+            border-color: rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+
+            .option {
+                color: #1e293b;
+
+                &:hover {
+                    background: rgba(245, 158, 11, 0.1);
+                }
+            }
+        }
+    }
+}

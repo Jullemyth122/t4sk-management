@@ -10,15 +10,26 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
     const handleCreateCardForList = useCallback(async (listId) => {
         const inputs = newCardInputs[listId] || {};
         const title = (inputs.title || '').trim();
-        if (!title || !selectedBoardId) return dispatchSet('uiError', 'Title or board required');
+        if (!title || !selectedBoardId) {
+            dispatchSet('uiError', 'Title or board required');
+            throw new Error('Title or board required');
+        }
         const assigned = (inputs.assignees || []).filter(Boolean);
-        if (assigned.length > 0 && !canAssignTasks) return dispatchSet('uiError', 'Permission denied to assign tasks');
+        if (assigned.length > 0 && !canAssignTasks) {
+            dispatchSet('uiError', 'Permission denied to assign tasks');
+            throw new Error('Permission denied to assign tasks');
+        }
         const due = inputs.dueDate ? new Date(inputs.dueDate) : null;
+        const start = inputs.startDate ? new Date(inputs.startDate) : null;
         const priorityLabel = inputs.priority || 'medium';
         const effort = Number(inputs.effort) || 1;
         const cp = computePriority({ dueDate: due, priorityLabel, effort, dependencies: [], title });
         const parsedWeight = Number(inputs.weight) || null;
         const defaultWeight = parsedWeight !== null ? clampInt(parsedWeight) : null;
+        
+        // Extract subtasks (NEW)
+        const subtasks = Array.isArray(inputs.subtasks) ? inputs.subtasks : [];
+
         const tempId = `tmp-card-${Date.now()}`;
         const tempCard = {
             id: tempId,
@@ -30,6 +41,7 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
             priorityRank: cp.priorityRank,
             status: 'todo',
             dueDate: due,
+            startDate: start,
             effort,
             weight: defaultWeight,
             progress: Number(inputs.progress ?? 0),
@@ -37,13 +49,15 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
             complexityMode: inputs.complexityMode || 'auto',
             createdAt: new Date(),
             createdBy: uid || null,
+            subtasks, // Use extracted subtasks
         };
         snapshotRef.current.cardsMap = { ...cardsMap };
         dispatchSet('cardsMap', (prev) => ({ ...prev, [listId]: [tempCard, ...(prev[listId] || [])] }));
         try {
             const created = await boardSvc.createCard({ businessId, uid, boardId: selectedBoardId, listId, card: tempCard });
             dispatchSet('cardsMap', (prev) => ({ ...prev, [listId]: prev[listId].map((c) => c.id === tempId ? created : c) }));
-            dispatchSet('newCardInputs', (p) => ({ ...p, [listId]: { title: '', dueDate: '', effort: 3, priority: 'medium', weight: '' } }));
+            // Reset form, including subtasks
+            dispatchSet('newCardInputs', (p) => ({ ...p, [listId]: { title: '', dueDate: '', effort: 3, priority: 'medium', weight: '', subtasks: [] } }));
         } catch (err) {
             console.error('createCard failed', err);
             dispatchSet('cardsMap', snapshotRef.current.cardsMap || {});
@@ -93,15 +107,13 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
             const up = { ...updates };
             if (up.progress !== undefined) {
                 up.progress = clampInt(up.progress, 0, 100);
-                if (up.progress === 100) {
-                    up.status = up.status || 'done';
-                    up.completedAt = up.completedAt || serverTimestamp();
-                }
+                // Removed auto-completion logic for 100% progress
             }
-            const needRank = up.priority !== undefined || up.dueDate !== undefined || up.effort !== undefined || up.complexity !== undefined || up.complexityMode !== undefined;
+            const needRank = up.priority !== undefined || up.dueDate !== undefined || up.effort !== undefined || up.complexity !== undefined || up.complexityMode !== undefined || up.startDate !== undefined;
             if (needRank) {
                 const cp = computePriority({
                     dueDate: up.dueDate,
+                    startDate: up.startDate,
                     priorityLabel: up.priority,
                     effort: up.effort,
                     dependencies: [],

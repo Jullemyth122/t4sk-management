@@ -1,964 +1,319 @@
-// CardItem.jsx
-
-// src/pages/dashboard/Bcomponent/CardItem.jsx
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import gsap from 'gsap';
-import { computePriority } from '../../utils/prioritization';
-import SubmissionModal from './SubmissionModal';
+import React, { useState } from 'react';
 import { timeAgo } from '../../utils/time';
+import TaskDetailsModal from './TaskDetailsModal';
+import SubmissionModal from './SubmissionModal';
 import ReviewModal from './ReviewModal';
-import CustomSelect from './CustomSelect';
 
 export default function CardItem({
     card,
     listId,
-    listCardCount = 1,
-    lists,
-    cardEditing,
     cardDrafts,
     setCardDrafts,
-    setCardEditing,
-    handleUpdateCard,
+    handleUpdateCard,     // updates card content
     handleDeleteCard,
-    handleMoveCard,
     handleSubmitCard,
-    handleReviewAction,
+    handleReviewAction,   // approve/reject
     canEdit,
     membersMap = {},
     emailMap = {},
-    currentUserUid = null,
-    currentUserEmail = '',
-
-    reviewerOptions = null,
-    reviewerOptionsSource = '',
-    compactExpanded,
-    setCompactExpanded
+    businessOwnerUid,
+    currentUserUid,        // needed for permissions in modal
+    reviewerOptions,       // needed for modal
+    currentUserEmail
 }) {
-    // state (kept minimal)
-    const [submissionNote, setSubmissionNote] = useState('');
-    const [submitting, setSubmitting] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
+    const [submitModalOpen, setSubmitModalOpen] = useState(false);
     const [reviewModalOpen, setReviewModalOpen] = useState(false);
-    const [moveSelectValue, setMoveSelectValue] = useState(null);
 
-    // refs & animation helpers
-    const barRef = useRef(null);
-    const percentRef = useRef(null);
-    const checkRef = useRef(null);
-    const animRefs = useRef({});
-    const prevPctRef = useRef(null);
-
-    // small helpers
-    const formatDateForInput = (d) => {
-        if (!d) return '';
-        try {
-            if (d.seconds) return new Date(d.seconds * 1000).toISOString().slice(0, 10);
-            return new Date(d).toISOString().slice(0, 10);
-        } catch (e) {
-            return '';
-        }
-    };
-
-    const resolveAssigneeLabel = (a) => {
-        if (!a) return '';
-        const s = String(a);
+    // Helpers
+    const resolveAssignee = (val) => {
+        if (!val) return null;
+        const s = String(val).trim();
         if (s.includes('@')) {
-            const lower = s.toLowerCase();
-            const m = emailMap[lower];
-            return m ? (m.name || m.email) : s;
-        } else {
-            const m = membersMap[s];
-            return m ? (m.email || m.name || s) : s;
+            const m = emailMap[s.toLowerCase()];
+            return { name: m?.name || m?.email || s, email: s, avatar: m?.avatar };
         }
+        const m = membersMap[s];
+        return { name: m?.name || m?.displayName || s, email: m?.email, avatar: m?.avatar };
     };
 
-    const prettyDate = (d) => {
-        if (!d) return '—';
-        try {
-            if (d.seconds) return new Date(d.seconds * 1000).toLocaleDateString();
-            return new Date(d).toLocaleDateString();
-        } catch (e) {
-            return '—';
-        }
+    const assignees = (card.assignees || []).map(resolveAssignee).filter(Boolean);
+    const completedSubtasks = (card.subtasks || []).filter(s => s.completed).length;
+    const totalSubtasks = (card.subtasks || []).length;
+
+    // Status Logic
+    const isDone = String(card.status || '').toLowerCase() === 'done';
+    const isApproved = String(card.submission?.reviewStatus || '').toLowerCase() === 'approved';
+    const isRejected = String(card.submission?.reviewStatus || '').toLowerCase() === 'rejected';
+    const isPendingReview = String(card.status || '').toLowerCase() === 'pending';
+
+    // Progress Bar Logic
+    const displayProgress = Number.isFinite(Number(card.progress)) ? Math.round(Number(card.progress)) : 0;
+    const progress = isApproved || isDone ? 100 : displayProgress;
+
+    // Permissions
+    const currentUserMember = membersMap[currentUserUid] || Object.values(membersMap).find(m => m.email === currentUserEmail);
+
+    // Check if user is business owner (always high-level)
+    const isBusinessOwner = businessOwnerUid && currentUserUid && String(currentUserUid) === String(businessOwnerUid);
+
+    // Check role name for high-level (use roleName, role, or inferred from member data)
+    const memberRole = currentUserMember?.roleName || currentUserMember?.role || '';
+    const isHighLevelByRole = currentUserMember && ['owner', 'admin', 'manager'].includes(String(memberRole).toLowerCase());
+
+    // User is high-level if they are the business owner OR have a high-level role
+    const isHighLevel = isBusinessOwner || isHighLevelByRole;
+
+    const isReviewer = (card.submission?.reviewerUid === currentUserUid) || (card.submission?.reviewerEmail === currentUserEmail);
+
+    const showReviewActions = (isHighLevel || isReviewer) && isPendingReview;
+
+    // Open Modal Handler
+    const handleCardClick = (e) => {
+        // Prevent opening if clicking buttons/inputs directly
+        if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.card-actions-row')) return;
+
+        // Only high-level users or reviewers can open the details modal
+        if (!isHighLevel && !isReviewer) return;
+
+        setModalOpen(true);
     };
-    const prettyDue = (d) => prettyDate(d);
 
-    // data derived from props (hooks must run every render)
-    const parentList = Array.isArray(lists) ? lists.find((L) => String(L.id) === String(listId)) : null;
+    // Priority badge styles with cool gradients
+    const priorityStyles = {
+        high: { background: 'linear-gradient(135deg, #ff416c, #ff4b2b)', color: '#fff', boxShadow: '0 2px 8px rgba(255, 65, 108, 0.4)' },
+        medium: { background: 'linear-gradient(135deg, #f7971e, #ffd200)', color: '#1a1a2e', boxShadow: '0 2px 8px rgba(247, 151, 30, 0.4)' },
+        low: { background: 'linear-gradient(135deg, #11998e, #38ef7d)', color: '#fff', boxShadow: '0 2px 8px rgba(56, 239, 125, 0.4)' },
+        easy: { background: 'linear-gradient(135deg, #667eea, #764ba2)', color: '#fff', boxShadow: '0 2px 8px rgba(102, 126, 234, 0.4)' },
+    };
 
-    const mergedAssignees = useMemo(() => {
-        const arr = [];
-        if (Array.isArray(card.assignees)) arr.push(...card.assignees);
-        if (parentList && Array.isArray(parentList.assignees)) arr.push(...parentList.assignees);
-        return Array.from(new Set(arr.filter(Boolean).map((x) => String(x).trim())));
-    }, [card.assignees, parentList]);
-
-    const mergedAssigneesNormalized = useMemo(() => {
-        return new Set(
-            mergedAssignees.map((a) => {
-                if (!a) return '';
-                const s = String(a).trim();
-                return s.includes('@') ? s.toLowerCase() : s;
-            })
-        );
-    }, [mergedAssignees]);
-
-    const isAssignee = mergedAssignees.some((a) => {
-        if (!a) return false;
-        const s = String(a).trim();
-        if (currentUserUid && s === currentUserUid) return true;
-        if (currentUserEmail && s.toLowerCase() === currentUserEmail.toLowerCase()) return true;
-        return false;
-    });
-
-    const alreadySubmitted =
-        String(card.status || '').toLowerCase() === 'pending' || String(card.status || '').toLowerCase() === 'done';
-
-    const reviewerUidFromCard = card.submission?.reviewerUid || null;
-    const reviewerEmailFromCard = card.submission?.reviewerEmail || null;
-    const isReviewer =
-        (reviewerUidFromCard && currentUserUid && String(reviewerUidFromCard) === String(currentUserUid)) ||
-        (reviewerEmailFromCard &&
-            currentUserEmail &&
-            String(reviewerEmailFromCard).toLowerCase() === String(currentUserEmail).toLowerCase());
-
-    const submissionStatus = String(card.submission?.reviewStatus || '').toLowerCase();
-    const showReviewActions =
-        isReviewer &&
-        (submissionStatus === 'pending' || !submissionStatus) &&
-        String(card.status || '').toLowerCase() === 'pending';
-
-    const onPerformReview = useCallback(
-        async (action, note = '') => {
-            if (!handleReviewAction) {
-                console.warn('handleReviewAction not provided');
-                return;
-            }
-            try {
-                await handleReviewAction({ listId, cardId: card.id, action, note });
-            } catch (err) {
-                console.error('review action failed', err);
-                throw err;
-            }
-        },
-        [handleReviewAction, listId, card.id]
-    );
-
-    const onDelete = useCallback(async () => {
-        if (!handleDeleteCard) {
-            console.warn('handleDeleteCard not provided');
-            return;
-        }
-        if (!window.confirm('Delete this card? This action cannot be undone.')) return;
-        try {
-            await handleDeleteCard({ listId, cardId: card.id });
-        } catch (err) {
-            console.error('delete card failed', err);
-        }
-    }, [handleDeleteCard, listId, card.id]);
-
-    const isLocked =
-        String(card.status || '').toLowerCase() === 'done' ||
-        String(card.submission?.reviewStatus || '').toLowerCase() === 'approved';
-
-    const isDoneish =
-        String(card.status || '').toLowerCase() === 'done' ||
-        String(card.submission?.reviewStatus || '').toLowerCase() === 'approved';
-
-    const displayPct = isDoneish
-        ? 100
-        : Number.isFinite(Number(card.progress))
-            ? Math.max(0, Math.min(100, Math.round(Number(card.progress))))
-            : 0;
-
-    const pct = clampPercent(displayPct);
-
-    const cardWeight =
-        Number.isFinite(Number(card.weight))
-            ? Math.round(Number(card.weight))
-            : card.submission && typeof card.submission.contribution === 'number'
-                ? Math.round(card.submission.contribution)
-                : null;
-
-    const modalReviewerOptions = useMemo(() => {
-        const ops = Array.isArray(reviewerOptions) ? reviewerOptions.slice() : null;
-
-        if (Array.isArray(ops) && ops.length) {
-            return ops.filter((opt) => {
-                if (!opt || opt.value === undefined || opt.value === null) return true;
-                const v = String(opt.value);
-                const norm = v.includes('@') ? v.toLowerCase() : v;
-                return !mergedAssigneesNormalized.has(norm);
-            });
-        }
-
-        const fallback = mergedAssignees
-            .map((a) => {
-                if (!a) return null;
-                const s = String(a).trim();
-                if (s.includes('@')) {
-                    const mm = emailMap[s.toLowerCase()] || null;
-                    return { value: s.toLowerCase(), label: mm ? mm.name || mm.email : s, subtitle: mm ? mm.email : '' };
-                } else {
-                    const mm = membersMap[s] || null;
-                    return { value: s, label: mm ? mm.name || mm.email : s, subtitle: mm ? mm.email : '' };
-                }
-            })
-            .filter(Boolean);
-
-        return fallback.filter((opt) => {
-            const v = String(opt.value);
-            const norm = v.includes('@') ? v.toLowerCase() : v;
-            return !mergedAssigneesNormalized.has(norm);
-        });
-    }, [reviewerOptions, mergedAssigneesNormalized, membersMap, emailMap, mergedAssignees]);
-
-    // GSAP animation hook (always declared)
-    useEffect(() => {
-        const toPct = pct;
-
-        try {
-            animRefs.current.tween && animRefs.current.tween.kill && animRefs.current.tween.kill();
-        } catch (e) { }
-        try {
-            animRefs.current.counter && animRefs.current.counter.kill && animRefs.current.counter.kill();
-        } catch (e) { }
-
-        const prev = prevPctRef.current;
-        const startVal = prev === null || prev === undefined ? 0 : Number(prev);
-
-        if (prev !== null && Number(prev) === toPct) {
-            if (barRef.current) barRef.current.style.width = `${toPct}%`;
-            if (percentRef.current) {
-                percentRef.current.textContent = `${toPct}%`;
-                percentRef.current.dataset.val = String(toPct);
-            }
-            if (toPct === 100 && checkRef.current) {
-                checkRef.current.style.display = 'inline-flex';
-                checkRef.current.style.opacity = '1';
-                checkRef.current.style.transform = 'scale(1)';
-            } else if (checkRef.current) {
-                checkRef.current.style.display = 'none';
-            }
-            prevPctRef.current = toPct;
-            return;
-        }
-
-        if (!barRef.current || !percentRef.current) {
-            if (barRef.current) barRef.current.style.width = `${toPct}%`;
-            if (percentRef.current) {
-                percentRef.current.textContent = `${toPct}%`;
-                percentRef.current.dataset.val = String(toPct);
-            }
-            prevPctRef.current = toPct;
-            return;
-        }
-
-        try {
-            gsap.set(barRef.current, { width: `${startVal}%` });
-            if (percentRef.current) {
-                percentRef.current.textContent = `${startVal}%`;
-                percentRef.current.dataset.val = String(startVal);
-            }
-
-            animRefs.current.tween = gsap.to(barRef.current, {
-                duration: 0.6,
-                width: `${toPct}%`,
-                ease: 'power2.out',
-            });
-
-            const counter = { val: startVal };
-            animRefs.current.counter = gsap.to(counter, {
-                duration: 0.6,
-                val: toPct,
-                roundProps: 'val',
-                ease: 'power2.out',
-                onUpdate: () => {
-                    if (percentRef.current) {
-                        percentRef.current.textContent = `${counter.val}%`;
-                        percentRef.current.dataset.val = String(counter.val);
-                    }
-                },
-            });
-
-            if (toPct === 100) {
-                if (checkRef.current) {
-                    gsap.set(checkRef.current, { scale: 0, opacity: 0, display: 'inline-flex' });
-                    gsap.to(checkRef.current, { duration: 0.48, scale: 1, opacity: 1, ease: 'back.out(1.7)' });
-                }
-                gsap.fromTo(
-                    barRef.current,
-                    { boxShadow: '0 0 0px rgba(76,175,80,0)' },
-                    { duration: 0.6, boxShadow: '0 0 12px rgba(76,175,80,0.45)', yoyo: true, repeat: 1 }
-                );
-            } else {
-                if (checkRef.current) {
-                    gsap.to(checkRef.current, {
-                        duration: 0.18,
-                        scale: 0,
-                        opacity: 0,
-                        onComplete: () => {
-                            if (checkRef.current) checkRef.current.style.display = 'none';
-                        },
-                    });
-                }
-                gsap.to(barRef.current, { duration: 0.2, boxShadow: '0 0 0px rgba(0,0,0,0)' });
-            }
-        } catch (err) {
-            if (barRef.current) barRef.current.style.width = `${toPct}%`;
-            if (percentRef.current) {
-                percentRef.current.textContent = `${toPct}%`;
-                percentRef.current.dataset.val = String(toPct);
-            }
-            if (toPct === 100 && checkRef.current) {
-                checkRef.current.style.display = 'inline-flex';
-                checkRef.current.style.opacity = '1';
-                checkRef.current.style.transform = 'scale(1)';
-            } else if (checkRef.current) {
-                checkRef.current.style.display = 'none';
-            }
-        } finally {
-            prevPctRef.current = toPct;
-        }
-    }, [pct]);
-
-    // ready to render — don't return early, render conditional UI instead
-    const isEditing = !!(cardEditing && cardEditing[card.id]);
-    // const isCompact = isDoneish && !isEditing;
-    const shouldCompact = !isEditing && !compactExpanded;
-
-
-    // prepare some values used in edit UI (safe to compute here as plain vars)
-    const complexityOptions = [
-        { value: 'auto||', label: 'Auto detect', subtitle: 'Let system infer complexity' },
-        { value: 'manual||easy', label: 'Manual: Easy' },
-        { value: 'manual||medium', label: 'Manual: Medium' },
-        { value: 'manual||hard', label: 'Manual: Hard' },
-    ];
-
-    const curComplexVal =
-        (cardDrafts[card.id]?.complexityMode ?? card.complexityMode ?? 'auto') +
-        '||' +
-        String(cardDrafts[card.id]?.complexity ?? card.complexity ?? '');
-
-    const priorityOptions = [
-        { value: 'low', label: 'Easy' },
-        { value: 'medium', label: 'Medium' },
-        { value: 'high', label: 'Hard' },
-    ];
-
-    const curPriority = cardDrafts[card.id]?.priority ?? card.priority ?? 'medium';
+    const getPriorityStyle = () => {
+        const p = String(card.priority || 'medium').toLowerCase();
+        return priorityStyles[p] || priorityStyles.medium;
+    };
 
     return (
-        <article className={`card-item ${String(card.id).startsWith('tmp-') ? 'optimistic' : ''}  ${shouldCompact ? 'compact' : ''} `} data-priority={card.priority || 'medium'}>
-            {/** If editing show edit UI **/}
-            {isEditing ? (
-                <>
-                    <input
-                        className="card-edit-input card-title-input"
-                        value={cardDrafts[card.id]?.title ?? card.title}
-                        onChange={(e) => setCardDrafts((p) => ({ ...p, [card.id]: { ...(p[card.id] || {}), title: e.target.value } }))}
-                        aria-label="Card title"
-                    />
-                    <div className="card-edit-row">
-                        <input
-                            type="date"
-                            className="card-edit-input"
-                            value={(cardDrafts[card.id]?.dueDate ?? formatDateForInput(card.dueDate)) || ''}
-                            onChange={(e) => setCardDrafts((p) => ({ ...p, [card.id]: { ...(p[card.id] || {}), dueDate: e.target.value } }))}
-                            aria-label="Due date"
-                        />
-                        <input
-                            type="number"
-                            className="card-edit-input card-effort-input"
-                            value={cardDrafts[card.id]?.effort ?? card.effort}
-                            onChange={(e) => setCardDrafts((p) => ({ ...p, [card.id]: { ...(p[card.id] || {}), effort: e.target.value } }))}
-                            aria-label="Effort estimate"
-                        />
+        <>
+            <article
+                className={`card-item summary-mode ${isRejected ? 'rejected' : ''} ${isApproved ? 'approved' : ''}`}
+                onClick={handleCardClick}
+                role="button"
+                tabIndex={0}
+                style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden', padding: '10px 12px' }}
+            >
+                {/* Row 1: Priority Badge + Title + Dates (all inline) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+                    <span style={{
+                        ...getPriorityStyle(),
+                        padding: '3px 8px',
+                        borderRadius: 12,
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        whiteSpace: 'nowrap'
+                    }}>
+                        {card.priority || 'Medium'}
+                    </span>
+
+                    <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {card.title || 'Untitled Task'}
+                    </h4>
+
+                    <div style={{ display: 'flex', gap: 6, fontSize: '0.7rem', opacity: 0.7, whiteSpace: 'nowrap' }}>
+                        {card.startDate && <span>🚀{new Date(card.startDate).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })}</span>}
+                        {card.dueDate && <span>📅{new Date(card.dueDate.seconds ? card.dueDate.seconds * 1000 : card.dueDate).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })}</span>}
                     </div>
+                </div>
 
-                    <div className="card-edit-row" style={{ alignItems: 'center', gap: 12 }}>
-                        <label style={{ fontSize: 13, minWidth: 70 }}>Priority</label>
-                        <div style={{ flex: 1 }}>
-                            <CustomSelect
-                                options={priorityOptions}
-                                value={curPriority}
-                                onChange={(val) => {
-                                    setCardDrafts((p) => ({ ...p, [card.id]: { ...(p[card.id] || {}), priority: String(val) } }));
-                                }}
-                                placeholder="Priority"
-                                searchable={false}
-                                ariaLabel="Priority"
-                                width="160px"
-                            />
-                        </div>
+                {/* Row 2: Status badges (if any) */}
+                {(isRejected || isPendingReview || isApproved) && (
+                    <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+                        {isRejected && <span className="status-badge rejected" style={{ fontSize: '0.65rem', padding: '2px 6px' }}>✕ Rejected</span>}
+                        {isPendingReview && !isRejected && <span className="status-badge pending" style={{ fontSize: '0.65rem', padding: '2px 6px' }}>⏳ Review</span>}
+                        {isApproved && <span className="status-badge approved" style={{ fontSize: '0.65rem', padding: '2px 6px' }}>✓ Done</span>}
                     </div>
+                )}
 
-                    <div className="card-edit-px">
-                        <label style={{ fontSize: 13 }}>Complexity:</label>
-                        <div style={{ flex: 1 }}>
-                            <CustomSelect
-                                options={complexityOptions}
-                                value={curComplexVal}
-                                onChange={(val) => {
-                                    const [mode, valPart] = String(val).split('||');
-                                    setCardDrafts((p) => ({
-                                        ...p,
-                                        [card.id]: {
-                                            ...(p[card.id] || {}),
-                                            complexityMode: mode,
-                                            complexity: valPart === '' ? null : isNaN(Number(valPart)) ? valPart : Number(valPart),
-                                        },
-                                    }));
-                                }}
-                                placeholder="Select complexity"
-                                searchable={true}
-                                ariaLabel="Complexity"
-                            />
-                        </div>
-
-                        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <label style={{ fontSize: 13 }}>Progress</label>
-                            <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={cardDrafts[card.id]?.progress ?? card.progress ?? 0}
-                                onChange={(e) => setCardDrafts((p) => ({ ...p, [card.id]: { ...(p[card.id] || {}), progress: Number(e.target.value) } }))}
-                                disabled={(cardDrafts[card.id]?.subtasks || card.subtasks || []).length > 0}
-                                title={(cardDrafts[card.id]?.subtasks || card.subtasks || []).length > 0 ? "Progress driven by subtasks" : "Manual progress"}
-                            />
-                            <div style={{ minWidth: 40, textAlign: 'right' }}>{cardDrafts[card.id]?.progress ?? card.progress ?? 0}%</div>
-                        </div>
+                {/* Row 3: Progress bar + percentage (slim) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <div style={{ flex: 1, background: 'rgba(255,255,255,0.08)', borderRadius: 3, height: 4, overflow: 'hidden' }}>
+                        <div style={{
+                            width: `${progress}%`,
+                            height: '100%',
+                            background: isRejected ? '#ff416c' : (isApproved ? '#38ef7d' : 'linear-gradient(90deg, #667eea, #764ba2)'),
+                            borderRadius: 3,
+                            transition: 'width 0.3s ease'
+                        }} />
                     </div>
+                    <span style={{ fontSize: '0.65rem', opacity: 0.6, minWidth: 28 }}>{progress}%</span>
+                    {totalSubtasks > 0 && <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>{completedSubtasks}/{totalSubtasks}</span>}
+                </div>
 
-                    {/* Subtasks UI in Edit Mode */}
-                    <div className="card-edit-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8, marginTop: 12 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <label style={{ fontSize: 13, fontWeight: 600 }}>Subtasks</label>
-                            <span style={{ fontSize: 11, color: 'var(--sidenav-ISO)' }}>
-                                {(cardDrafts[card.id]?.subtasks || card.subtasks || []).filter(s => s.completed).length} / {(cardDrafts[card.id]?.subtasks || card.subtasks || []).length} done
-                            </span>
-                        </div>
-
-                        <div className="subtask-list">
-                            {(cardDrafts[card.id]?.subtasks || card.subtasks || []).map((st, idx) => (
-                                <div key={st.id || idx} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={!!st.completed}
-                                        onChange={(e) => {
-                                            const newSubtasks = [...(cardDrafts[card.id]?.subtasks || card.subtasks || [])];
-                                            newSubtasks[idx] = { ...newSubtasks[idx], completed: e.target.checked };
-
-                                            // auto-calc progress if subtasks exist
-                                            const total = newSubtasks.length;
-                                            const done = newSubtasks.filter(s => s.completed).length;
-                                            const newProgress = total > 0 ? Math.round((done / total) * 100) : 0;
-
-                                            setCardDrafts(p => ({
-                                                ...p,
-                                                [card.id]: {
-                                                    ...(p[card.id] || {}),
-                                                    subtasks: newSubtasks,
-                                                    progress: newProgress
-                                                }
-                                            }));
-                                        }}
-                                    />
-                                    <input
-                                        style={{ flex: 1, padding: '4px 6px', fontSize: 13, border: 'none', background: 'transparent' }}
-                                        value={st.text}
-                                        onChange={(e) => {
-                                            const newSubtasks = [...(cardDrafts[card.id]?.subtasks || card.subtasks || [])];
-                                            newSubtasks[idx] = { ...newSubtasks[idx], text: e.target.value };
-                                            setCardDrafts(p => ({ ...p, [card.id]: { ...(p[card.id] || {}), subtasks: newSubtasks } }));
-                                        }}
-                                        placeholder="Subtask..."
-                                    />
-                                    <button
-                                        type="button"
-                                        className="card-btn card-btn-ghost card-btn-danger"
-                                        style={{ padding: '2px 6px', fontSize: 12 }}
-                                        onClick={() => {
-                                            const newSubtasks = (cardDrafts[card.id]?.subtasks || card.subtasks || []).filter((_, i) => i !== idx);
-                                            // recalibrate progress
-                                            const total = newSubtasks.length;
-                                            const done = newSubtasks.filter(s => s.completed).length;
-                                            const newProgress = total > 0 ? Math.round((done / total) * 100) : (cardDrafts[card.id]?.progress ?? 0); // fallback if cleared
-
-                                            setCardDrafts(p => ({
-                                                ...p,
-                                                [card.id]: {
-                                                    ...(p[card.id] || {}),
-                                                    subtasks: newSubtasks,
-                                                    progress: newProgress
-                                                }
-                                            }));
-                                        }}
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div style={{ display: 'flex', gap: 6 }}>
-                            <input
-                                placeholder="+ Add new subtask..."
-                                style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--bd-border)', fontSize: 13, background: 'var(--bd-inp)' }}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && e.target.value.trim()) {
-                                        e.preventDefault();
-                                        const text = e.target.value.trim();
-                                        const newSub = { id: `st-${Date.now()}`, text, completed: false };
-                                        const curSubtasks = [...(cardDrafts[card.id]?.subtasks || card.subtasks || [])];
-                                        const newSubtasks = [...curSubtasks, newSub];
-
-                                        // recalc progress
-                                        const total = newSubtasks.length;
-                                        const done = newSubtasks.filter(s => s.completed).length;
-                                        const newProgress = total > 0 ? Math.round((done / total) * 100) : 0;
-
-                                        setCardDrafts(p => ({
-                                            ...p,
-                                            [card.id]: {
-                                                ...(p[card.id] || {}),
-                                                subtasks: newSubtasks,
-                                                progress: newProgress
-                                            }
-                                        }));
-                                        e.target.value = '';
-                                    }
-                                }}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="card-edit-actions">
-                        <button
-                            className="card-btn card-btn-primary"
-                            onClick={() => {
-                                const draft = cardDrafts[card.id] || {};
-                                const updates = {};
-                                if (draft.title !== undefined) updates.title = draft.title;
-                                if (draft.effort !== undefined) updates.effort = Number(draft.effort) || 1;
-                                if (draft.dueDate !== undefined) updates.dueDate = draft.dueDate ? new Date(draft.dueDate) : null;
-
-                                if (draft.complexityMode !== undefined) updates.complexityMode = draft.complexityMode;
-                                if (draft.complexity !== undefined) updates.complexity = draft.complexity === '' ? null : draft.complexity;
-                                if (draft.complexityMode !== undefined) updates.complexityMode = draft.complexityMode;
-                                if (draft.complexity !== undefined) updates.complexity = draft.complexity === '' ? null : draft.complexity;
-                                if (draft.progress !== undefined) updates.progress = Number(draft.progress) || 0;
-                                if (draft.subtasks !== undefined) updates.subtasks = draft.subtasks;
-
-                                const due = updates.dueDate || card.dueDate || null;
-                                const priorityLabel = cardDrafts[card.id]?.priority ?? card.priority ?? 'medium';
-                                const effortVal = updates.effort ?? card.effort ?? 1;
-                                const complexityModeVal = updates.complexityMode ?? card.complexityMode ?? 'auto';
-                                const complexityVal = updates.complexity ?? card.complexity ?? null;
-                                const cp = computePriority({
-                                    dueDate: due,
-                                    priorityLabel,
-                                    effort: effortVal,
-                                    dependencies: card.dependencies || [],
-                                    createdAt: card.createdAt || null,
-                                    complexity: complexityVal,
-                                    complexityMode: complexityModeVal,
-                                    title: cardDrafts[card.id]?.title ?? card.title,
-                                    description: card.description || '',
-                                });
-
-                                updates.priorityRank = cp.priorityRank;
-                                updates.complexity = cp.complexity ?? updates.complexity;
-                                updates.complexityMode = complexityModeVal;
-                                updates.priority = priorityLabel;
-
-                                handleUpdateCard({ listId, cardId: card.id, updates });
-                            }}
-                            aria-label="Save card"
-                        >
-                            ✎ Save
-                        </button>
-
-                        <button
-                            className="card-btn card-btn-ghost"
-                            onClick={() => {
-                                setCardEditing((p) => ({ ...p, [card.id]: false }));
-                                setCardDrafts((p) => {
-                                    const c = { ...p };
-                                    delete c[card.id];
-                                    return c;
-                                });
-                            }}
-                            aria-label="Cancel edit"
-                        >
-                            ↺ Cancel
-                        </button>
-                    </div>
-                </>
-            ) : (
-                <>
-                    <div className="card-top">
-                        <div className="card-title" title={card.title}>{card.title}</div>
-
-                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                            {/* per-card expand/collapse — compactExpanded = true means expanded/full details shown */}
-                            {!isEditing && (
-                                <button
-                                    className="card-btn"
-                                    onClick={() => setCompactExpanded(!compactExpanded)}
-                                    aria-label={compactExpanded ? 'Collapse details' : 'Expand details'}
-                                    title={compactExpanded ? 'Collapse details' : 'Expand details'}
-                                    style={{ padding: '6px 8px' }}
-                                >
-                                    {compactExpanded ? '▾' : '▸'}
-                                </button>
-                            )}
-
-                            <div className={`card-priority pill pill-${String(card.priority || 'medium').toLowerCase()}`}>
-                                {card.priority || 'medium'}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="card-meta">
-                        <div className="card-meta-left">
-                            {card.dueDate ? (
-                                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                                    <div className="card-start" style={{ fontSize: 13 }}>
-                                        Start:{' '}
-                                        <span className="card-start-val">{card.createdAt ? prettyDate(card.createdAt) : '—'}</span>
-                                    </div>
-                                    <div className="card-due">
-                                        Due: <span className="card-due-val">{prettyDue(card.dueDate)}</span>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="card-due">
-                                    Due: <span className="card-due-val">{prettyDue(card.dueDate)}</span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <div style={{ marginTop: 8 }}>
-                        <div style={{ fontSize: '10px', textAlign: 'right' }} aria-hidden>
-                            <span ref={percentRef} data-val={String(pct)}>
-                                {`${pct}%`}
-                            </span>
-                        </div>
-
-                        <div style={{ height: 8, background: 'rgba(0,0,0,0.06)', borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
-                            <div
-                                ref={barRef}
-                                style={{
-                                    width: `${pct}%`,
-                                    height: '100%',
-                                    background: 'linear-gradient(90deg,#4caf50,#8bc34a)',
-                                    transition: 'none',
-                                }}
-                                role="progressbar"
-                                aria-valuemin={0}
-                                aria-valuemax={100}
-                                aria-valuenow={pct}
-                            />
-                        </div>
-
-                        <div style={{ fontSize: 12, color: 'var(--sidenav-ISO)', marginTop: 6 }}>
-                            {isDoneish ? 'Done' : `${displayPct}% complete`}
-                            {cardWeight !== null ? (
-                                <span style={{ marginLeft: 12, fontSize: 12, color: 'var(--sidenav-ISO)' }}>• Contrib: {cardWeight}%</span>
-                            ) : null}
-                        </div>
-                    </div>
-
-                    {Array.isArray(card.assignees) && card.assignees.length > 0 && (
-                        <div className="card-assignees" aria-hidden>
-                            {card.assignees.map((a, idx) => (
-                                <div key={idx} className="assignee-pill" title={resolveAssigneeLabel(a)}>
-                                    {resolveAssigneeLabel(a)}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {(String(card.status || '').toLowerCase() === 'pending' ||
-                        String(card.status || '').toLowerCase() === 'done' ||
-                        String(card.status || '').toLowerCase() === 'rejected') && (
-                            <div className="card-submitted" style={{ marginTop: 6, fontSize: 12, color: 'var(--sidenav-ISO)' }}>
-                                <span style={{ fontWeight: 700, marginRight: 8 }}>
-                                    {String(card.status || '').toLowerCase() === 'done' || String(card.submission?.reviewStatus || '').toLowerCase() === 'approved'
-                                        ? card.submission?.type === 'complete'
-                                            ? '✅ Completed'
-                                            : '✓ Approved'
-                                        : String(card.status || '').toLowerCase() === 'pending'
-                                            ? '⏳ Pending'
-                                            : '✕ Rejected'}
-                                </span>
-
-                                <span>
-                                    by{' '}
-                                    {card.submittedBy && membersMap[String(card.submittedBy)]
-                                        ? membersMap[String(card.submittedBy)].name || membersMap[String(card.submittedBy)].email
-                                        : card.submittedBy || 'Unknown'}
-                                </span>
-
-                                <span style={{ marginLeft: 8, color: 'var(--sidenav-ISO)', fontWeight: 600 }}>• {timeAgo(card.submittedAt)}</span>
-
-                                {card.submission?.qaChecked && (
-                                    <span className="pill" style={{ marginLeft: 8 }}>
-                                        QA ✓
-                                    </span>
-                                )}
-
-                                {(card.submission?.reviewerUid || card.submission?.reviewerEmail) && (
-                                    <span style={{ marginLeft: 8, color: 'var(--sidenav-ISO)' }}>
-                                        • Reviewer:{' '}
-                                        {card.submission?.reviewerUid
-                                            ? membersMap[String(card.submission.reviewerUid)]
-                                                ? membersMap[String(card.submission.reviewerUid)].name || membersMap[String(card.submission.reviewerUid)].email
-                                                : card.submission.reviewerUid
-                                            : card.submission?.reviewerEmail}
-                                    </span>
-                                )}
-
-                                {card.submission?.reviewStatus && (
-                                    <span style={{ marginLeft: 8 }} className={`pill pill-review-${card.submission.reviewStatus}`}>
-                                        {card.submission.reviewStatus.charAt(0).toUpperCase() + card.submission.reviewStatus.slice(1)}
-                                    </span>
-                                )}
-
-                                {card.submissionNote ? <div style={{ marginTop: 6, fontStyle: 'italic' }}>"{card.submissionNote}"</div> : null}
-
-                                {card.submission?.reviewNote ? (
-                                    <div style={{ marginTop: 8, fontSize: 13, color: 'var(--sidenav-ISO)' }}>
-                                        <strong>Reviewer note:</strong>
-                                        <div style={{ marginTop: 6, fontStyle: 'italic' }}>{card.submission.reviewNote}</div>
-                                    </div>
-                                ) : null}
-                            </div>
-                        )}
-
-                        {/* View mode subtasks - Full visible checklist */}
-                        {!isEditing && Array.isArray(card.subtasks) && card.subtasks.length > 0 && (
-                            <div className="card-subtasks-view" style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-                                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--sidenav-ISO)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                    Tasks · {card.subtasks.filter(s => s.completed).length} of {card.subtasks.length} complete
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                    {card.subtasks.map((st, idx) => {
-                                        const canToggle = isAssignee && !isLocked;
-                                        return (
-                                            <div
-                                                key={st.id || idx}
-                                                onClick={() => {
-                                                    if (!canToggle) return;
-                                                    const newSubtasks = [...card.subtasks];
-                                                    newSubtasks[idx] = { ...st, completed: !st.completed };
-                                                    const total = newSubtasks.length;
-                                                    const done = newSubtasks.filter(s => s.completed).length;
-                                                    const newProgress = total > 0 ? Math.round((done / total) * 100) : 0;
-                                                    handleUpdateCard({
-                                                        listId,
-                                                        cardId: card.id,
-                                                        updates: { subtasks: newSubtasks, progress: newProgress },
-                                                        listAssignees: parentList?.assignees || []
-                                                    });
-                                                }}
-                                                style={{
-                                                    display: 'flex',
-                                                    gap: 10,
-                                                    alignItems: 'flex-start',
-                                                    padding: '6px 8px',
-                                                    borderRadius: 6,
-                                                    background: st.completed ? 'rgba(76, 175, 80, 0.06)' : 'rgba(0,0,0,0.02)',
-                                                    transition: 'all 0.2s ease',
-                                                    cursor: canToggle ? 'pointer' : 'default',
-                                                    userSelect: 'none'
-                                                }}
-                                                title={canToggle ? 'Click to toggle completion' : (isLocked ? 'Card is locked' : 'Not assigned to you')}
-                                            >
-                                                <div style={{
-                                                    minWidth: 18,
-                                                    height: 18,
-                                                    borderRadius: 4,
-                                                    border: `2px solid ${st.completed ? '#4caf50' : '#ccc'}`,
-                                                    background: st.completed ? '#4caf50' : 'white',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    marginTop: 2,
-                                                    color: 'white',
-                                                    fontSize: 11,
-                                                    fontWeight: 'bold'
-                                                }}>
-                                                    {st.completed && '✓'}
-                                                </div>
-                                                <div style={{
-                                                    flex: 1,
-                                                    fontSize: 13.5,
-                                                    lineHeight: '1.5',
-                                                    textDecoration: st.completed ? 'line-through' : 'none',
-                                                    color: st.completed ? 'var(--sidenav-ISO)' : 'inherit',
-                                                    opacity: st.completed ? 0.75 : 1
-                                                }}>
-                                                    {st.text}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        )}
-
-                    <div className="card-actions">
-                        {canEdit && !isLocked && (
+                {/* Row 4: Assignees + Actions + Details (all in one row) */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    {/* Quick action buttons */}
+                    <div style={{ display: 'flex', gap: 4 }}>
+                        {!isApproved && !isPendingReview && (currentUserMember && assignees.some(a => String(a.email).toLowerCase() === String(currentUserMember.email).toLowerCase() || a.name === currentUserMember.name)) && (
                             <button
-                                className="card-btn"
-                                onClick={() => {
-                                    setCardEditing((p) => ({ ...(p || {}), [card.id]: true }));
-                                    setCardDrafts((p) => ({
-                                        ...(p || {}),
-                                        [card.id]: {
-                                            title: card.title,
-                                            dueDate:
-                                                card.dueDate && (card.dueDate.seconds ? new Date(card.dueDate.seconds * 1000).toISOString().slice(0, 10) : new Date(card.dueDate).toISOString().slice(0, 10)),
-                                            effort: card.effort,
-                                            progress: card.progress ?? 0,
-                                            complexityMode: card.complexityMode ?? 'auto',
-                                            complexity: card.complexity ?? null,
-                                        },
-                                    }));
-                                }}
-                                aria-label={`Edit card ${card.title || ''}`}
+                                className="btn-small action ghost"
+                                onClick={(e) => { e.stopPropagation(); setSubmitModalOpen(true); }}
+                                style={{ fontSize: '0.68rem', padding: '3px 6px', borderRadius: 4 }}
                             >
-                                ✎ Edit
+                                Submit
                             </button>
                         )}
-
-                        {canEdit && !isLocked && (
-                            <div style={{ minWidth: 120 }}>
-                                <CustomSelect
-                                    options={[{ value: '', label: '⇄ Move', subtitle: 'Move to another list' }, ...lists.filter((x) => x.id !== listId).map((opt) => ({ value: String(opt.id), label: opt.name }))]}
-                                    value={moveSelectValue}
-                                    onChange={async (val) => {
-                                        if (!val) return;
-                                        setMoveSelectValue(val);
-                                        try {
-                                            await handleMoveCard({ fromListId: listId, toListId: val, card });
-                                        } finally {
-                                            setMoveSelectValue(null);
-                                        }
-                                    }}
-                                    placeholder="⇄ Move"
-                                    searchable={true}
-                                    width="200px"
-                                    ariaLabel="Move card"
-                                />
-                            </div>
-                        )}
-
-                        {canEdit && !isLocked && (
-                            <button className="card-btn card-btn-danger" onClick={onDelete} aria-label={`Delete card ${card.title || ''}`} title="Delete card">
-                                🗑 Delete
-                            </button>
-                        )}
-
-                        {isAssignee && !alreadySubmitted && !isLocked && (
-                            <>
-                                <button className="card-btn card-btn-primary" onClick={() => setModalOpen(true)} aria-label={`Submit task ${card.title || ''}`} disabled={submitting}>
-                                    ⤴ Submit
-                                </button>
-
-                                <SubmissionModal
-                                    open={modalOpen}
-                                    onClose={() => setModalOpen(false)}
-                                    onSubmit={async ({ note, type, attachments, qaChecked, reviewerUid: selReviewer }) => {
-                                        let reviewerUid = null;
-                                        let reviewerEmail = null;
-                                        if (selReviewer) {
-                                            if (String(selReviewer).includes('@')) {
-                                                reviewerEmail = String(selReviewer).toLowerCase();
-                                            } else {
-                                                reviewerUid = String(selReviewer);
-                                            }
-                                        }
-
-                                        const defaultContribution = Number.isFinite(Number(card.weight)) && Number(card.weight) > 0 ? Number(card.weight) : Math.round(100 / Math.max(1, listCardCount || 1));
-
-                                        await handleSubmitCard({
-                                            listId,
-                                            cardId: card.id,
-                                            note,
-                                            type,
-                                            qaChecked: !!qaChecked,
-                                            reviewerUid,
-                                            reviewerEmail,
-                                            attachments: attachments || [],
-                                            submission: { contribution: defaultContribution },
-                                        });
-                                    }}
-                                    defaultNote={submissionNote}
-                                    card={card}
-                                    assignees={mergedAssignees.map((a) => {
-                                        const m = a && a.includes('@') ? emailMap[a.toLowerCase()] || null : membersMap[a] || null;
-                                        return { id: a, name: m ? m.name || m.email : a, email: m?.email || (a.includes('@') ? a : '') };
-                                    })}
-                                    currentUser={{ uid: currentUserUid, email: currentUserEmail }}
-                                    reviewerOptions={modalReviewerOptions}
-                                    reviewerOptionsSource={reviewerOptionsSource || 'higher'}
-                                    defaultReviewerUid={card.submission?.reviewerUid || ''}
-                                />
-                            </>
-                        )}
-
                         {showReviewActions && (
-                            <>
-                                <button className="card-btn card-btn-primary" onClick={() => setReviewModalOpen(true)} aria-label="Open review dialog">
-                                    Review
-                                </button>
-
-                                <ReviewModal
-                                    open={reviewModalOpen}
-                                    onClose={() => setReviewModalOpen(false)}
-                                    reviewerName={
-                                        reviewerUidFromCard && membersMap[String(reviewerUidFromCard)] ? membersMap[String(reviewerUidFromCard)].name || membersMap[String(reviewerUidFromCard)].email : reviewerEmailFromCard || ''
-                                    }
-                                    onConfirm={async (action, note) => {
-                                        await onPerformReview(action, note);
-                                    }}
-                                />
-                            </>
-                        )}
-
-                        {showReviewActions && handleReviewAction && (
-                            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginLeft: 6 }}>
-                                <button className="card-btn card-btn-primary" onClick={() => handleReviewAction({ listId, cardId: card.id, action: 'approve' })} aria-label="Approve submission">
-                                    ✓ Approve
-                                </button>
-
-                                <button
-                                    className="card-btn card-btn-danger"
-                                    onClick={() => {
-                                        const note = window.prompt('Optional note for rejection (visible to submitter):', '') || '';
-                                        handleReviewAction({ listId, cardId: card.id, action: 'reject', note });
-                                    }}
-                                    aria-label="Reject submission"
-                                >
-                                    ✕ Reject
-                                </button>
-                            </div>
+                            <button 
+                                className="btn-small action primary"
+                                onClick={(e) => { e.stopPropagation(); setReviewModalOpen(true); }}
+                                style={{ fontSize: '0.68rem', padding: '3px 6px', borderRadius: 4 }}
+                            >
+                                Review
+                            </button>
                         )}
                     </div>
-                </>
-            )}
-        </article>
-    );
-}
 
-// small helper outside component
-function clampPercent(v) {
-    const n = Number(v) || 0;
-    return Math.max(0, Math.min(100, Math.round(n)));
+                    {/* Assignees + Details button (right side) */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ display: 'flex' }}>
+                            {assignees.slice(0, 3).map((a, i) => (
+                                <div key={i} title={a.name} style={{
+                                    width: 20, height: 20, borderRadius: '50%',
+                                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                                    border: '2px solid var(--card-bg, #1a1a2e)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontSize: '0.55rem', fontWeight: 600, marginLeft: i > 0 ? -6 : 0,
+                                    overflow: 'hidden', color: '#fff'
+                                }}>
+                                    {a.avatar ? <img src={a.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (a.name[0] || '?').toUpperCase()}
+                                </div>
+                            ))}
+                            {assignees.length > 3 && (
+                                <div style={{
+                                    width: 20, height: 20, borderRadius: '50%',
+                                    background: 'rgba(255,255,255,0.15)',
+                                    border: '2px solid var(--card-bg, #1a1a2e)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontSize: '0.5rem', marginLeft: -6, color: '#fff'
+                                }}>
+                                    +{assignees.length - 3}
+                                </div>
+                            )}
+                        </div>
+
+                        {(isHighLevel || isReviewer) && (
+                            <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); setModalOpen(true); }}
+                                title="View details"
+                                style={{
+                                    background: 'linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2))',
+                                    border: '1px solid rgba(102,126,234,0.3)',
+                                    borderRadius: 6,
+                                    padding: '3px 8px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 3,
+                                    color: '#a78bfa',
+                                    fontSize: '0.65rem',
+                                    fontWeight: 500,
+                                    transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(102,126,234,0.35), rgba(118,75,162,0.35))'; e.currentTarget.style.borderColor = 'rgba(102,126,234,0.5)'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2))'; e.currentTarget.style.borderColor = 'rgba(102,126,234,0.3)'; }}
+                            >
+                                <span>📋</span>
+                                <span>Details</span>
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Rejected Feedback (if any) */}
+                {isRejected && card.submission?.reviewerNote && (
+                    <div style={{ marginTop: 6, padding: '4px 8px', background: 'rgba(255, 65, 108, 0.1)', borderRadius: 4, fontSize: '0.7rem', color: '#ff8a80', borderLeft: '2px solid #ff416c' }}>
+                        "{card.submission.reviewerNote}"
+                    </div>
+                )}
+            </article>
+
+            {/* --- Modals --- */}
+
+            <TaskDetailsModal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                card={card}
+                draft={cardDrafts}
+                setDraft={setCardDrafts}
+                canEdit={canEdit}
+                onSave={() => {
+                    const d = cardDrafts[card.id];
+                    if (d) handleUpdateCard({ listId, cardId: card.id, updates: d });
+                    setModalOpen(false);
+                }}
+                onDelete={() => handleDeleteCard({ listId, cardId: card.id })}
+                membersMap={membersMap}
+                emailMap={emailMap}
+                businessOwnerUid={businessOwnerUid}
+                currentUserUid={currentUserUid}
+                handleReviewAction={handleReviewAction}
+                isReviewer={isReviewer}
+                isHighLevel={isHighLevel}
+                assigneeCandidates={Object.values(membersMap).map(m => ({
+                    id: m.uid || m.id,
+                    email: m.email,
+                    name: m.name || m.displayName
+                }))}
+                // Pass priority/complexity options if needed, or define in modal
+                priorityOptions={[
+                    { value: 'low', label: 'Easy' },
+                    { value: 'medium', label: 'Medium' },
+                    { value: 'high', label: 'Hard' }
+                ]}
+            />
+
+            <SubmissionModal
+                open={submitModalOpen}
+                onClose={() => setSubmitModalOpen(false)}
+                card={card}
+                assignees={assignees.map(a => ({ ...a, id: a.email || a.name }))} // adapter
+                currentUser={currentUserMember}
+                onSubmit={async (data) => {
+                    if (!handleSubmitCard) return;
+                    await handleSubmitCard(listId, card.id, data);
+                }}
+                onSubtaskToggle={async (subtaskIndex, newCompleted) => {
+                    // Immediately persist subtask toggle to Firestore
+                    if (!handleUpdateCard || !card?.subtasks) return;
+                    const newSubtasks = card.subtasks.map((st, idx) =>
+                        idx === subtaskIndex ? { ...st, completed: newCompleted } : st
+                    );
+                    // Calculate new progress based on subtasks
+                    const completedCount = newSubtasks.filter(s => s.completed).length;
+                    const newProgress = newSubtasks.length > 0 ? Math.round((completedCount / newSubtasks.length) * 100) : 0;
+                    await handleUpdateCard({
+                        listId,
+                        cardId: card.id,
+                        updates: { subtasks: newSubtasks, progress: newProgress }
+                    });
+                }}
+                reviewerOptions={reviewerOptions}
+            />
+
+            <ReviewModal
+                open={reviewModalOpen}
+                onClose={() => setReviewModalOpen(false)}
+                onApprove={async (note) => {
+                    await handleReviewAction({ listId, cardId: card.id, action: 'approve', note });
+                    setReviewModalOpen(false);
+                }}
+                onReject={async (note) => {
+                    await handleReviewAction({ listId, cardId: card.id, action: 'reject', note });
+                    setReviewModalOpen(false);
+                }}
+            />
+        </>
+    );
 }
