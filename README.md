@@ -1,6 +1,6 @@
-# Aullevo - Modern Task Management Platform
+# T4SK Management - Modern Task Management Platform
 
-Aullevo is a powerful, real-time task management application built with **React**, **Vite**, and **Firebase**. It provides a sleek, responsive interface for teams to collaborate, track projects, and manage workflows efficiently.
+T4SK Management is a powerful, real-time task management application built with **React**, **Vite**, and **Firebase**. It provides a sleek, responsive interface for teams to collaborate, track projects, and manage workflows efficiently.
 
 ## 🚀 Key Features
 
