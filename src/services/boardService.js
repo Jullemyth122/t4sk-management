@@ -16,7 +16,7 @@ import {
     setDoc,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { COLLECTIONS, ensure, sendNotification } from "./accountService"; // Assuming cross-import if needed; otherwise, duplicate or import from a shared helpers.
+import { COLLECTIONS, ensure, sendNotification, sanitizeString } from "./accountService"; // Assuming cross-import if needed; otherwise, duplicate or import from a shared helpers.
 
 // --- Boards Section ---
 function boardsRoot({ businessId = null, uid = null }) {
@@ -48,10 +48,12 @@ export const subscribeBoards = ({ businessId = null, uid = null, cb }) => {
 
 export const createBoard = async ({ businessId = null, uid = null, name, description = "", settings = {} }) => {
     ensure(name, "createBoard: name required");
+    const safeName = sanitizeString(name, 200);
+    const safeDesc = sanitizeString(description, 2000);
     const root = boardsRoot({ businessId, uid });
     const payload = {
-        name,
-        description,
+        name: safeName,
+        description: safeDesc,
         businessId: businessId ?? null,
         ownerUid: uid ?? null,
         settings: settings ?? {},
@@ -190,8 +192,8 @@ export const createCard = async ({ businessId = null, uid = null, boardId, listI
     };
 
     const payload = {
-        title: card.title,
-        description: card.description ?? "",
+        title: sanitizeString(card.title, 200),
+        description: sanitizeString(card.description ?? "", 2000),
         assignees: card.assignees ?? [],
         labels: card.labels ?? [],
         priority: card.priority ?? "medium",
@@ -448,8 +450,6 @@ export async function createSubmission({
     };
 
     batch.update(cardRef, cardUpdate);
-
-    await batch.commit();
 
     await batch.commit();
 

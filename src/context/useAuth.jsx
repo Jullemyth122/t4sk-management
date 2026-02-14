@@ -1,5 +1,5 @@
 // src/context/useAuth.jsx
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
 import { auth, googleProvider } from "../config/firebase";
 import {
   createUserWithEmailAndPassword,
@@ -25,6 +25,20 @@ export const AuthProvider = ({ children }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
+
+  // Rate limiting: max 5 auth attempts per 60 seconds
+  const authAttemptsRef = useRef([]);
+  const AUTH_RATE_LIMIT = 5;
+  const AUTH_RATE_WINDOW_MS = 60000;
+
+  const checkRateLimit = useCallback(() => {
+    const now = Date.now();
+    authAttemptsRef.current = authAttemptsRef.current.filter(t => now - t < AUTH_RATE_WINDOW_MS);
+    if (authAttemptsRef.current.length >= AUTH_RATE_LIMIT) {
+      throw new Error("Too many attempts. Please wait a moment before trying again.");
+    }
+    authAttemptsRef.current.push(now);
+  }, []);
 
   useEffect(() => {
     let unsubscribeProfile = null;
@@ -94,6 +108,7 @@ export const AuthProvider = ({ children }) => {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
     setErrorMessage("");
     try {
+      checkRateLimit();
       const cred = await signInWithEmailAndPassword(auth, email, password);
       setEmail(""); setPassword(""); setUsername("");
       return cred.user;
@@ -108,6 +123,7 @@ export const AuthProvider = ({ children }) => {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
     setErrorMessage("");
     try {
+      checkRateLimit();
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
@@ -128,7 +144,6 @@ export const AuthProvider = ({ children }) => {
       setUsername("");
       setErrorMessage("");
       setSuccessMessage("");
-      localStorage.setItem("user", JSON.stringify(user));
     } catch (error) {
         setErrorMessage(error.message);
         setSuccessMessage("");
@@ -143,6 +158,7 @@ export const AuthProvider = ({ children }) => {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
     setErrorMessage("");
     try {
+      checkRateLimit();
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       await fbUpdateProfile(user, { displayName: username });

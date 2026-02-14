@@ -1,0 +1,20 @@
+/* src/scss/personal-dashboard.scss */
+@import './business-dashboard.scss';
+
+/* 
+   User requested exact same design/theme as Business Dashboard.
+   So we just inherit everything from business-dashboard.scss.
+   No overrides needed for colors or layout.
+*/
+
+.personal-theme.bd-root {
+    /* Ensure we use the exact same logic as .bd-root default */
+    /* If business dashboard relies on specific variable fallbacks, we might need to ensure they are set,
+       but usually business-dashboard.scss sets defaults on .bd-root itself. */
+       
+    /* We can leave this empty to fully inherit, or explicitly map if there are context differences.
+       The business dashboard uses --bd-bg: var(--bg-color); 
+       If PersonalInfo or App sets --bg-color differently, it might differ.
+       But generally, just importing is enough if we don't override.
+    */
+}

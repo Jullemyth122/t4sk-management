@@ -287,11 +287,14 @@ export default function PersonalInfo({ simulateLoading = false }) {
 
   return (
     <main className="personal-page improved">
-      <header className="pc-header">
+      <header className="pc-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1>Personal Setup</h1>
           <p className="muted">Manage your personal preferences and profile.</p>
         </div>
+        <button className="btn secondary" onClick={() => navigate('/personalDashboard')}>
+          Go to Dashboard →
+        </button>
       </header>
 
       <div className="pc-body">

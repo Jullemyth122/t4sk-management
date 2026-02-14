@@ -11,6 +11,7 @@ import AuthGuard from "./routes/AuthGuard"; // auth guard is equal to this three
 import PersonalInfo from "./info/PersonalInfo";
 import BusinessInfo from "./info/BusinessInfo";
 import BusinessDashboardSimple from "./dashboard/BusinessDashboard";
+import PersonalDashboard from "./dashboard/PersonalDashboard";
 // import SecureRoute from "./routes/SecureRoute";
 // import RequireAccountType from "./routes/RequireAccountType";
 // import ChooseAccountGuard from "./routes/ChooseAccountGuard";
@@ -32,6 +33,14 @@ const router = createBrowserRouter([
         element: (
           <AuthGuard requireAuth={true} requireType="present">
             <PersonalInfo simulateLoading={true}/>
+          </AuthGuard>
+        )
+      },
+      {
+        path: "personalDashboard",
+        element: (
+          <AuthGuard requireAuth={true} requireType="present">
+            <PersonalDashboard />
           </AuthGuard>
         )
       },
