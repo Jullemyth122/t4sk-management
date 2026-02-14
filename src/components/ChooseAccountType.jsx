@@ -143,8 +143,7 @@ export default function ChooseAccountType() {
     const handleLogout = async () => {
         try {
         setLoggingOut(true);
-        await auth.signOut();
-        localStorage.removeItem("user");
+            await auth.signOut();
         navigate("/signup", { replace: true });
         } catch (err) {
         console.error("Logout error", err);

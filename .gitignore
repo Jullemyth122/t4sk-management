@@ -24,3 +24,15 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Environment variables
+.env
+.env.*
+.env.local
+
+# firebase
+firebase.json
+.firebaserc
+database.rules.json
+firestore.rules
+storage.rules

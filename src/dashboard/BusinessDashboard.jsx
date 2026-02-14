@@ -77,7 +77,6 @@ const initialState = {
   sidebarCollapsed: false,
   sidebarTab: 'boards',
   memberRoleFilter: 'all',
-  memberRoleFilter: 'all',
   boardSort: 'recent',
 
   // OCR Preview

@@ -18,6 +18,12 @@ export const ensure = (cond, message) => {
     if (!cond) throw new Error(message);
 };
 
+// Input sanitization: trim + truncate to a max length
+export const sanitizeString = (str, maxLength = 500) => {
+    if (typeof str !== 'string') return '';
+    return str.trim().slice(0, maxLength);
+};
+
 export const slugify = (name = "") => String(name)
     .toLowerCase()
     .replace(/[^\w\s-]/g, "")
@@ -106,10 +112,14 @@ export const sendNotification = async (recipientUid, { title, message, link = nu
     if (!recipientUid) return;
     const accountRef = doc(db, COLLECTIONS.ACCOUNT, recipientUid);
     
+    // Sanitize inputs
+    const safeTitle = sanitizeString(title, 100);
+    const safeMessage = sanitizeString(message, 500);
+
     const notification = {
-        id: doc(collection(db, "dummy")).id, // Generate a random ID
-        title,
-        message,
+        id: doc(collection(db, "dummy")).id,
+        title: safeTitle,
+        message: safeMessage,
         link,
         type,
         read: false,
@@ -117,13 +127,35 @@ export const sendNotification = async (recipientUid, { title, message, link = nu
     };
 
     try {
-        await updateDoc(accountRef, {
-            notifications: arrayUnion(notification), // Add to end (we can sort client-side or use unshift logic if we read-modify-write)
-            updatedAt: serverTimestamp()
-        });
+        // Check existing notifications count and cap at 100
+        const acctSnap = await getDoc(accountRef);
+        if (acctSnap.exists()) {
+            const data = acctSnap.data();
+            let notifications = Array.isArray(data.notifications) ? data.notifications : [];
+
+            // Dedup: skip if identical title+message exists in last 5 notifications
+            const recentDup = notifications.slice(-5).some(
+                n => n.title === safeTitle && n.message === safeMessage
+            );
+            if (recentDup) return;
+
+            // Cap: if over 100, trim oldest
+            if (notifications.length >= 100) {
+                notifications = notifications.slice(-99);
+            }
+            notifications.push(notification);
+            await updateDoc(accountRef, {
+                notifications,
+                updatedAt: serverTimestamp()
+            });
+        } else {
+            await updateDoc(accountRef, {
+                notifications: arrayUnion(notification),
+                updatedAt: serverTimestamp()
+            });
+        }
     } catch (err) {
         console.warn("Failed to send notification:", err);
-        // Fallback: setDoc if account doesn't exist? (Unlikely for valid recipientUid)
     }
 };
 
@@ -141,6 +173,8 @@ export const createBusiness = async ({ ownerUid, businessName, payload = {} }) =
     ensure(ownerUid, "createBusiness: ownerUid required");
     ensure(businessName, "createBusiness: businessName required");
 
+    // Sanitize business name
+    const safeName = sanitizeString(businessName, 200);
     const businessRef = doc(collection(db, COLLECTIONS.BUSINESSES));
     const businessId = businessRef.id;
     const now = serverTimestamp();
@@ -148,8 +182,8 @@ export const createBusiness = async ({ ownerUid, businessName, payload = {} }) =
     const defaultSettings = { maxRoleLevel: 10, maxRoleCapacity: 20 };
 
     const businessDoc = {
-        name: businessName,
-        slug: slugify(`${businessName}-${businessId.slice(0, 6)}`),
+        name: safeName,
+        slug: slugify(`${safeName}-${businessId.slice(0, 6)}`),
         ownerUid,
         published: false,
         createdAt: now,
@@ -283,10 +317,43 @@ export const updateBusinessSettings = async (businessId, settings = {}) => {
 export const deleteBusiness = async (businessId, ownerUid) => {
     ensure(businessId && ownerUid, "deleteBusiness: missing args");
     
-    // 1. Delete Business Doc
+    // 1. Cleanup subcollections: members, roles, invites
+    const subcollections = ["members", "roles", "invites"];
+    for (const sub of subcollections) {
+        try {
+            const col = collection(db, COLLECTIONS.BUSINESSES, businessId, sub);
+            const snaps = await getDocs(col);
+            if (!snaps.empty) {
+                // Also clean up member affiliations if deleting members
+                if (sub === "members") {
+                    await Promise.all(snaps.docs.map(async (d) => {
+                        const memberData = d.data();
+                        if (memberData.uid && memberData.uid !== ownerUid) {
+                            try {
+                                const memberAcctRef = doc(db, COLLECTIONS.ACCOUNT, memberData.uid);
+                                const memberSnap = await getDoc(memberAcctRef);
+                                if (memberSnap.exists()) {
+                                    const mData = memberSnap.data();
+                                    const mAff = (mData.businessAffiliations || []).filter(a => a.businessId !== businessId);
+                                    const mUpdates = { businessAffiliations: mAff, updatedAt: serverTimestamp() };
+                                    if (mAff.length === 0) mUpdates.accountType = null;
+                                    await updateDoc(memberAcctRef, mUpdates);
+                                }
+                            } catch (e) { console.warn("deleteBusiness: failed to clean member affiliation", e); }
+                        }
+                    }));
+                }
+                await Promise.all(snaps.docs.map(d => deleteDoc(d.ref)));
+            }
+        } catch (e) {
+            console.warn(`deleteBusiness: failed to cleanup ${sub}`, e);
+        }
+    }
+
+    // 2. Delete Business Doc
     await deleteDoc(doc(db, COLLECTIONS.BUSINESSES, businessId));
 
-    // 2. Remove affiliation from owner
+    // 3. Remove affiliation from owner
     const accountRef = doc(db, COLLECTIONS.ACCOUNT, ownerUid);
     const snap = await getDoc(accountRef);
     if (snap.exists()) {
@@ -302,8 +369,6 @@ export const deleteBusiness = async (businessId, ownerUid) => {
         await updateDoc(accountRef, updates);
     }
 
-    // NOTE: This does not cleanup subcollections (roles, members, invites) or other members' affiliations
-    // due to client-side limitations. For 'reset testing' purposes, this is acceptable.
     return true;
 };
 

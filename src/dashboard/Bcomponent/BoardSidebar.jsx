@@ -23,10 +23,6 @@ export default function BoardSidebar({
     setBoardSort,
 }) {
 
-    useEffect(() => {
-        console.log(boardPage, boardsTotalPages, boardsPerPage)
-    }, [boardPage, boardsTotalPages, boardsPerPage])
-
     return (
         <div className="bd-section bd-boards-pane">
             {/* <div className="bd-boards-head"><h3>Boards</h3><span className="count">{boards.length}</span></div> */}

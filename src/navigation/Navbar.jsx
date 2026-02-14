@@ -202,7 +202,6 @@ const Navbar = ({ simulateLoading = true }) => {
         try {
             const res = await signOut();
             if (res.ok) {
-                localStorage.removeItem("user");
                 navigate('/signup', { replace: true });
             } else {
                 console.error('Logout failed', res.error);
@@ -235,7 +234,7 @@ const Navbar = ({ simulateLoading = true }) => {
     const showInvitesUI = !accountType && !hasAffiliations;    
         
     
-    const dashboardPath = accountType ? `/${accountType}` : null;
+    const dashboardPath = accountType === 'business' ? '/business' : (accountType === 'personal' ? '/personalDashboard' : `/${accountType}`);
     const dashboardLabel = accountType ? (accountType === "business" ? "Business" : "Personal") : null;
 
     const [loading, setLoading] = useState(Boolean(simulateLoading));

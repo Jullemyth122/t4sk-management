@@ -135,7 +135,7 @@ export default function AIInsightsView({ businessId }) {
                             <div style={{ fontSize: '42px', fontWeight: '800', color: reviewBottlenecks > 0 ? THEME.warning : THEME.textHi }}>
                                 {reviewBottlenecks}
                             </div>
-                            <div className="text-xs mt-2 opacity-80">Stuck > 48h in Review</div>
+                            <div className="text-xs mt-2 opacity-80">Stuck &#60; 48h in Review</div>
                         </div>
 
                         {/* Velocity */}

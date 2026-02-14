@@ -9,14 +9,14 @@ import { FacebookAuthProvider, getAuth, GoogleAuthProvider } from "firebase/auth
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCYp4X7iPXe-x6ExPDsMiLQDnxa11w3irc",
-  authDomain: "t4sk-management.firebaseapp.com",
-  projectId: "t4sk-management",
-  storageBucket: "t4sk-management.firebasestorage.app",
-  messagingSenderId: "793539323795",
-  appId: "1:793539323795:web:8b258fd229186014c76a66",
-  measurementId: "G-687TPFB54B",
-  databaseURL: "https://t4sk-management-default-rtdb.firebaseio.com"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
 };
 
 // Initialize Firebase
