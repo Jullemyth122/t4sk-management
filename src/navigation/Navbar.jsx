@@ -234,7 +234,8 @@ const Navbar = ({ simulateLoading = true }) => {
     const showInvitesUI = !accountType && !hasAffiliations;    
         
     
-    const dashboardPath = accountType === 'business' ? '/business' : (accountType === 'personal' ? '/personalDashboard' : `/${accountType}`);
+    const infoPath = accountType === 'business' ? '/business' : (accountType === 'personal' ? '/personal' : `/${accountType}`);
+    const dashboardPath = accountType === 'business' ? '/businessDashboard' : (accountType === 'personal' ? '/personalDashboard' : `/${accountType}Dashboard`);
     const dashboardLabel = accountType ? (accountType === "business" ? "Business" : "Personal") : null;
 
     const [loading, setLoading] = useState(Boolean(simulateLoading));
@@ -286,7 +287,7 @@ const Navbar = ({ simulateLoading = true }) => {
                                 {/* Only show Business Info link if user is owner of the business (for business accounts) */}
                                 {/* Also show if account is business but has NO affiliations yet (new created account needs to setup) */}
                                 {(accountType !== 'business' || isBusinessOwner || !hasAffiliations) && (
-                                    <Link className='nav-link' to={dashboardPath}>
+                                    <Link className='nav-link' to={infoPath}>
                                         <svg width="21" height="22" viewBox="0 0 21 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M10.5008 0.5C13.2857 0.5 15.9566 1.60633 17.9259 3.5756C19.8952 5.54487 21.0015 8.21578 21.0015 11.0007C21.0015 13.7857 19.8952 16.4566 17.9259 18.4259C15.9566 20.3952 13.2857 21.5015 10.5008 21.5015C7.71578 21.5015 5.04487 20.3952 3.0756 18.4259C1.10633 16.4566 0 13.7857 0 11.0007C0 8.21578 1.10633 5.54487 3.0756 3.5756C5.04487 1.60633 7.71578 0.5 10.5008 0.5ZM12.0758 6.947C12.8558 6.947 13.4887 6.4055 13.4887 5.603C13.4887 4.8005 12.8543 4.259 12.0758 4.259C11.2958 4.259 10.6657 4.8005 10.6657 5.603C10.6657 6.4055 11.2958 6.947 12.0758 6.947ZM12.3502 15.3875C12.3502 15.227 12.4057 14.81 12.3742 14.573L11.1413 15.992C10.8863 16.2605 10.5667 16.4465 10.4167 16.397C10.3487 16.372 10.2918 16.3235 10.2563 16.2602C10.2209 16.197 10.2091 16.1231 10.2233 16.052L12.2782 9.56C12.4462 8.7365 11.9843 7.985 11.0048 7.889C9.97125 7.889 8.45025 8.9375 7.52475 10.268C7.52475 10.427 7.49475 10.823 7.52625 11.06L8.75775 9.6395C9.01275 9.374 9.30975 9.1865 9.45975 9.2375C9.53365 9.26402 9.59421 9.31847 9.62842 9.38914C9.66264 9.45981 9.66778 9.54108 9.64275 9.6155L7.60575 16.076C7.37025 16.832 7.81575 17.573 8.89575 17.741C10.4857 17.741 11.4247 16.718 12.3517 15.3875H12.3502Z" />
                                         </svg>
@@ -295,7 +296,7 @@ const Navbar = ({ simulateLoading = true }) => {
                                     </Link>
                                 )}
 
-                                <Link className="nav-link" to={dashboardPath+"Dashboard"}>
+                                <Link className="nav-link" to={dashboardPath}>
                                     <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M10 4.183V0.817C10 0.579 10.078 0.383333 10.234 0.23C10.39 0.0766667 10.5833 0 10.814 0H15.694C15.9253 0 16.1173 0.0766667 16.27 0.23C16.4227 0.383333 16.4993 0.579 16.5 0.817V4.183C16.5 4.42167 16.422 4.61733 16.266 4.77C16.11 4.92333 15.9167 5 15.686 5H10.806C10.5753 5 10.3833 4.92333 10.23 4.77C10.0767 4.61667 10 4.421 10 4.183ZM0.5 7.2V0.8C0.5 0.573334 0.578 0.383333 0.734 0.23C0.89 0.0766667 1.08333 0 1.314 0H6.194C6.42533 0 6.61733 0.0766667 6.77 0.23C6.92267 0.383333 6.99933 0.573334 7 0.8V7.2C7 7.42667 6.922 7.61667 6.766 7.77C6.61 7.92333 6.41667 8 6.186 8H1.306C1.07533 8 0.883333 7.92333 0.73 7.77C0.576667 7.61667 0.5 7.42667 0.5 7.2ZM10 15.2V8.8C10 8.57333 10.078 8.38333 10.234 8.23C10.39 8.07667 10.5833 8 10.814 8H15.694C15.9253 8 16.1173 8.07667 16.27 8.23C16.4227 8.38333 16.4993 8.57333 16.5 8.8V15.2C16.5 15.4267 16.422 15.6167 16.266 15.77C16.11 15.9233 15.9167 16 15.686 16H10.806C10.5753 16 10.3833 15.9233 10.23 15.77C10.0767 15.6167 10 15.4267 10 15.2ZM0.5 15.183V11.817C0.5 11.579 0.578 11.3833 0.734 11.23C0.89 11.0767 1.08333 11 1.314 11H6.194C6.42533 11 6.61733 11.0767 6.77 11.23C6.92267 11.3833 6.99933 11.579 7 11.817V15.183C7 15.4217 6.922 15.6173 6.766 15.77C6.61 15.9233 6.41667 16 6.186 16H1.306C1.07533 16 0.883333 15.9233 0.73 15.77C0.576667 15.6167 0.5 15.421 0.5 15.183ZM1.5 7H6V1H1.5V7ZM11 15H15.5V9H11V15ZM11 4H15.5V1H11V4ZM1.5 15H6V12H1.5V15Z"/>
                                     </svg>

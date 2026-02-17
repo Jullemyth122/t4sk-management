@@ -78,10 +78,10 @@ export const saveUserData = async (user, username, options = {}) => {
 export const updateAccountType = async (uid, accountType) => {
     ensure(uid, "updateAccountType: uid required");
 
-    await updateDoc(doc(db, COLLECTIONS.ACCOUNT, uid), {
+    await setDoc(doc(db, COLLECTIONS.ACCOUNT, uid), {
         accountType,
         updatedAt: serverTimestamp(),
-    });
+    }, { merge: true });
 
     try {
         await removeAllInvitesFromAccount(uid);

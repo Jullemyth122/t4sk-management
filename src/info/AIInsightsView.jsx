@@ -26,7 +26,7 @@ const IconWarning = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="
 const IconSuccess = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={THEME.success} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
 const IconInfo = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={THEME.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>;
 
-const InsightCard = ({ insight }) => {
+const InsightCard = ({ insight, onInsightClick }) => {
     let borderColor = THEME.grid;
     let Icon = IconInfo;
     let titleColor = THEME.textHi;
@@ -35,17 +35,27 @@ const InsightCard = ({ insight }) => {
     if (insight.type === 'warning') { borderColor = THEME.warning; Icon = IconWarning; titleColor = THEME.warning; }
     if (insight.type === 'success') { borderColor = THEME.success; Icon = IconSuccess; titleColor = THEME.success; }
 
+    const hasCards = insight.cardIds && insight.cardIds.length > 0;
+    const isClickable = hasCards && onInsightClick;
+
     return (
-        <div style={{ 
-            background: `linear-gradient(to right, ${THEME.card}, rgba(30, 41, 59, 0.5))`, 
-            borderLeft: `4px solid ${borderColor}`,
-            padding: '16px',
-            borderRadius: '0 8px 8px 0',
-            marginBottom: '12px'
-        }}>
+        <div
+            style={{
+                background: `linear-gradient(to right, ${THEME.card}, rgba(30, 41, 59, 0.5))`,
+                borderLeft: `4px solid ${borderColor}`,
+                padding: '16px',
+                borderRadius: '0 8px 8px 0',
+                marginBottom: '12px',
+                cursor: isClickable ? 'pointer' : 'default',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+            }}
+            onClick={() => isClickable && onInsightClick(insight)}
+            onMouseEnter={(e) => { if (isClickable) { e.currentTarget.style.transform = 'translateX(4px)'; e.currentTarget.style.boxShadow = `0 0 12px ${borderColor}33`; } }}
+            onMouseLeave={(e) => { if (isClickable) { e.currentTarget.style.transform = 'translateX(0)'; e.currentTarget.style.boxShadow = 'none'; } }}
+        >
             <div style={{ display: 'flex', gap: '12px' }}>
                 <div style={{ paddingTop: 2 }}><Icon /></div>
-                <div>
+                <div style={{ flex: 1 }}>
                     <h4 style={{ color: titleColor, margin: '0 0 4px 0', fontSize: '16px', fontWeight: 600 }}>{insight.title}</h4>
                     <p style={{ color: THEME.text, margin: '0 0 8px 0', fontSize: '14px' }}>{insight.message}</p>
                     {insight.action && (
@@ -60,13 +70,26 @@ const InsightCard = ({ insight }) => {
                             <strong>Recommendation:</strong> {insight.action}
                         </div>
                     )}
+                    {isClickable && (
+                        <div style={{
+                            marginTop: 8,
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            color: borderColor,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 4
+                        }}>
+                            <span>View {insight.cardIds.length} Task{insight.cardIds.length > 1 ? 's' : ''} →</span>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
     );
 };
 
-export default function AIInsightsView({ businessId }) {
+export default function AIInsightsView({ businessId, onInsightClick }) {
     const { 
         loading, error, healthScore, completionRate, highRiskTasks, reviewBottlenecks,
         workloadData, riskData, insights 
@@ -155,7 +178,7 @@ export default function AIInsightsView({ businessId }) {
                         </h3>
                         <div className="insights-feed">
                             {insights.length > 0 ? (
-                                insights.map((ins, i) => <InsightCard key={i} insight={ins} />)
+                                insights.map((ins, i) => <InsightCard key={i} insight={ins} onInsightClick={onInsightClick} />)
                             ) : (
                                 <div style={{ padding: 20, background: THEME.card, borderRadius: 8, fontStyle: 'italic' }}>
                                     System detects optimal workflow. No actionable anomalies found.

@@ -35,10 +35,13 @@ export function useBusinessAnalytics(businessId) {
                 const listsSnaps = await Promise.all(listPromises);
 
                 const listRefs = [];
+                const listBoardIds = []; // Parallel array for board IDs
                 listsSnaps.forEach((snap, i) => {
+                    const bId = boardIds[i];
                     snap.docs.forEach(doc => {
                         // Store ref to fetch cards later
                         listRefs.push(doc.ref);
+                        listBoardIds.push(bId);
                     });
                 });
 
@@ -47,9 +50,10 @@ export function useBusinessAnalytics(businessId) {
                 const cardsSnaps = await Promise.all(cardPromises);
 
                 const loadedCards = [];
-                cardsSnaps.forEach(snap => {
+                cardsSnaps.forEach((snap, i) => {
+                    const bId = listBoardIds[i]; // Corresponding board ID
                     snap.docs.forEach(doc => {
-                        loadedCards.push({ id: doc.id, ...doc.data() });
+                        loadedCards.push({ id: doc.id, ...doc.data(), boardId: bId });
                     });
                 });
 
@@ -89,6 +93,10 @@ export function useBusinessAnalytics(businessId) {
         let completedWeightedEffort = 0;
         let highRiskTasks = 0;
         let reviewBottlenecks = 0;
+        const bottleneckCardIds = [];
+        const highRiskCardIds = [];
+        let bottleneckBoardId = null;
+        let highRiskBoardId = null;
         
         const memberStats = {}; // uid -> { name, tasks, effort, complexity, completed, late, role }
         const riskDistribution = { low: 0, medium: 0, high: 0, critical: 0 };
@@ -129,7 +137,11 @@ export function useBusinessAnalytics(businessId) {
                 }
             }
             riskDistribution[riskLevel]++;
-            if (riskLevel === 'high' || riskLevel === 'critical') highRiskTasks++;
+            if (riskLevel === 'high' || riskLevel === 'critical') {
+                highRiskTasks++;
+                highRiskCardIds.push(c.id);
+                if (!highRiskBoardId && c.boardId) highRiskBoardId = c.boardId;
+            }
 
             // 4. Submission / Review Analysis
             if (c.submission) {
@@ -140,6 +152,8 @@ export function useBusinessAnalytics(businessId) {
                     const submittedAt = getDate(c.submission.createdAt || c.submittedAt);
                     if (submittedAt && (now - submittedAt) > (2 * oneDay)) {
                         reviewBottlenecks++;
+                        bottleneckCardIds.push(c.id);
+                        if (!bottleneckBoardId && c.boardId) bottleneckBoardId = c.boardId;
                     }
                 }
             } else if (status === 'review' || status === 'pending') {
@@ -148,6 +162,8 @@ export function useBusinessAnalytics(businessId) {
                  const updatedAt = getDate(c.updatedAt);
                  if (updatedAt && (now - updatedAt) > (3 * oneDay)) {
                      reviewBottlenecks++;
+                     bottleneckCardIds.push(c.id);
+                     if (!bottleneckBoardId && c.boardId) bottleneckBoardId = c.boardId;
                  }
             }
 
@@ -236,7 +252,9 @@ export function useBusinessAnalytics(businessId) {
                 type: 'critical',
                 title: 'Project Health Critical',
                 message: `Health Score is ${healthScore}/100. ${highRiskTasks} tasks are High Risk or Overdue. Immediate triage required.`,
-                action: 'Review "Critical" tasks in the board view.'
+                action: 'Review "Critical" tasks in the board view.',
+                cardIds: highRiskCardIds,
+                boardId: highRiskBoardId
             });
         }
 
@@ -246,7 +264,9 @@ export function useBusinessAnalytics(businessId) {
                 type: 'warning',
                 title: 'Review Process Stalled',
                 message: `${reviewBottlenecks} tasks have been stuck in review for over 48h. This is impacting velocity.`,
-                action: 'Ping reviewers or re-assign review ownership.'
+                action: 'Ping reviewers or re-assign review ownership.',
+                cardIds: bottleneckCardIds,
+                boardId: bottleneckBoardId
             });
         }
 

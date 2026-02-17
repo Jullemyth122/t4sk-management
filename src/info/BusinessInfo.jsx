@@ -1,5 +1,6 @@
 // src/pages/BusinessInfo.jsx
 import React, { useEffect, useRef, useMemo, useCallback, useReducer, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     doc,
     setDoc,
@@ -210,6 +211,8 @@ export default function BusinessInfo({ simulateLoading = false }) {
     const uid = currentUser?.uid ?? currentUser?.profile?.uid ?? null;
     const mountedRef = useRef(true);
     useEffect(() => () => { mountedRef.current = false; }, []);
+
+    const navigate = useNavigate();
 
     const [state, dispatch] = useReducer(reducer, { ...initialState, loading: Boolean(simulateLoading) });
 
@@ -870,7 +873,18 @@ export default function BusinessInfo({ simulateLoading = false }) {
 
                     {/* --- AI INSIGHTS TAB --- */}
                     {tab === "ai" && (canViewSettings || isOwner) && (
-                        <AIInsightsView businessId={state.businessId} />
+                        <AIInsightsView
+                            businessId={state.businessId}
+                            onInsightClick={(insight) => {
+                                if (insight.cardIds && insight.cardIds.length > 0) {
+                                    let url = `/businessDashboard?highlightCards=${insight.cardIds.join(',')}&highlightColor=${insight.type}`;
+                                    if (insight.boardId) {
+                                        url += `&boardId=${insight.boardId}`;
+                                    }
+                                    navigate(url);
+                                }
+                            }}
+                        />
                     )}
 
                     {/* --- MEMBERS TAB --- */}
