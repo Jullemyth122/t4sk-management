@@ -47,6 +47,9 @@ export default function ListColumn({
     workloadMap,
     isOverloaded,
     businessOwnerUid,
+    isPersonal = false,
+    highlightCardIds,
+    highlightColor
 }) {
     // resolve permissions
     const _canUpdateList = (canUpdateList !== undefined) ? canUpdateList : canEdit;
@@ -577,8 +580,10 @@ export default function ListColumn({
                                     workloadMap={workloadMap}
                                     isOverloaded={isOverloaded}
                                     businessOwnerUid={businessOwnerUid}
+                                    isPersonal={isPersonal}
                                     compactExpanded={!!expandedMap[card.id]}
                                     setCompactExpanded={() => setExpandedMap((p) => ({ ...(p || {}), [card.id]: !p?.[card.id] }))}
+                                    highlightColor={highlightCardIds && highlightCardIds.has(card.id) ? highlightColor : null}
                                 />
                             ))}
                         </div>
@@ -656,6 +661,7 @@ export default function ListColumn({
                                         compactExpanded={!!expandedMap[card.id]}
                                         setCompactExpanded={() => setExpandedMap((p) => ({ ...(p || {}), [card.id]: !p?.[card.id] }))}
                                         businessOwnerUid={businessOwnerUid}
+                                        highlightColor={highlightCardIds && highlightCardIds.has(card.id) ? highlightColor : null}
                                     />
                                 ))}
                             </div>

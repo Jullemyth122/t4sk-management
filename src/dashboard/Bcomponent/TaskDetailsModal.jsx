@@ -21,7 +21,8 @@ export default function TaskDetailsModal({
     currentUserUid,
     isReviewer,
     isHighLevel,
-    canEdit
+    canEdit,
+    isPersonal = false
 }) {
     // Only render if open
     if (!open || !card) return null;
@@ -255,7 +256,8 @@ export default function TaskDetailsModal({
                                 {subtasks.map((st, i) => (
                                     <div key={i} className="td-subtask-item">
                                         {/* Status indicator (read-only) */}
-                                        <div style={{
+                                        <div
+                                            style={{
                                             minWidth: 18,
                                             height: 18,
                                             borderRadius: 4,
@@ -267,7 +269,7 @@ export default function TaskDetailsModal({
                                             color: 'white',
                                             fontSize: 11,
                                             fontWeight: 'bold',
-                                            opacity: 0.7
+                                                opacity: 0.7
                                         }}>
                                             {st.completed && '✓'}
                                         </div>
@@ -295,7 +297,7 @@ export default function TaskDetailsModal({
                         </div>
                         
                         {/* Reviewer Actions (if submitted and viewer is reviewer) */}
-                        {(isReviewer || isHighLevel) && !isRejected && !isSubmitted && String(card.status) === 'pending' && (
+                        {(isReviewer || isHighLevel) && !isRejected && !isSubmitted && String(card.status) === 'pending' && !isPersonal && (
                             <div style={{ marginTop: 24, background: 'rgba(255,255,255,0.03)', padding: 20, borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)' }}>
                                 <h4 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', color: 'var(--sidenav-H1)' }}>Reviewer Actions</h4>
                                 <textarea 

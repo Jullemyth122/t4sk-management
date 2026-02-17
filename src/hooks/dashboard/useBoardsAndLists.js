@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import * as boardSvc from '../../services/boardService'
-export function useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards }) {
+export function useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards, highlightBoardId }) {
     // Subscribe to boards
     useEffect(() => {
         if (!businessId) {
@@ -12,10 +12,21 @@ export function useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, us
     }, [businessId, dispatchSet]);
 
     // Auto-select first board for low-level users
+    // Auto-select first board for low-level users (OR handle highlightBoardId)
     useEffect(() => {
-        if (!boards || boards.length === 0 || userLevel > 2 || selectedBoardId) return;
+        if (!boards || boards.length === 0) return;
+
+        // If highlight request exists and is valid, prefer it OVER default selection
+        if (highlightBoardId && boards.some(b => b.id === highlightBoardId)) {
+            if (selectedBoardId !== highlightBoardId) {
+                dispatchSet('selectedBoardId', highlightBoardId);
+            }
+            return;
+        }
+
+        if (userLevel > 2 || selectedBoardId) return;
         dispatchSet('selectedBoardId', boards[0].id);
-    }, [boards, userLevel, selectedBoardId, dispatchSet]);
+    }, [boards, userLevel, selectedBoardId, dispatchSet, highlightBoardId]);
 
     // Keep selectedBoardId valid
     useEffect(() => {

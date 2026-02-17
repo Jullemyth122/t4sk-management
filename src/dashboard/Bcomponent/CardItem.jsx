@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { timeAgo } from '../../utils/time';
 import TaskDetailsModal from './TaskDetailsModal';
 import SubmissionModal from './SubmissionModal';
@@ -19,11 +19,30 @@ export default function CardItem({
     businessOwnerUid,
     currentUserUid,        // needed for permissions in modal
     reviewerOptions,       // needed for modal
-    currentUserEmail
+    currentUserEmail,
+    isPersonal = false,
+    highlightColor
 }) {
     const [modalOpen, setModalOpen] = useState(false);
     const [submitModalOpen, setSubmitModalOpen] = useState(false);
     const [reviewModalOpen, setReviewModalOpen] = useState(false);
+    const cardRef = useRef(null);
+
+    // Highlight color mapping
+    const HIGHLIGHT_COLORS = {
+        warning: '#f59e0b',
+        critical: '#ef4444',
+        success: '#10b981',
+        info: '#6366f1'
+    };
+    const hlColor = highlightColor ? (HIGHLIGHT_COLORS[highlightColor] || highlightColor) : null;
+
+    // Auto-scroll into view when highlighted
+    useEffect(() => {
+        if (hlColor && cardRef.current) {
+            cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }, [hlColor]);
 
     // Helpers
     const resolveAssignee = (val) => {
@@ -74,7 +93,7 @@ export default function CardItem({
         if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.card-actions-row')) return;
 
         // Only high-level users or reviewers can open the details modal
-        if (!isHighLevel && !isReviewer) return;
+        if (!isHighLevel && !isReviewer && !isPersonal) return;
 
         setModalOpen(true);
     };
@@ -95,11 +114,23 @@ export default function CardItem({
     return (
         <>
             <article
-                className={`card-item summary-mode ${isRejected ? 'rejected' : ''} ${isApproved ? 'approved' : ''}`}
+                ref={cardRef}
+                className={`card-item summary-mode ${isRejected ? 'rejected' : ''} ${isApproved ? 'approved' : ''} ${hlColor ? 'highlighted' : ''}`}
                 onClick={handleCardClick}
                 role="button"
                 tabIndex={0}
-                style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden', padding: '10px 12px' }}
+                style={{
+                    cursor: 'pointer',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    padding: '10px 12px',
+                    ...(hlColor ? {
+                        '--highlight-color': hlColor,
+                        border: `2px solid ${hlColor}`,
+                        boxShadow: `0 0 12px ${hlColor}66, 0 0 24px ${hlColor}33`,
+                        animation: 'highlight-pulse 2s ease-in-out infinite'
+                    } : {})
+                }}
             >
                 {/* Row 1: Priority Badge + Title + Dates (all inline) */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
@@ -154,13 +185,13 @@ export default function CardItem({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     {/* Quick action buttons */}
                     <div style={{ display: 'flex', gap: 4 }}>
-                        {!isApproved && !isPendingReview && (currentUserMember && assignees.some(a => String(a.email).toLowerCase() === String(currentUserMember.email).toLowerCase() || a.name === currentUserMember.name)) && (
+                        {!isApproved && !isPendingReview && ((currentUserMember && assignees.some(a => String(a.email).toLowerCase() === String(currentUserMember.email).toLowerCase() || a.name === currentUserMember.name)) || isBusinessOwner || isPersonal) && (
                             <button
                                 className="btn-small action ghost"
                                 onClick={(e) => { e.stopPropagation(); setSubmitModalOpen(true); }}
                                 style={{ fontSize: '0.68rem', padding: '3px 6px', borderRadius: 4 }}
                             >
-                                Submit
+                                {isPersonal ? 'Complete' : 'Submit'}
                             </button>
                         )}
                         {showReviewActions && (
@@ -202,7 +233,7 @@ export default function CardItem({
                             )}
                         </div>
 
-                        {(isHighLevel || isReviewer) && (
+                        {(isHighLevel || isReviewer || isPersonal) && (
                             <button
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); setModalOpen(true); }}
@@ -245,6 +276,7 @@ export default function CardItem({
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
                 card={card}
+                isPersonal={isPersonal}
                 listId={listId}
                 draft={cardDrafts}
                 setDraft={setCardDrafts}

@@ -119,30 +119,39 @@
   /* Signup */
   --signup-comp: #f8fafc;
 
-  --signup-shape-light: #cbd5e1;
-  --signup-shape-dark: #94a3b880;
+  --signup-shape-light: #fcd34d;
+    /* Amber 300 */
+    --signup-shape-dark: #fbbf24;
+    /* Amber 400 */
 
-  --signup-shape2-light: #64748b;
-  --signup-shape2-dark: #94a3b880;
+  --signup-shape2-light: #f59e0b;
+    /* Amber 500 */
+    --signup-shape2-dark: #d97706;
+    /* Amber 600 */
 
-  --sign-otc-light: #cbd5e180;
-  --sign-otc-dark: #94a3b880;
+  --sign-otc-light: rgba(255, 255, 255, 0.8);
+    --sign-otc-dark: rgba(255, 255, 255, 0.6);
     --sign-bx-otc-light: #e2e8f0;
 
-  --sign-txt-6xl: #334155;
-  --sign-highlight: #e2e8f0;
+  --sign-txt-6xl: #b45309;
+    /* Amber 700 (Bronze/Gold alternative) */
+    --sign-highlight: #78350f;
+    /* Amber 900 */
 
-  --sign-dashline: #94a3b8;
-  --sign-dashline2: #64748b;
-    --sign-sct: #1e293b;
+  --sign-dashline: #cbd5e1;
+    --sign-dashline2: #94a3b8;
+    --sign-sct: #78350f;
+    /* Dark text */
 
-  --sign-si: #64748b;
+  --sign-si: #b45309;
+    /* Active Tab */
+    --sign-header-inactive: #64748b;
+    /* Slate 500 */
 
-  --sign-labels: #475569;
+  --sign-labels: #64748b;
   --sign-input: #1e293b;
 }
 
-:root,
 [data-theme="dark"] {
   --bg-color: #252525;
   --text-color: #fff;
@@ -252,30 +261,7 @@
     --select-hover: rgba(255, 255, 255, 0.05);
     --select-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
 
-  /* Signup */
-  --signup-comp: #232323;
-
-  --signup-shape-light: #565656;
-  --signup-shape-dark: #282828d0;
-
-  --sign-otc-light: #4b4b4b62;
-  --sign-otc-dark: #5050505f;
-  --sign-bx-otc-light: #2f2f2f78;
-
-  --sign-txt-6xl: #d8d0a0;
-  --sign-highlight: #1e1e1e;
-
-  --sign-dashline: #1e1e1e;
-  --sign-dashline2: #1e1e1e;
-  --sign-sct: #d8d0a0;
-
-  --sign-si: #d8d0a0;
-
-  --signup-shape2-light: #d8d0a0;
-  --signup-shape2-dark: #363636a7;
-
-  --sign-labels: #787878;
-  --sign-input: #fff;
+  /* Signup variables moved to signup.scss */
 }
 
 body,

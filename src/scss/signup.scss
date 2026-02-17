@@ -15,6 +15,67 @@
     --height-signup-in:85vh;
 }
 
+/* ==========================================================================
+   Signup Theme Variables (Local Scope)
+   ========================================================================== */
+.signup-comp {
+
+
+}
+[data-theme="dark"] {
+        /* Default (Dark Mode) */
+    --signup-comp: #232323;
+    --signup-shape-light: #565656;
+    --signup-shape-dark: #282828d0;
+    --signup-shape2-light: #d8d0a0; /* Keeping original gold-ish tone */
+    --signup-shape2-dark: #363636a7;
+    
+    --sign-otc-light: #4b4b4b62;
+    --sign-otc-dark: #5050505f;
+    --sign-bx-otc-light: #2f2f2f78;
+    
+    --sign-txt-6xl: #f59e0b; /* Amber 500 */
+    --sign-highlight: #d97706; /* Amber 600 */
+    
+    --sign-dashline: #4a4a4a;
+    --sign-dashline2: #4a4a4a;
+    --sign-sct: #fbbf24; /* Amber 400 */
+    
+    --sign-si: #fcd34d; /* Amber 300 */
+    --sign-header-inactive: #a1a1aa;
+    
+    --sign-labels: #787878;
+    --sign-input: #fff;
+}
+
+/* Light Mode Overrides (Global Context) */
+[data-theme="light"]  {
+    --signup-comp: #f8fafc;
+    
+    --signup-shape-light: #fcd34d; /* Amber 300 */
+    --signup-shape-dark: #fbbf24; /* Amber 400 */
+    --signup-shape2-light: #f59e0b; /* Amber 500 */
+    --signup-shape2-dark: #d97706; /* Amber 600 */
+    
+    --sign-otc-light: rgba(255, 255, 255, 0.82);
+    --sign-otc-dark: rgba(255, 255, 255, 0.65);
+    --sign-bx-otc-light: #e2e8f0;
+    
+    --sign-txt-6xl: #b45309; /* Amber 700 */
+    --sign-highlight: #d97706; /* Amber 600 */
+    
+    --sign-dashline: #cbd5e1;
+    --sign-dashline2: #cbd5e1;
+    --sign-sct: #b45309; /* Amber 700 */
+    
+    --sign-si: #b45309; /* Amber 700 */
+    --sign-header-inactive: #94a3b8; /* Slate 400 */
+    
+    --sign-labels: #64748b;
+    --sign-input: #1e293b;
+}
+
+
 @media (max-width:1280px) {
     :root {
         --signup-in-comp_wd:90vw;
@@ -193,7 +254,7 @@
                     gap: 10px;
 
                     h1 {
-                        color: #D9D9D9;
+                        color: var(--sign-header-inactive);
                         cursor: pointer;
                         font-size: var(--form_h1_head2);
                         transition: all 0.75s cubic-bezier(0.215, 0.610, 0.355, 1);
@@ -384,85 +445,5 @@
 }
 
 /* ========================================
-   LIGHT MODE OVERRIDES
+   LIGHT MODE OVERRIDES handled by index.css variables
    ======================================== */
-[data-theme="light"] {
-    .signup-comp,
-    .signup-in-comp {
-        .circle {
-            background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.15), transparent);
-        }
-
-        .form-holder {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.95));
-            border-color: rgba(0, 0, 0, 0.08);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-
-            h1 {
-                color: #1e293b;
-            }
-
-            p {
-                color: #64748b;
-            }
-
-            input {
-                background: rgba(0, 0, 0, 0.03);
-                border-color: rgba(0, 0, 0, 0.1);
-                color: #1e293b;
-
-                &::placeholder {
-                    color: #94a3b8;
-                }
-
-                &:focus {
-                    border-color: #f59e0b;
-                    background: #fff;
-                }
-            }
-
-            .btn-primary {
-                background: linear-gradient(135deg, #f59e0b, #d97706);
-                color: #fff;
-                box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-
-                &:hover {
-                    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
-                }
-            }
-
-            .divider {
-                color: #94a3b8;
-
-                &::before,
-                &::after {
-                    background: rgba(0, 0, 0, 0.1);
-                }
-            }
-
-            .social-login {
-                .social-btn {
-                    background: rgba(0, 0, 0, 0.03);
-                    border-color: rgba(0, 0, 0, 0.1);
-                    color: #334155;
-
-                    &:hover {
-                        background: rgba(0, 0, 0, 0.06);
-                    }
-                }
-            }
-
-            .footer-text {
-                color: #64748b;
-
-                a {
-                    color: #f59e0b;
-
-                    &:hover {
-                        color: #d97706;
-                    }
-                }
-            }
-        }
-    }
-}

@@ -1,18 +1,19 @@
 /* --- SKELETON LOCAL THEME VARIABLES (Default Dark) --- */
 :root {
-    --skel-bg-shimmer: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.09) 50%, rgba(255, 255, 255, 0.06) 100%);
-    --skel-spinner-border: rgba(255, 255, 255, 0.12);
-    --skel-spinner-top: rgba(255, 255, 255, 0.9);
-    --skel-text: #eaeaea;
+    /* Dark Mode: Subtle white shimmer on dark background */
+    --skel-bg-shimmer: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%);
+    --skel-spinner-border: rgba(255, 255, 255, 0.1);
+    --skel-spinner-top: #ffffff;
+    --skel-text: #a1a1aa; /* Zinc-400 */
 }
 
 /* --- LIGHT MODE OVERRIDES --- */
 [data-theme="light"] {
-    /* Scoped to body/root or specifically if wrapped, but generally applying to these elements */
-    --skel-bg-shimmer: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.09) 50%, rgba(0, 0, 0, 0.06) 100%);
-    --skel-spinner-border: rgba(0, 0, 0, 0.12);
-    --skel-spinner-top: rgba(0, 0, 0, 0.7);
-    --skel-text: #475569;
+    /* Light Mode: Slate gray shimmer on white/light background */
+    --skel-bg-shimmer: linear-gradient(90deg, rgb(203, 213, 225) 0%, rgb(203, 213, 225) 50%, rgb(203, 213, 225) 100%); /* Slate-300 based */
+    --skel-spinner-border: rgba(30, 41, 59, 0.1); /* Slate-800 */
+    --skel-spinner-top: #0f172a; /* Slate-900 */
+    --skel-text: #475569; /* Slate-600 */
 }
 
 .skeleton-block {
@@ -90,66 +91,4 @@
     color: var(--skel-text);
 }
 
-/* HomeSkeleton layout tweaks - try to match your home.scss */
-.skeleton-home {
-    .headline-skel {
-        display: flex;
-        align-items: center;
-        justify-content: space-evenly;
-        padding: 24px 12px;
-    }
-
-    .title-skel {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .content-banner-skel {
-        padding: 24px;
-        display: flex;
-        align-items: flex-start;
-        justify-content: center;
-    }
-
-    .show-content-skel {
-        display: flex;
-        gap: 20px;
-        width: 85vw;
-        max-width: 1200px;
-        align-items: flex-start;
-        justify-content: space-between;
-    }
-
-    .content1-skel {
-        width: 320px;
-    }
-
-    .subtask-scroll-skel {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        max-height: 65vh;
-        overflow: hidden;
-    }
-
-    .content2-skel {
-        width: 420px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-}
-
-/* small responsive tweak */
-@media (max-width: 900px) {
-    .skeleton-home .show-content-skel {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .skeleton-home .content2-skel {
-        width: 100%;
-    }
-}
+/* Obsolete home skeleton styles removed - Replaced with Tailwind */

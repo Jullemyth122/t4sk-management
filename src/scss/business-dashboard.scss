@@ -2066,6 +2066,28 @@
     }
 }
 
+/* AI Insight → Card Highlight Glow */
+.card-item.highlighted {
+    z-index: 2;
+    border: 2px solid var(--highlight-color, #f59e0b);
+    animation: highlight-pulse 2s ease-in-out infinite;
+    
+    &:hover {
+        border-color: var(--highlight-color, #f59e0b);
+    }
+}
+
+@keyframes highlight-pulse {
+    0%, 100% {
+        box-shadow: 0 0 8px color-mix(in srgb, var(--highlight-color, #f59e0b) 40%, transparent),
+                    0 0 20px color-mix(in srgb, var(--highlight-color, #f59e0b) 20%, transparent);
+    }
+    50% {
+        box-shadow: 0 0 16px color-mix(in srgb, var(--highlight-color, #f59e0b) 60%, transparent),
+                    0 0 36px color-mix(in srgb, var(--highlight-color, #f59e0b) 30%, transparent);
+    }
+}
+
 /* Compact / shrunk card style for approved/done cards */
 .card-item.compact {
     padding: 6px 8px;

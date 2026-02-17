@@ -1,5 +1,6 @@
 // src/pages/BusinessDashboard.jsx
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import usePagination from '../hooks/usePagination';
 import BoardSidebar from './Bcomponent/BoardSidebar';
@@ -88,6 +89,35 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
 
   const { state, dispatchSet, uid, userEmail, profile, currentUser } = useUserData(propBusinessId, initialState);
 
+  // --- Highlight from AI Insights ---
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [highlightActive, setHighlightActive] = useState(true);
+
+  const highlightCardIds = useMemo(() => {
+    if (!highlightActive) return new Set();
+    const raw = searchParams.get('highlightCards');
+    if (!raw) return new Set();
+    return new Set(raw.split(',').filter(Boolean));
+  }, [searchParams, highlightActive]);
+
+  const highlightColor = highlightActive ? (searchParams.get('highlightColor') || '') : '';
+  const highlightBoardId = highlightActive ? searchParams.get('boardId') : null;
+
+
+  // Auto-clear highlight after 8 seconds
+  useEffect(() => {
+    if (highlightCardIds.size === 0) return;
+    const timer = setTimeout(() => {
+      setHighlightActive(false);
+      // Clean URL params
+      searchParams.delete('highlightCards');
+      searchParams.delete('highlightColor');
+      searchParams.delete('boardId');
+      setSearchParams(searchParams, { replace: true });
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [highlightCardIds.size]);
+
   const { businessId, businessName, businessOwnerUid, boards, selectedBoardId, lists, cardsMap, roles, members, membersLoading, membersError, uiError, boardQuery, boardView, memberQuery, editingBoard, boardDraft, newBoardName, newListName, newListAssignees, assigneeSearch, assigneeDropdownOpen, listNameEditing, listNameDrafts, cardEditing, cardDrafts, newCardInputs, copiedEmailId, loading, ocrRaw, ocrResult, ocrError, showHeaderActions, sidebarCollapsed, sidebarTab, previewFile, previewUrl } = state;
 
   const getMemberLevel = useCallback((m, rolesList = roles) => {
@@ -104,7 +134,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
   useRolesAndMembers({ businessId, dispatchSet, businessOwnerUid, members });
 
 
-  useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards });
+  useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards, highlightBoardId });
   useCards({ businessId, selectedBoardId, lists, dispatchSet });
 
   const { workloadMap, isOverloaded } = useMemberWorkload({ cardsMap, lists });
@@ -573,6 +603,8 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                       workloadMap={workloadMap}
                       isOverloaded={isOverloaded}
                       businessOwnerUid={businessOwnerUid}
+                      highlightCardIds={highlightCardIds}
+                      highlightColor={highlightColor}
                     />
                   ))}
 
