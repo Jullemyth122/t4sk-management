@@ -1,6 +1,6 @@
 import SkeletonBlock from "./SkeletonBlock";
 import "../../scss/skeleton.scss";
-import "../../scss/Home.scss";
+// import "../../scss/Home.scss";
 
 export default function HomeSkeleton() {
     return (
