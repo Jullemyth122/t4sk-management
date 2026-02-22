@@ -6,28 +6,37 @@ import Signup from "./components/authentication/Signup";
 import ChooseAccountType from "./components/ChooseAccountType";
 import PublicRoute from "./routes/PublicRoute"; // optional keep
 
-
 import AuthGuard from "./routes/AuthGuard"; // auth guard is equal to this three component
 import PersonalInfo from "./info/PersonalInfo";
 import BusinessInfo from "./info/BusinessInfo";
 import BusinessDashboardSimple from "./dashboard/BusinessDashboard";
 import PersonalDashboard from "./dashboard/PersonalDashboard";
+import ErrorBoundary from "./components/ErrorBoundary";
+
+import TermsPage from "./components/authentication/TermsPage";
+import PrivacyPolicy from "./components/authentication/PrivacyPolicy";
+
 // import SecureRoute from "./routes/SecureRoute";
 // import RequireAccountType from "./routes/RequireAccountType";
 // import ChooseAccountGuard from "./routes/ChooseAccountGuard";
+
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
       // Wrap Task so logged-in users without accountType are forced to /choose-account
-      <AuthGuard requireAuth={false} requireType="present">
-        <Task />
-      </AuthGuard>
+      <ErrorBoundary>
+        <AuthGuard requireAuth={false} requireType="present">
+          <Task />
+        </AuthGuard>
+      </ErrorBoundary>
     ),
     errorElement: <div>Oops</div>,
     children: [   
       { path: "home", element: <PublicRoute><Home simulateLoading={true}/></PublicRoute> },  
       { path: "signup", element: <PublicRoute><Signup simulateLoading={true}/></PublicRoute> },
+      { path: "terms", element: <PublicRoute><TermsPage /></PublicRoute> },
+      { path: "privacy", element: <PublicRoute><PrivacyPolicy /></PublicRoute> },
       // These are children of Task so they show navbar (AuthGuard above will block access if no accountType)
       { path: "personal",
         element: (
@@ -59,7 +68,7 @@ const router = createBrowserRouter([
         )
       },
 
-      { path: "*", element: <div>Not found</div> },
+      { path: "*", element: <ErrorBoundary /> },
     ]
   },
 
@@ -67,9 +76,11 @@ const router = createBrowserRouter([
   {
     path: "choose-account",
     element: (
-      <AuthGuard requireAuth={true} requireType="absent">
-        <ChooseAccountType />
-      </AuthGuard>
+      <ErrorBoundary>
+        <AuthGuard requireAuth={true} requireType="absent">
+          <ChooseAccountType />
+        </AuthGuard>
+      </ErrorBoundary>
     )
   },
 ]);

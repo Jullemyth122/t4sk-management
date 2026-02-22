@@ -65,10 +65,18 @@ export const saveUserData = async (user, username, options = {}) => {
         lowerEmail: lower,
         uid: user.uid,
         notifications: [],
-        ...(options.accountType !== undefined ? { accountType: options.accountType } : {}),
         invitesEmail: [],
         updatedAt: serverTimestamp(),
         createdAt: serverTimestamp(),
+
+        // === CONSENT FIELDS (new) ===
+        termsAccepted: Boolean(options.termsAccepted),
+        privacyAccepted: Boolean(options.privacyAccepted),
+        acceptedVersion: options.acceptedVersion || "1.0",
+        termsAcceptedAt: options.termsAccepted ? Timestamp.now() : null,
+
+        // Optional accountType (kept for backward compatibility)
+        ...(options.accountType !== undefined ? { accountType: options.accountType } : {}),
     };
 
     await setDoc(doc(db, COLLECTIONS.ACCOUNT, user.uid), payload, { merge: true });

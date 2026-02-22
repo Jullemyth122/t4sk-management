@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth';
 import gsap from 'gsap';
 import '../../scss/signup.scss';
@@ -7,6 +7,7 @@ import SignupSkeleton from '../loaders/SignupSkeleton';
 
 const Signup = ({ simulateLoading = false }) => {
   const navigate = useNavigate();
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const {
     handleSignup,
@@ -79,18 +80,45 @@ const Signup = ({ simulateLoading = false }) => {
   // autopurge messages
   useEffect(() => {
     if (!successMessage) return;
-    const t = setTimeout(() => setSuccessMessage(""), 5000);
+    const t = setTimeout(() => setSuccessMessage(""), 3000);
     return () => clearTimeout(t);
   }, [successMessage, setSuccessMessage]);
 
   useEffect(() => {
     if (!errorMessage) return;
-    const t = setTimeout(() => setErrorMessage(""), 5000);
+    const t = setTimeout(() => setErrorMessage(""), 3000);
     return () => clearTimeout(t);
   }, [errorMessage, setErrorMessage]);
 
   // handlers
-  const handleRegister = async (e) => { await handleSignup(e); };
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    // Clear previous messages
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    // === CLIENT-SIDE VALIDATION ===
+    if (!username.trim()) {
+      setErrorMessage("Username is required");
+      return;
+    }
+    if (!email.trim()) {
+      setErrorMessage("Email is required");
+      return;
+    }
+    if (password.length < 6) {
+      setErrorMessage("Password must be at least 6 characters");
+      return;
+    }
+    if (!acceptedTerms) {
+      setErrorMessage("Please accept the Terms of Service and Privacy Policy");
+      return;
+    }
+
+    await handleSignup(e, acceptedTerms);
+  };
+
   const handleLoggingIn = async (e) => { await handleLogin(e); };
   const handleLogginGoogle = async (e) => { await handleGoogleLogin(e); };
   const handleLogginFacebook = async (e) => { navigate('/dashboard'); };
@@ -143,6 +171,11 @@ const Signup = ({ simulateLoading = false }) => {
                 }
                 <h1 className='forgetButton' onClick={e => toggleView("Forget")}> ResetPassword </h1>
               </div>
+              {(errorMessage || successMessage) && (
+                <div className={`message-banner ${errorMessage ? 'error' : 'success'}`}>
+                  {errorMessage || successMessage}
+                </div>
+              )}
               <div className="slider" ref={containerRef}>
                 <form className="label-inputs" onSubmit={handleRegister}>
                   <div className="label-input">
@@ -172,13 +205,47 @@ const Signup = ({ simulateLoading = false }) => {
                     onChange={(e) => setPassword(e.target.value)}
                     />
                   </div>
-                  <div className="result-input grid items-center justify-evenly">
-                    <button className="button-sign create-button">
-                    <h5> Create Account </h5>
+                  {/* === TERMS & PRIVACY CHECKBOX === */}
+                  <div className="terms-consent">
+                    <label className="flex items-start gap-3 cursor-pointer text-sm">
+                      <input
+                        type="checkbox"
+                        checked={acceptedTerms}
+                        onChange={(e) => setAcceptedTerms(e.target.checked)}
+                        className="mt-1 accent-amber-500"
+                      />
+                      <span>
+                        I agree to the {" "}
+                        <Link
+                          to="/terms"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-amber-500 hover:underline"
+                        >
+                          Terms of Service {" "}
+                        </Link>
+                        and
+                        {" "}
+                        <Link
+                          to="/privacy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-amber-500 hover:underline"
+                        >
+                          Privacy Policy
+                        </Link>
+                      </span>
+                    </label>
+                  </div>
+                  {/* Create Account Button */}
+                  <div className="result-input">
+                    <button
+                      type="submit"
+                      className="button-sign create-button"
+                    // disabled={!acceptedTerms || !username.trim() || !email.trim() || password.length < 6}
+                    >
+                      <h5>Create Account</h5>
                     </button>
-                    {errorMessage && <p className="error-message">{errorMessage}</p>}
-                    {successMessage && <p className="success-message">{successMessage}</p>} {/* Display success message */}
-
                   </div>
                 </form>
                 <form className="label-inputs" onSubmit={handleLoggingIn}>

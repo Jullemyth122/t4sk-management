@@ -49,7 +49,14 @@ export default function ListColumn({
     businessOwnerUid,
     isPersonal = false,
     highlightCardIds,
-    highlightColor
+    highlightColor,
+
+    // NEW: Pagination props from dashboard
+    loadMoreCards,
+    resetLimitCards,
+    cardsHasMoreMap,
+    cardsLimitsMap = {},
+    cardsBaseLimit = 3
 }) {
     // resolve permissions
     const _canUpdateList = (canUpdateList !== undefined) ? canUpdateList : canEdit;
@@ -547,7 +554,25 @@ export default function ListColumn({
 
             {!collapsed && (
                 <>
-                    <div style={{ marginTop: 8 }}>
+                    <div className="active-group-header">
+                        <div className="load-more-group">
+                            {loadMoreCards && cardsHasMoreMap[list.id] && (
+                                <button
+                                    className="list-load-more-btn"
+                                    onClick={() => loadMoreCards(list.id)}
+                                >
+                                    ↓ Load More Cards
+                                </button>
+                            )}
+                            {resetLimitCards && (cardsLimitsMap[list.id] || cardsBaseLimit) > cardsBaseLimit && (
+                                <button
+                                    className="list-reset-btn"
+                                    onClick={() => resetLimitCards(list.id)}
+                                >
+                                    ↑ Show Less
+                                </button>
+                            )}
+                        </div>
                         <div className="group-header">
                             <strong>Active</strong>
                             <span>{activeCards.length} items</span>
@@ -584,6 +609,7 @@ export default function ListColumn({
                                     compactExpanded={!!expandedMap[card.id]}
                                     setCompactExpanded={() => setExpandedMap((p) => ({ ...(p || {}), [card.id]: !p?.[card.id] }))}
                                     highlightColor={highlightCardIds && highlightCardIds.has(card.id) ? highlightColor : null}
+                                    listAssignees={list.assignees}
                                 />
                             ))}
                         </div>
@@ -622,6 +648,18 @@ export default function ListColumn({
                                 </div>
                             </div>
                         )}
+
+                        {/* Global Load More for this List (Firestore Subscription Limit) */}
+                        {/* {(cards || []).length >= (cardsLimitsMap[list.id] || cardsBaseLimit) && (
+                            <div className="list-load-more-container">
+                                <button
+                                    className="list-load-more-btn"
+                                    onClick={() => loadMoreCards && loadMoreCards(list.id)}
+                                >
+                                    ↓ Load More Cards
+                                </button>
+                            </div>
+                        )} */}
                     </div>
 
                     {/* APPROVED / COMPLETED group */}
@@ -662,6 +700,7 @@ export default function ListColumn({
                                         setCompactExpanded={() => setExpandedMap((p) => ({ ...(p || {}), [card.id]: !p?.[card.id] }))}
                                         businessOwnerUid={businessOwnerUid}
                                         highlightColor={highlightCardIds && highlightCardIds.has(card.id) ? highlightColor : null}
+                                        listAssignees={list.assignees}
                                     />
                                 ))}
                             </div>

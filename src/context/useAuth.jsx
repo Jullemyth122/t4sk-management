@@ -10,7 +10,6 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../config/firebase";
-// import { fetchAccountProfile, saveUserData } from "../utilities/accountService";
 import { fetchAccountProfile, saveUserData } from "../services/accountService";
 import { usePresence } from "../hooks/usePresence";
 
@@ -154,22 +153,49 @@ export const AuthProvider = ({ children }) => {
 
   }
 
-  const handleSignup = async (e) => {
+  const handleSignup = async (e, acceptedTerms = false) => {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
+
     setErrorMessage("");
+    setSuccessMessage("");
+
+    if (!acceptedTerms) {
+      setErrorMessage("You must accept the Terms of Service and Privacy Policy to create an account.");
+      return;
+    }
+
     try {
       checkRateLimit();
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+
       await fbUpdateProfile(user, { displayName: username });
-      await saveUserData(user, username, email);
-      setEmail(""); setPassword(""); setUsername("");
-      setSuccessMessage("Account created!");
-      // DO NOT call Navigate() here — return user and let the component navigate
+
+      // ←←← THIS IS THE KEY CHANGE ←←←
+      await saveUserData(user, username, email, {
+        termsAccepted: true,
+        privacyAccepted: true,
+        acceptedVersion: "1.0",           // increase when you update legal docs
+        termsAcceptedAt: new Date().toISOString(),
+      });
+
+      setSuccessMessage("Account created successfully! Redirecting...");
+
+      // Auto redirect (best UX)
+      setTimeout(() => {
+        window.location.href = "/choose-account";
+      }, 1200);
+
       return user;
     } catch (err) {
       console.error("Signup error:", err);
-      setErrorMessage(err?.message || "Signup failed");
+      const friendlyMsg = err.code === 'auth/email-already-in-use'
+        ? "This email is already registered."
+        : err.code === 'auth/weak-password'
+          ? "Password should be at least 6 characters."
+          : err.message || "Signup failed";
+      setErrorMessage(friendlyMsg);
       throw err;
     }
   };

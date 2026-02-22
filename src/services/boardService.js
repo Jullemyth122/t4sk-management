@@ -14,6 +14,7 @@ import {
     runTransaction,
     writeBatch,
     setDoc,
+    limit,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { COLLECTIONS, ensure, sendNotification, sanitizeString } from "./accountService"; // Assuming cross-import if needed; otherwise, duplicate or import from a shared helpers.
@@ -165,10 +166,10 @@ export const updateList = async ({ businessId = null, uid = null, boardId, listI
 };
 
 // --- Cards Section ---
-export const subscribeCardsForList = ({ businessId = null, uid = null, boardId, listId, cb }) => {
+export const subscribeCardsForList = ({ businessId = null, uid = null, boardId, listId, limitCount = 10, cb }) => {
     ensure(boardId && listId, "subscribeCardsForList: boardId & listId required");
     const col = collection(db, businessId ? COLLECTIONS.BUSINESSES : COLLECTIONS.ACCOUNT, businessId ?? uid, "boards", boardId, "lists", listId, "cards");
-    const q = query(col, orderBy("priorityRank", "desc"));
+    const q = query(col, orderBy("priorityRank", "desc"), limit(limitCount));
     const unsub = onSnapshot(
         q,
         (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
