@@ -39,6 +39,7 @@ export function usePermissionsAndDerived({ profile, businessId, roles = [], memb
     const canCreateCard = can('cards.create');
     const canUseOCR = can('ocr.use');
     const canViewBoards = can('boards.read');
+    const canUseAI = can('ai.chat');
 
     const boardsFiltered = useMemo(() => {
         if (!boardQuery) return boards || [];
@@ -141,6 +142,7 @@ export function usePermissionsAndDerived({ profile, businessId, roles = [], memb
         canUpdateList, 
         canCreateCard, 
         canUseOCR,     
+        canUseAI,
         canViewBoards, 
         boardsFiltered,
         membersFiltered,

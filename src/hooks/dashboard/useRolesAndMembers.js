@@ -1,7 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import * as accountSvc from '../../services/accountService';
 
 export function useRolesAndMembers({ businessId, dispatchSet, businessOwnerUid, members }) {
+    // Keep a ref to current members so the inject-owner effect doesn't
+    // need `members` in its dependency array (which would cause a loop).
+    const membersRef = useRef(members);
+    membersRef.current = members;
+
     // Load roles & members
     useEffect(() => {
         if (!businessId) {
@@ -40,15 +45,15 @@ export function useRolesAndMembers({ businessId, dispatchSet, businessOwnerUid, 
         return () => { cancelled = true; };
     }, [businessId, dispatchSet]);
 
-    // Inject owner if missing
+    // Inject owner if missing — only re-run when businessOwnerUid changes
     useEffect(() => {
         if (!businessOwnerUid) return;
-        // If members already include owner (by uid), nothing to do
-        const found = (members || []).some(m => {
+        // Check current members via ref to avoid dependency on `members`
+        const alreadyPresent = (membersRef.current || []).some(m => {
             const key = m.uid || m.id || null;
             return key && String(key) === String(businessOwnerUid);
         });
-        if (found) return;
+        if (alreadyPresent) return;
         (async () => {
             try {
                 const ownerProfile = await accountSvc.fetchAccountProfile(businessOwnerUid);
@@ -68,5 +73,5 @@ export function useRolesAndMembers({ businessId, dispatchSet, businessOwnerUid, 
                 console.warn('failed to fetch owner profile for reviewer fallback', err);
             }
         })();
-    }, [businessOwnerUid, members, dispatchSet]);
+    }, [businessOwnerUid, dispatchSet]);
 }

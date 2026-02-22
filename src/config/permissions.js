@@ -33,8 +33,11 @@ export const PERMISSIONS = [
 
     // OCR Features
     { key: 'ocr.use', name: 'Use OCR', description: 'Can use OCR features to import data' },
+
+    // AI Features
+    { key: 'ai.chat', name: 'Use AI Co-Pilot', description: 'Can use the AI co-pilot chat assistant' },
 ];
 
 export const PERMISSION_CATEGORIES = [
-    'business', 'settings', 'roles', 'members', 'boards', 'lists', 'cards', 'ocr'
+    'business', 'settings', 'roles', 'members', 'boards', 'lists', 'cards', 'ocr', 'ai'
 ];

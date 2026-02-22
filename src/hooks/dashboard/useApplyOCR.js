@@ -91,7 +91,8 @@ export function useApplyOCR({ selectedBoardId, canCreateList, ocrResult, lists, 
             if (explicitEmailRE.test(norm)) {
                 const exact = candidateEmails.find(c => c === norm);
                 if (exact) return exact;
-                return norm;
+                // No exact match — do NOT return the raw OCR email.
+                // Fall through to fuzzy matching below.
             }
 
             const tokenLocal = (norm.split('@')[0] || norm);
@@ -128,11 +129,14 @@ export function useApplyOCR({ selectedBoardId, canCreateList, ocrResult, lists, 
                 const emailKey = norm.toLowerCase();
                 if (emailMap && emailMap[emailKey]) {
                     const mem = emailMap[emailKey];
-                    const id = mem.uid || mem.id || null;
+                    const id = mem.uid || null;
                     if (id && String(id) === String(businessOwnerUid)) return null;
                     return id || emailKey;
                 }
-                return emailKey;
+                // Email not found in members — check candidateEmails list
+                if (candidateEmails.includes(emailKey)) return emailKey;
+                // Not a known member email — exclude it
+                return null;
             }
 
             // uid or id token -> map via membersMap if possible (prefer uid)
@@ -141,7 +145,7 @@ export function useApplyOCR({ selectedBoardId, canCreateList, ocrResult, lists, 
                 const candidate = uidMatch[1];
                 if (membersMap && membersMap[candidate]) {
                     const mm = membersMap[candidate];
-                    const id = mm.uid || mm.id || null;
+                    const id = mm.uid || null;
                     if (id && String(id) === String(businessOwnerUid)) return null;
                     return id || (mm.email ? String(mm.email).toLowerCase() : null);
                 }
@@ -152,14 +156,15 @@ export function useApplyOCR({ selectedBoardId, canCreateList, ocrResult, lists, 
             if (fuzzy) {
                 if (emailMap && emailMap[fuzzy]) {
                     const mem = emailMap[fuzzy];
-                    const id = mem.uid || mem.id || null;
+                    const id = mem.uid || null;
                     if (id && String(id) === String(businessOwnerUid)) return null;
                     return id || String(fuzzy).toLowerCase();
                 }
                 return String(fuzzy).toLowerCase();
             }
 
-            return norm || null;
+            // No match found — exclude unknown tokens to avoid assigning to non-existent members
+            return null;
         };
 
         // --- 2. Execution Loop ---
@@ -320,11 +325,11 @@ export function useApplyOCR({ selectedBoardId, canCreateList, ocrResult, lists, 
                 
                 totalTasksCreated += toCreate.length;
 
-                // Update list assignees (Union of all cards, validated against lowLevelUidSet)
-                const finalUniqueAssigneesUids = Array.from(allUniqueAssignees).filter(id => lowLevelUidSet.has(id)); 
+                // Update list assignees (Union of all cards, excluding owner)
+                const finalUniqueAssigneesUids = Array.from(allUniqueAssignees).filter(id => id && String(id) !== String(businessOwnerUid)); 
                 if (finalUniqueAssigneesUids.length > 0) {
                      await boardSvc.updateList({ businessId, uid, boardId: selectedBoardId, listId, updates: { assignees: finalUniqueAssigneesUids } });
-                     dispatchSet('lists', (prev) => prev.map(l => l.id === listId ? { ...l, assignees: finalUniqueAssigneesUids } : l));
+                     dispatchSet('lists', (prev) => (prev || []).map(l => l.id === listId ? { ...l, assignees: finalUniqueAssigneesUids } : l));
                 }
 
             } // end list loop

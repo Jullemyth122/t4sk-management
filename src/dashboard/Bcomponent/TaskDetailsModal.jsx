@@ -295,26 +295,7 @@ export default function TaskDetailsModal({
                                 {subtasks.length === 0 && <div style={{ opacity: 0.5, fontStyle: 'italic', fontSize: '0.9rem', padding: '8px 0' }}>No subtasks yet</div>}
                             </div>
                         </div>
-                        
-                        {/* Reviewer Actions (if submitted and viewer is reviewer) */}
-                        {(isReviewer || isHighLevel) && !isRejected && !isSubmitted && String(card.status) === 'pending' && !isPersonal && (
-                            <div style={{ marginTop: 24, background: 'rgba(255,255,255,0.03)', padding: 20, borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <h4 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', color: 'var(--sidenav-H1)' }}>Reviewer Actions</h4>
-                                <textarea 
-                                    className="td-textarea"
-                                    value={reviewNote} 
-                                    onChange={e => setReviewNote(e.target.value)} 
-                                    placeholder="Add feedback..." 
-                                    style={{ marginBottom: 16, minHeight: 60 }} 
-                                />
-                                <div style={{ display: 'flex', gap: 12 }}>
-                                    <button onClick={onApprove} className="td-btn" style={{ background: '#4caf50', color: '#fff' }} disabled={actionLoading}>Approve</button>
-                                    <button onClick={onReject} className="td-btn" style={{ background: '#f44336', color: '#fff' }} disabled={actionLoading}>Reject</button>
-                                </div>
-                            </div>
-                        )}
-
-                    </div>
+                        {/* Reviewer Actions have been moved exclusively to ReviewModal.jsx triggered from CardItem */}                    </div>
                 </div>
 
                 {/* Footer */}

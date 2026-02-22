@@ -21,7 +21,11 @@ export default function CardItem({
     reviewerOptions,       // needed for modal
     currentUserEmail,
     isPersonal = false,
-    highlightColor
+    highlightColor,
+    viewMode = 'card',
+    listColor,
+    listName,
+    listAssignees = []
 }) {
     const [modalOpen, setModalOpen] = useState(false);
     const [submitModalOpen, setSubmitModalOpen] = useState(false);
@@ -87,6 +91,12 @@ export default function CardItem({
 
     const showReviewActions = (isHighLevel || isReviewer) && isPendingReview;
 
+    const isCurrentUserAssigned = currentUserMember && assignees.some(a =>
+        (a.email && currentUserMember.email && String(a.email).toLowerCase() === String(currentUserMember.email).toLowerCase()) ||
+        (a.name && currentUserMember.name && a.name === currentUserMember.name)
+    );
+    const canSubmit = !isApproved && !isPendingReview && (isPersonal || isCurrentUserAssigned);
+
     // Open Modal Handler
     const handleCardClick = (e) => {
         // Prevent opening if clicking buttons/inputs directly
@@ -111,8 +121,92 @@ export default function CardItem({
         return priorityStyles[p] || priorityStyles.medium;
     };
 
-    return (
-        <>
+    const renderContent = () => {
+        if (viewMode === 'row') {
+            const formattedDate = card.dueDate
+                ? new Date(card.dueDate.seconds ? card.dueDate.seconds * 1000 : card.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                : null;
+            return (
+                <div
+                    ref={cardRef}
+                    className={`card-row-mode ${isRejected ? 'rejected' : ''} ${isApproved ? 'approved' : ''} ${hlColor ? 'highlighted' : ''}`}
+                    onClick={handleCardClick}
+                    style={{
+                        ...(hlColor ? {
+                            '--highlight-color': hlColor,
+                            border: `2px solid ${hlColor}`,
+                            boxShadow: `0 0 12px ${hlColor}66, 0 0 24px ${hlColor}33`,
+                            animation: 'highlight-pulse 2s ease-in-out infinite'
+                        } : {})
+                    }}
+                >
+                    <span className="row-dot" style={{ background: listColor || '#667eea' }} />
+
+                    <div className="row-title-col">
+                        <span className="row-title">{card.title || 'Untitled Task'}</span>
+                        <span className="row-list-name">{listName}</span>
+                    </div>
+
+                    <div className="row-assignees">
+                        {assignees.slice(0, 3).map((a, i) => (
+                            <div key={i} title={a.name} className="row-avatar" style={{ zIndex: 3 - i }}>
+                                {a.avatar ? <img src={a.avatar} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /> : (a.name[0] || '?').toUpperCase()}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="row-progress">
+                        <div className="progress-bar">
+                            <div className="progress-fill" style={{ width: `${progress}%`, background: isDone || isApproved ? '#10b981' : (listColor || '#667eea') }} />
+                        </div>
+                        <span className="progress-text">
+                            {completedSubtasks}/{totalSubtasks}
+                        </span>
+                    </div>
+
+                    <span className="row-priority" style={{ color: getPriorityStyle().color, background: getPriorityStyle().background }}>
+                        {card.priority || 'Medium'}
+                    </span>
+
+                    <div className="row-due">
+                        {formattedDate && (
+                            <>
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ marginRight: 4 }}>
+                                    <circle cx="6" cy="6" r="5" />
+                                    <path d="M6 3v3.5l2.5 1" strokeLinecap="round" />
+                                </svg>
+                                {formattedDate}
+                            </>
+                        )}
+                    </div>
+
+                    <div className="row-actions">
+                        <div style={{ display: 'flex', gap: 4 }}>
+                            {canSubmit && (
+                                <button
+                                    className="btn-small action ghost"
+                                    onClick={(e) => { e.stopPropagation(); setSubmitModalOpen(true); }}
+                                    style={{ fontSize: '0.68rem', padding: '4px 8px', borderRadius: 4 }}
+                                >
+                                    {isPersonal ? 'Complete' : 'Submit'}
+                                </button>
+                            )}
+                            {showReviewActions && (
+                                <button
+                                    className="btn-small action primary"
+                                    onClick={(e) => { e.stopPropagation(); setReviewModalOpen(true); }}
+                                    style={{ fontSize: '0.68rem', padding: '4px 8px', borderRadius: 4 }}
+                                >
+                                    Review
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
             <article
                 ref={cardRef}
                 className={`card-item summary-mode ${isRejected ? 'rejected' : ''} ${isApproved ? 'approved' : ''} ${hlColor ? 'highlighted' : ''}`}
@@ -185,7 +279,7 @@ export default function CardItem({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     {/* Quick action buttons */}
                     <div style={{ display: 'flex', gap: 4 }}>
-                        {!isApproved && !isPendingReview && ((currentUserMember && assignees.some(a => String(a.email).toLowerCase() === String(currentUserMember.email).toLowerCase() || a.name === currentUserMember.name)) || isBusinessOwner || isPersonal) && (
+                        {canSubmit && (
                             <button
                                 className="btn-small action ghost"
                                 onClick={(e) => { e.stopPropagation(); setSubmitModalOpen(true); }}
@@ -269,6 +363,12 @@ export default function CardItem({
                     </div>
                 )}
             </article>
+        );
+    };
+
+    return (
+        <>
+            {renderContent()}
 
             {/* --- Modals --- */}
 
@@ -294,11 +394,17 @@ export default function CardItem({
                 handleReviewAction={handleReviewAction}
                 isReviewer={isReviewer}
                 isHighLevel={isHighLevel}
-                assigneeCandidates={Object.values(membersMap).map(m => ({
-                    id: m.uid || m.id,
-                    email: m.email,
-                    name: m.name || m.displayName
-                }))}
+                assigneeCandidates={Object.values(membersMap)
+                    .filter(m => (listAssignees || []).some(la => {
+                        const rawKey = String(la).toLowerCase();
+                        return rawKey === String(m.uid || m.id).toLowerCase() || rawKey === String(m.email).toLowerCase();
+                    }))
+                    .map(m => ({
+                        id: m.uid || m.id,
+                        email: m.email,
+                        name: m.name || m.displayName
+                    }))
+                }
                 // Pass priority/complexity options if needed, or define in modal
                 priorityOptions={[
                     { value: 'low', label: 'Easy' },
