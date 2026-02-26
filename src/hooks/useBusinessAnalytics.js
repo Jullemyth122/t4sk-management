@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { collectionGroup, query, where, getDocs, collection } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
@@ -8,6 +8,11 @@ export function useBusinessAnalytics(businessId) {
     const [members, setMembers] = useState([]);
     const [lists, setLists] = useState([]);
     const [error, setError] = useState(null);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+    const refresh = useCallback(() => {
+        setRefreshTrigger(prev => prev + 1);
+    }, []);
 
     useEffect(() => {
         if (!businessId) return;
@@ -79,7 +84,7 @@ export function useBusinessAnalytics(businessId) {
         fetchData();
 
         return () => { cancelled = true; };
-    }, [businessId]);
+    }, [businessId, refreshTrigger]);
 
     // Computed Advanced Analytics
     const analytics = useMemo(() => {
@@ -129,6 +134,8 @@ export function useBusinessAnalytics(businessId) {
             if (status !== 'done') {
                 if (dueDate && dueDate < now) {
                     riskLevel = 'critical'; // Overdue
+                } else if (dueDate && (dueDate - now) <= (2 * oneDay) && progress < 80) {
+                    riskLevel = 'high'; // Due soon (High Risk)
                 } else if (priority === 'high' && progress < 20) {
                     riskLevel = 'high'; // Stagnant High Priority
                 } else if (c.dependencies && c.dependencies.length > 0) {
@@ -256,6 +263,15 @@ export function useBusinessAnalytics(businessId) {
                 cardIds: highRiskCardIds,
                 boardId: highRiskBoardId
             });
+        } else if (highRiskTasks > 0) {
+            insights.push({
+                type: 'warning',
+                title: 'Attention Required',
+                message: `${highRiskTasks} task(s) are High Risk or Overdue and require attention.`,
+                action: 'Review "High Risk" or "Overdue" tasks in the board view.',
+                cardIds: highRiskCardIds,
+                boardId: highRiskBoardId
+            });
         }
 
         // 2. Bottleneck Alert
@@ -306,5 +322,5 @@ export function useBusinessAnalytics(businessId) {
 
     }, [cards, members, loading]);
 
-    return { loading, error, ...analytics };
+    return { loading, error, refresh, ...analytics };
 }

@@ -30,6 +30,7 @@ export const PERMISSIONS = [
     { key: 'cards.delete', name: 'Delete Cards', description: 'Can delete cards' },
     { key: 'cards.move', name: 'Move Cards', description: 'Can move cards between lists' },
     { key: 'cards.assign', name: 'Assign Members', description: 'Can assign members to cards' },
+    { key: 'reviews.receive', name: 'Receive Submissions', description: 'Can be assigned as a reviewer for task submissions' },
 
     // OCR Features
     { key: 'ocr.use', name: 'Use OCR', description: 'Can use OCR features to import data' },

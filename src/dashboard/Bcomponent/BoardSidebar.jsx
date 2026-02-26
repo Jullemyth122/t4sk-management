@@ -23,6 +23,8 @@ export default function BoardSidebar({
     setBoardSort,
 }) {
 
+
+
     return (
         <div className="bd-section bd-boards-pane">
             {/* <div className="bd-boards-head"><h3>Boards</h3><span className="count">{boards.length}</span></div> */}
@@ -102,10 +104,12 @@ export default function BoardSidebar({
                 </div>
             </div>
 
-            <div className="bd-create">
-                <input value={newBoardName} onChange={(e)=>setNewBoardName(e.target.value)} placeholder="New board name" className="bd-input" />
-                <button onClick={handleCreateBoard} className="bd-btn" disabled={!canCreateBoard}>Create</button>
-            </div>
+            {canCreateBoard &&
+                <div className="bd-create">
+                    <input value={newBoardName} onChange={(e) => setNewBoardName(e.target.value)} placeholder="New board name" className="bd-input" />
+                    <button onClick={handleCreateBoard} className="bd-btn" disabled={!canCreateBoard}>Create</button>
+                </div>
+            }
         </div>
     );
 }

@@ -1,0 +1,381 @@
+// Import businessMixins if needed, or rely on business-dashboard importing this
+// @import './businessMixins';
+
+.create-task-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.2s ease-out;
+
+    .create-task-modal {
+        background: var(--bd-header-bg); /* Use the rich gradient background */
+        border: 1px solid var(--bd-border-subtle);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 700px; /* Slightly wider to match dashboard spacing */
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow: hidden;
+
+        // Header matches sidebar styling
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--bd-border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.15); /* Slight darkening for the header */
+
+            h3 {
+                margin: 0;
+                color: var(--bd-text-main);
+                font-size: 1.15rem;
+                font-weight: 700;
+                letter-spacing: -0.2px;
+            }
+
+            .close-btn {
+                background: transparent;
+                border: 1px solid transparent;
+                color: var(--bd-text-sub);
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.25rem;
+                cursor: pointer;
+                transition: all 0.2s;
+
+                &:hover {
+                    color: var(--bd-text-main);
+                    background: rgba(255, 255, 255, 0.08); /* Match bd-action-btn hover */
+                    border-color: var(--bd-border-light);
+                }
+            }
+        }
+
+        // Body matches sd-modal-grid style roughly, but just two columns
+        .modal-body {
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px; /* Wider gap like standard bd-forms */
+            max-height: 70vh;
+            overflow-y: auto;
+
+            &::-webkit-scrollbar { width: 6px; }
+            &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+            &::-webkit-scrollbar-track { background: transparent; }
+
+            // Form Fields
+            .form-column {
+                display: flex;
+                flex-direction: column;
+                gap: 16px; /* consistent vertical spacing */
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+
+                label {
+                    display: block;
+                    margin-bottom: 6px;
+                    color: var(--bd-text-main);
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                }
+
+                input[type="text"],
+                input[type="date"],
+                input[type="number"] {
+                    width: 100%;
+                    padding: 10px 12px;
+                    background: var(--bd-input-bg);
+                    border: 1px solid transparent;
+                    border-radius: 8px;
+                    color: var(--bd-text-main);
+                    font-size: 0.9rem;
+                    font-family: inherit;
+                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+                    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+
+                    &:focus {
+                        outline: none;
+                        background: rgba(0, 0, 0, 0.04);
+                        border-color: var(--task-modalbtnBG); /* Use theme accent */
+                        box-shadow: 0 0 0 2px rgba(83, 143, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+                    }
+                    
+                    &::placeholder {
+                        color: var(--bd-input-pg, rgba(255,255,255,0.4));
+                    }
+                }
+            }
+
+            // Subtask Area
+            .subtasks-container {
+                display: flex;
+                flex-direction: column;
+                
+                .subtasks-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 12px;
+
+                    h4 {
+                        margin: 0;
+                        color: var(--bd-text-main);
+                        font-size: 0.95rem;
+                        font-weight: 600;
+                    }
+                }
+
+                .subtask-list {
+                    background: var(--bd-panel-bg);
+                    border: 1px solid var(--bd-border-subtle);
+                    border-radius: 10px;
+                    padding: 12px;
+                    margin-bottom: 16px;
+                    min-height: 120px;
+                    max-height: 250px;
+                    overflow-y: auto;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+
+                    &::-webkit-scrollbar { width: 4px; }
+                    &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+
+                    .mini-subtask-item {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 8px 12px;
+                        background: var(--bd-card-bg); /* Match generic card */
+                        border: 1px solid var(--bd-card-border);
+                        border-radius: 8px;
+                        font-size: 0.85rem;
+                        color: var(--bd-text-main);
+                        transition: transform 0.15s, box-shadow 0.15s;
+
+                        &:hover {
+                            background: var(--bd-card-hover);
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                        }
+
+                        .mini-subtask-text {
+                            flex: 1;
+                            margin-right: 12px;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                            font-weight: 500;
+                        }
+
+                        .mini-subtask-meta {
+                            color: var(--task-modalbtnBG); /* Highlight weight in theme color */
+                            font-size: 0.75rem;
+                            font-weight: 700;
+                            margin-right: 12px;
+                            background: rgba(83, 143, 255, 0.1);
+                            padding: 2px 6px;
+                            border-radius: 4px;
+                        }
+
+                        .remove-btn {
+                            background: transparent;
+                            border: 1px solid transparent;
+                            color: var(--bd-text-sub);
+                            cursor: pointer;
+                            font-size: 1.1rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 24px;
+                            height: 24px;
+                            border-radius: 6px;
+                            transition: all 0.2s;
+
+                            &:hover {
+                                background: rgba(255, 107, 107, 0.1);
+                                color: #FF6B6B;
+                            }
+                        }
+                    }
+
+                    .empty-subtasks {
+                        text-align: center;
+                        color: var(--bd-text-sub);
+                        font-size: 0.85rem;
+                        padding: 20px 0;
+                        opacity: 0.7;
+                    }
+                }
+
+                .subtask-add-row {
+                    display: flex;
+                    gap: 8px;
+
+                    input[type="text"] {
+                        flex: 1;
+                        padding: 10px 12px;
+                        background: var(--bd-input-bg);
+                        border: 1px solid transparent;
+                        border-radius: 8px;
+                        color: var(--bd-text-main);
+                        font-size: 0.85rem;
+
+                        &:focus {
+                            border-color: var(--task-modalbtnBG);
+                        }
+                    }
+
+                    input[type="number"] {
+                        width: 70px;
+                        text-align: center;
+                        padding: 10px;
+                        background: var(--bd-input-bg);
+                        border: 1px solid transparent;
+                        border-radius: 8px;
+                        color: var(--bd-text-main);
+
+                        &:focus {
+                            border-color: var(--task-modalbtnBG);
+                        }
+                    }
+
+                    .add-subtask-btn {
+                        background: var(--bd-btn-bg);
+                        color: var(--bd-text-main);
+                        border: 1px solid var(--bd-btn-border);
+                        border-radius: 8px;
+                        padding: 0 16px;
+                        font-weight: 700;
+                        cursor: pointer;
+                        transition: all 0.18s;
+
+                        &:hover {
+                            background: var(--bd-btn-hover);
+                            border-color: var(--bd-border-light);
+                            transform: translateY(-1px);
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+                        }
+
+                        &:active {
+                            transform: translateY(0);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Footer matches bd-header-like action area
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--bd-border-subtle);
+            background: rgba(0, 0, 0, 0.2); // Matching the sd-left pane depth
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+
+            button {
+                padding: 10px 20px;
+                border-radius: 10px;
+                font-size: 0.9rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                font-family: inherit;
+
+                &.btn-cancel {
+                    background: transparent;
+                    border: 1px solid var(--bd-border-subtle);
+                    color: var(--bd-text-main);
+
+                    &:hover {
+                        background: rgba(255, 255, 255, 0.05);
+                        border-color: var(--bd-border-light);
+                    }
+                }
+
+                &.btn-create {
+                    background: linear-gradient(135deg, var(--task-modalbtnBG), var(--task-modalbtnBG1));
+                    border: none;
+                    color: #fff;
+                    box-shadow: 0 4px 15px rgba(83, 143, 255, 0.2);
+
+                    &:hover {
+                        filter: brightness(1.1);
+                        transform: translateY(-1px);
+                    }
+
+                    &:active {
+                        transform: translateY(0);
+                    }
+
+                    &:disabled {
+                        opacity: 0.5;
+                        cursor: not-allowed;
+                        transform: none;
+                        filter: grayscale(100%);
+                    }
+                }
+            }
+        }
+
+        // Responsive adjustments
+        @media (max-width: 768px) {
+            .modal-body {
+                grid-template-columns: 1fr;
+                gap: 24px;
+                padding: 20px;
+            }
+            .modal-header {
+                padding: 20px;
+            }
+            .modal-footer {
+                padding: 20px;
+            }
+        }
+    }
+}
+
+// Light theme overrides mapping where necessary, mostly relies on BD tokens
+[data-theme="light"] .create-task-modal-overlay {
+    background: rgba(0, 0, 0, 0.4);
+
+    .create-task-modal {
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+        
+        .modal-header { background: rgba(0, 0, 0, 0.02); }
+        .modal-footer { background: rgba(0, 0, 0, 0.02); }
+        
+        .subtasks-container .subtask-list .mini-subtask-item {
+            .mini-subtask-meta {
+                background: rgba(33, 118, 203, 0.08);
+            }
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}

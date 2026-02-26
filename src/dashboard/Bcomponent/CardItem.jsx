@@ -70,6 +70,45 @@ export default function CardItem({
     const isRejected = String(card.submission?.reviewStatus || '').toLowerCase() === 'rejected';
     const isPendingReview = String(card.status || '').toLowerCase() === 'pending';
 
+    // Overdue Logic
+    const now = new Date();
+    const cardDueDate = card.dueDate ? new Date(card.dueDate.seconds ? card.dueDate.seconds * 1000 : card.dueDate) : null;
+    const isOverdue = cardDueDate && cardDueDate < now && !isDone && !isApproved;
+
+    // Override highlight color if overdue
+    const displayHlColor = isOverdue ? HIGHLIGHT_COLORS.critical : hlColor;
+
+    // Trigger Notification if newly overdue
+    useEffect(() => {
+        if (isOverdue && !card.overdueNotified) {
+            import('../../services/accountService').then(({ sendNotification }) => {
+                const title = `Task Overdue: ${card.title || 'Untitled'}`;
+                const message = `The task "${card.title || 'Untitled'}" is now overdue. Please review its status.`;
+                const sentUids = new Set();
+
+                // Notify assigning owner
+                if (businessOwnerUid) {
+                    sendNotification(businessOwnerUid, { title, message, type: 'critical' });
+                    sentUids.add(businessOwnerUid);
+                }
+
+                // Notify all assignees
+                for (const memberId of (card.assignees || [])) {
+                    const m = membersMap[memberId];
+                    if (m && m.uid && !sentUids.has(m.uid)) {
+                        sendNotification(m.uid, { title, message, type: 'critical' });
+                        sentUids.add(m.uid);
+                    }
+                }
+
+                // Update firestore to prevent duplicate notifications
+                if (handleUpdateCard) {
+                    handleUpdateCard({ listId, cardId: card.id, updates: { overdueNotified: true } });
+                }
+            }).catch(console.error);
+        }
+    }, [isOverdue, card.overdueNotified, card.id, listId, handleUpdateCard, businessOwnerUid, card.assignees, membersMap, card.title]);
+
     // Progress Bar Logic
     const displayProgress = Number.isFinite(Number(card.progress)) ? Math.round(Number(card.progress)) : 0;
     const progress = isApproved || isDone ? 100 : displayProgress;
@@ -82,20 +121,27 @@ export default function CardItem({
 
     // Check role name for high-level (use roleName, role, or inferred from member data)
     const memberRole = currentUserMember?.roleName || currentUserMember?.role || '';
-    const isHighLevelByRole = currentUserMember && ['owner', 'admin', 'manager'].includes(String(memberRole).toLowerCase());
+    const isHighLevelByRole = currentUserMember && ['owner', 'admin', 'manager', 'director', 'lead', 'supervisor', 'staff'].includes(String(memberRole).toLowerCase());
 
-    // User is high-level if they are the business owner OR have a high-level role
-    const isHighLevel = isBusinessOwner || isHighLevelByRole;
+    // Check if user is in reviewerOptions (meaning they have reviews.receive permission or are high level)
+    const isAuthorizedReviewer = Array.isArray(reviewerOptions) && reviewerOptions.some(
+        opt => String(opt.value).toLowerCase() === String(currentUserUid).toLowerCase() ||
+            String(opt.value).toLowerCase() === String(currentUserEmail).toLowerCase()
+    );
 
-    const isReviewer = (card.submission?.reviewerUid === currentUserUid) || (card.submission?.reviewerEmail === currentUserEmail);
+    // User is high-level if they are the business owner OR have a high-level role OR are in reviewerOptions
+    const isHighLevel = isBusinessOwner || isHighLevelByRole || isAuthorizedReviewer;
 
-    const showReviewActions = (isHighLevel || isReviewer) && isPendingReview;
+    const isReviewer = (card.submission?.reviewerUid === currentUserUid) || (card.submission?.reviewerEmail?.toLowerCase() === currentUserEmail?.toLowerCase());
+
+    const showReviewActions = (isHighLevel || isReviewer || isAuthorizedReviewer) && isPendingReview;
 
     const isCurrentUserAssigned = currentUserMember && assignees.some(a =>
         (a.email && currentUserMember.email && String(a.email).toLowerCase() === String(currentUserMember.email).toLowerCase()) ||
         (a.name && currentUserMember.name && a.name === currentUserMember.name)
     );
-    const canSubmit = !isApproved && !isPendingReview && (isPersonal || isCurrentUserAssigned);
+    // Overdue tasks cannot be submitted by assignees until the deadline is extended
+    const canSubmit = !isApproved && !isPendingReview && !isOverdue && (isPersonal || isCurrentUserAssigned);
 
     // Open Modal Handler
     const handleCardClick = (e) => {
@@ -129,14 +175,14 @@ export default function CardItem({
             return (
                 <div
                     ref={cardRef}
-                    className={`card-row-mode ${isRejected ? 'rejected' : ''} ${isApproved ? 'approved' : ''} ${hlColor ? 'highlighted' : ''}`}
+                    className={`card-row-mode ${isRejected ? 'rejected' : ''} ${isApproved ? 'approved' : ''} ${displayHlColor ? 'highlighted' : ''}`}
                     onClick={handleCardClick}
                     style={{
-                        ...(hlColor ? {
-                            '--highlight-color': hlColor,
-                            border: `2px solid ${hlColor}`,
-                            boxShadow: `0 0 12px ${hlColor}66, 0 0 24px ${hlColor}33`,
-                            animation: 'highlight-pulse 2s ease-in-out infinite'
+                        ...(displayHlColor ? {
+                            '--highlight-color': displayHlColor,
+                            border: `2px solid ${displayHlColor}`,
+                            boxShadow: `0 0 2px ${displayHlColor}66, 0 0 10px ${displayHlColor}33`,
+                            animation: 'highlight-pulse 3.5s ease-in-out infinite'
                         } : {})
                     }}
                 >
@@ -209,7 +255,7 @@ export default function CardItem({
         return (
             <article
                 ref={cardRef}
-                className={`card-item summary-mode ${isRejected ? 'rejected' : ''} ${isApproved ? 'approved' : ''} ${hlColor ? 'highlighted' : ''}`}
+                className={`card-item summary-mode ${isRejected ? 'rejected' : ''} ${isApproved ? 'approved' : ''} ${displayHlColor ? 'highlighted' : ''}`}
                 onClick={handleCardClick}
                 role="button"
                 tabIndex={0}
@@ -218,10 +264,10 @@ export default function CardItem({
                     position: 'relative',
                     overflow: 'hidden',
                     padding: '10px 12px',
-                    ...(hlColor ? {
-                        '--highlight-color': hlColor,
-                        border: `2px solid ${hlColor}`,
-                        boxShadow: `0 0 12px ${hlColor}66, 0 0 24px ${hlColor}33`,
+                    ...(displayHlColor ? {
+                        '--highlight-color': displayHlColor,
+                        border: `2px solid ${displayHlColor}`,
+                        boxShadow: `0 0 12px ${displayHlColor}66, 0 0 24px ${displayHlColor}33`,
                         animation: 'highlight-pulse 2s ease-in-out infinite'
                     } : {})
                 }}
@@ -246,7 +292,7 @@ export default function CardItem({
                     </h4>
 
                     <div style={{ display: 'flex', gap: 6, fontSize: '0.7rem', opacity: 0.7, whiteSpace: 'nowrap' }}>
-                        {card.startDate && <span>🚀{new Date(card.startDate).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })}</span>}
+                        {card.startDate && <span>🚀{new Date(card.startDate.seconds ? card.startDate.seconds * 1000 : card.startDate).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })}</span>}
                         {card.dueDate && <span>📅{new Date(card.dueDate.seconds ? card.dueDate.seconds * 1000 : card.dueDate).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })}</span>}
                     </div>
                 </div>
@@ -444,12 +490,8 @@ export default function CardItem({
             <ReviewModal
                 open={reviewModalOpen}
                 onClose={() => setReviewModalOpen(false)}
-                onApprove={async (note) => {
-                    await handleReviewAction({ listId, cardId: card.id, action: 'approve', note });
-                    setReviewModalOpen(false);
-                }}
-                onReject={async (note) => {
-                    await handleReviewAction({ listId, cardId: card.id, action: 'reject', note });
+                onConfirm={async (action, note) => {
+                    await handleReviewAction({ listId, cardId: card.id, action, note });
                     setReviewModalOpen(false);
                 }}
             />

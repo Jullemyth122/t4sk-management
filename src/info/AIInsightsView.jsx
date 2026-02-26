@@ -25,6 +25,7 @@ const IconCritical = () => <svg width="24" height="24" viewBox="0 0 24 24" fill=
 const IconWarning = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={THEME.warning} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4m0 4h.01"/></svg>;
 const IconSuccess = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={THEME.success} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
 const IconInfo = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={THEME.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>;
+const IconRefresh = ({ className }) => <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" /></svg>;
 
 const InsightCard = ({ insight, onInsightClick }) => {
     let borderColor = THEME.grid;
@@ -92,7 +93,7 @@ const InsightCard = ({ insight, onInsightClick }) => {
 export default function AIInsightsView({ businessId, onInsightClick }) {
     const { 
         loading, error, healthScore, completionRate, highRiskTasks, reviewBottlenecks,
-        workloadData, riskData, insights 
+        workloadData, riskData, insights, refresh 
     } = useBusinessAnalytics(businessId);
     
     const [viewMode, setViewMode] = useState('dashboard'); // 'dashboard' | 'performance'
@@ -105,28 +106,51 @@ export default function AIInsightsView({ businessId, onInsightClick }) {
     return (
         <div className="ai-dashboard fade-in" style={{ color: THEME.text, paddingBottom: 40 }}>
             {/* View Switcher */}
-            <div className="flex gap-4 mb-6 border-b border-slate-700 pb-2">
-                <button 
-                    onClick={() => setViewMode('dashboard')}
-                    style={{ 
-                        color: viewMode === 'dashboard' ? THEME.accent : THEME.text, 
-                        fontWeight: viewMode === 'dashboard' ? 'bold' : 'normal',
-                        borderBottom: viewMode === 'dashboard' ? `2px solid ${THEME.accent}` : 'none',
-                        paddingBottom: 4
+            <div className="flex gap-4 mb-6 border-b border-slate-700 pb-2 justify-between items-center">
+                <div className="flex gap-4">
+                    <button
+                        onClick={() => setViewMode('dashboard')}
+                        style={{
+                            color: viewMode === 'dashboard' ? THEME.accent : THEME.text,
+                            fontWeight: viewMode === 'dashboard' ? 'bold' : 'normal',
+                            borderBottom: viewMode === 'dashboard' ? `2px solid ${THEME.accent}` : 'none',
+                            paddingBottom: 4
+                        }}
+                    >
+                        Project Overview
+                    </button>
+                    <button
+                        onClick={() => setViewMode('performance')}
+                        style={{
+                            color: viewMode === 'performance' ? THEME.accent : THEME.text,
+                            fontWeight: viewMode === 'performance' ? 'bold' : 'normal',
+                            borderBottom: viewMode === 'performance' ? `2px solid ${THEME.accent}` : 'none',
+                            paddingBottom: 4
+                        }}
+                    >
+                        Staff Performance
+                    </button>
+                </div>
+                <button
+                    onClick={refresh}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        color: THEME.textHi,
+                        background: THEME.card,
+                        border: `1px solid ${THEME.grid}`,
+                        padding: '6px 14px',
+                        borderRadius: 6,
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'background 0.2s',
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = THEME.card}
                 >
-                    Project Overview
-                </button>
-                <button 
-                    onClick={() => setViewMode('performance')}
-                    style={{ 
-                        color: viewMode === 'performance' ? THEME.accent : THEME.text, 
-                        fontWeight: viewMode === 'performance' ? 'bold' : 'normal',
-                        borderBottom: viewMode === 'performance' ? `2px solid ${THEME.accent}` : 'none',
-                        paddingBottom: 4
-                    }}
-                >
-                    Staff Performance
+                    <IconRefresh className={loading ? "spin" : ""} /> Refresh Analytics
                 </button>
             </div>
 
@@ -314,6 +338,8 @@ export default function AIInsightsView({ businessId, onInsightClick }) {
                 }
                 .fade-in { animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+                .spin { animation: spin 1s linear infinite; }
+                @keyframes spin { 100% { transform: rotate(360deg); } }
             `}</style>
         </div>
     );

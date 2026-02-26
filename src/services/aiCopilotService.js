@@ -9,7 +9,7 @@ import { model } from '../config/firebase.js';
  * Serializes board state into a compact text context for the AI system prompt.
  * Keeps token count reasonable by summarizing rather than dumping raw data.
  */
-export function buildBoardContext({ board, lists, cardsMap, members, workloadMap, currentUserEmail }) {
+export function buildBoardContext({ board, lists, cardsMap, members, workloadMap, currentUserEmail, currentUserUid }) {
   const lines = [];
 
   // Board info
@@ -17,7 +17,7 @@ export function buildBoardContext({ board, lists, cardsMap, members, workloadMap
   if (board?.description) lines.push(`DESC: ${board.description}`);
 
   // Current user
-  lines.push(`\nCURRENT USER: ${currentUserEmail || 'Unknown'}`);
+  lines.push(`\nCURRENT USER: ${currentUserEmail || 'Unknown'} (UID: ${currentUserUid || 'Unknown'})`);
 
   // === UID → NAME LOOKUP MAP (this is the fix) ===
   const memberLookup = {};
@@ -58,6 +58,9 @@ export function buildBoardContext({ board, lists, cardsMap, members, workloadMap
   let totalCards = 0;
   let overdueCards = [];
   let dueToday = [];
+
+  // Track explicit tasks-per-member mapping to prevent context loss 
+  const memberTasksMap = {}; 
 
   if (lists?.length) {
     lines.push(`\nLISTS (${lists.length}):`);
@@ -108,7 +111,32 @@ export function buildBoardContext({ board, lists, cardsMap, members, workloadMap
         const dueLine = dueDate ? ` | Due: ${dueDate.toISOString().slice(0, 10)}` : '';
         const statusLine = isDone ? 'DONE' : rs === 'rejected' ? 'REJECTED' : s === 'pending' ? 'PENDING REVIEW' : 'TODO';
 
-        lines.push(`    - [${statusLine}] "${card.title}" | Priority: ${priority} | Assigned: ${assigneesDisplay}${dueLine}`);
+        const taskString = `[${statusLine}] "${card.title}" | Priority: ${priority} | Assigned: ${assigneesDisplay}${dueLine}`;
+
+        lines.push(`    - ${taskString}`);
+
+        // Accumulate exactly what this member owns
+        if (card.assignees && card.assignees.length > 0) {
+            card.assignees.forEach(aid => {
+               const key = String(aid || '').trim();
+               const displayName = memberLookup[key] || memberLookup[key.toLowerCase()] || key;
+               if (!memberTasksMap[displayName]) memberTasksMap[displayName] = [];
+               
+               // Let AI know if it's overdue or due today explicitly in their personal list
+               let marker = isDone ? ' (Completed)' : '';
+               if (!isDone && dueDate) {
+                   const msLeft = dueDate.getTime() - now.getTime();
+                   const daysLeft = msLeft / (1000 * 60 * 60 * 24);
+                   if (daysLeft < 0) marker += ' - *Overdue*';
+                   else if (daysLeft < 1) marker += ' - *Due today*';
+                   else marker += ' - *On track*';
+               } else if (!isDone) {
+                   marker += ' - *On track (No Due Date)*';
+               }
+
+               memberTasksMap[displayName].push(`"${card.title}" in "${list.name}"${marker}`);
+            });
+        }
 
         if (card.subtasks?.length) {
           const completed = card.subtasks.filter(st => st.completed).length;
@@ -138,6 +166,19 @@ export function buildBoardContext({ board, lists, cardsMap, members, workloadMap
     });
   }
 
+  // Explicit, un-missable member breakdown to defeat AI recency-bias
+  lines.push(`\nTASKS BY MEMBER (Workload Breakdown):`);
+  const membersWithTasks = Object.keys(memberTasksMap);
+  if (membersWithTasks.length > 0) {
+      membersWithTasks.forEach(name => {
+          const tasks = memberTasksMap[name];
+          lines.push(`\n  ${name} (${tasks.length} total tasks):`);
+          tasks.forEach(t => lines.push(`    - ${t}`));
+      });
+  } else {
+      lines.push(`  No tasks assigned to anyone.`);
+  }
+
   lines.push(`\nTODAY'S DATE: ${now.toISOString().slice(0, 10)}`);
 
   return lines.join('\n');
@@ -149,18 +190,18 @@ export function buildBoardContext({ board, lists, cardsMap, members, workloadMap
 const SYSTEM_PROMPT = `You are T4SK Co-Pilot, an advanced AI assistant embedded in a team task management dashboard. You have direct access to the board's real-time state.
 
 CORE CAPABILITIES:
-1. TASK SUMMARIZATION: You can summarize the board's progress, identify exactly what's behind schedule, and what was recently completed.
+1. TASK SUMMARIZATION: You can summarize the board's progress, identify exactly what's behind schedule, and what was recently completed. **CRITICAL: When the user asks "How many tasks do I have?", DO NOT just look at the Overdue/Due Today sections. You MUST look at the "\nTASKS BY MEMBER" section at the very end of the prompt to count ALL of their tasks (including "On track" tasks).**
 2. AI-POWERED SUGGESTIONS: You can identify similar tasks, suggest assigning tasks to specific members based on their current active workload (tasks count), and recommend who is best suited to take on new work.
 3. STANDUP GENERATOR: If asked to draft a standup or progress report, format it professionally:
    * **What was done:** [done/approved tasks]
-   * **What's in progress:** [active/pending tasks]
+   * **What's in progress:** [active/pending "On track" tasks]
    * **Blockers / At-risk:** [overdue tasks or rejected tasks]
 4. SMART DEADLINES: When suggesting deadlines for new or existing tasks, analyze the current date, member workloads, and urgency to provide realistic predictions.
 5. NATURAL LANGUAGE TASK CREATION: Users can ask you to "Create a high-priority task for John due Friday". You must respond with a friendly confirmation AND include a structured action block at the END of your response.
 
 RULES:
 - Be conversational, concise, and direct. Use bullet points and markdown formatting (bolding key terms) for readability.
-- When asked about specific data, ONLY reference tasks/members that exist in the board context. Do NOT invent data.
+- When summarizing a user's tasks, ALWAYS read the full list under the "TASKS BY MEMBER (Workload Breakdown)" section for their name to ensure you do not miss tasks that are "On track". Use their UID or Email to map them accurately.
 - When the user asks to CREATE a task, include this exact block at the end of your message:
 \`\`\`action
 {"type":"create_card","listName":"<target list name>","title":"<task title>","description":"<optional description>","priority":"<low|medium|high>","assignees":["<email or uid or name>"]}
