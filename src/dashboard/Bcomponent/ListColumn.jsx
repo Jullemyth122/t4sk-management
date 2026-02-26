@@ -4,6 +4,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import CardItem from './CardItem';
 import CustomSelect from './CustomSelect';
+import CreateTaskModal from './CreateTaskModal';
 import { getProjectedWeight, validateTotalWeight } from '../utils/subtaskUtils';
 
 export default function ListColumn({
@@ -11,10 +12,8 @@ export default function ListColumn({
     list,
     lists,
     cards = [],
-    listNameEditing,
-    listNameDrafts,
-    setListNameDrafts,
-    setListNameEditing,
+    allCards,  // all cards in this list (unfiltered) — used for progress calculation
+
     handleUpdateList,
     handleDeleteList,
     canEdit,
@@ -27,8 +26,6 @@ export default function ListColumn({
     handleDeleteCard,
     handleSubmitCard,
     handleReviewAction,
-    newCardInputs,
-    setNewCardInputs,
     handleCreateCardForList,
     membersMap = {},
     emailMap = {},
@@ -68,7 +65,7 @@ export default function ListColumn({
     // key: card.id -> boolean
     const [expandedMap, setExpandedMap] = useState({});
     const [collapsed, setCollapsed] = useState(false);
-    const [isQuickAddExpanded, setIsQuickAddExpanded] = useState(false); // Collapsible Quick Add State
+    const [showCreateModal, setShowCreateModal] = useState(false); // New Premium Modal State
 
     useEffect(() => {
         setCollapsed(false);
@@ -150,9 +147,11 @@ export default function ListColumn({
     const moreCount = Math.max(0, resolvedAssignees.length - visibleCount);
     const fullTitle = resolvedAssignees.map((r) => (r.email ? `${r.name} <${r.email}>` : r.name)).join(', ');
 
-    // compute aggregated list progress: prefer explicit list.progress ONLY if no cards
+    // compute aggregated list progress from ALL cards (not filtered)
+    // This ensures every member sees the full project progress regardless of their card visibility
+    const progressCards = allCards || cards;
     const listProgress = useMemo(() => {
-        if (!Array.isArray(cards) || cards.length === 0) {
+        if (!Array.isArray(progressCards) || progressCards.length === 0) {
             if (list && Number.isFinite(Number(list.progress))) {
                 return Math.max(0, Math.min(100, Math.round(Number(list.progress))));
             }
@@ -160,7 +159,7 @@ export default function ListColumn({
         }
 
         // ignore optimistic/temp cards
-        const stableCards = (cards || []).filter(c => !(String(c.id || '').startsWith('tmp-')));
+        const stableCards = (progressCards || []).filter(c => !(String(c.id || '').startsWith('tmp-')));
         if (stableCards.length === 0) return 0;
 
         // helper to get weight
@@ -225,16 +224,16 @@ export default function ListColumn({
         // Relative mode (default): Scale result to 0-100 range based on total weight
         return Math.round((weightedProgressSum / totalWeight) * 100);
 
-    }, [cards, list]);
+    }, [progressCards, list]);
 
     // === New: prevent creating a new card when listProgress >= 100
     const isListComplete = Number.isFinite(Number(listProgress)) && Number(listProgress) >= 100;
 
     // safe wrapper for creating a card: rejects if list is already 100%
-    const safeCreateCardForList = async (listId) => {
+    const safeCreateCardForList = async (cardData) => {
         if (isListComplete) {
             const err = new Error('Cannot create card: list already 100% complete');
-            console.warn(err.message, { listId, listProgress });
+            console.warn(err.message, { listId: list.id, listProgress });
             return Promise.reject(err);
         }
         if (!handleCreateCardForList) {
@@ -252,30 +251,32 @@ export default function ListColumn({
         const existingWeights = stableCards.map(extractWeight).filter(w => w !== null);
         const sumExisting = existingWeights.reduce((s, v) => s + v, 0);
 
-        // new weight from quick-add inputs (may be empty)
-        const newInputs = newCardInputs[listId] || {};
-        const rawNewWeight = newInputs.weight;
-        const parsedNewWeight = (rawNewWeight !== undefined && rawNewWeight !== '') ? Number(rawNewWeight) : null;
+        // new weight from the modal's cardData
+        const parsedNewWeight = (cardData.weight !== undefined && cardData.weight !== '') ? Number(cardData.weight) : null;
 
         // if there are explicit weights and the creator supplied a new explicit weight -> validate sum <= 100
         if (parsedNewWeight !== null && !Number.isNaN(parsedNewWeight)) {
             const newW = Math.max(0, Math.min(100, Math.round(parsedNewWeight)));
             if (sumExisting + newW > 100) {
                 const err = new Error(`Cannot create card: weight ${newW}% would make list total ${sumExisting + newW}% (>100%)`);
-                console.warn(err.message, { listId, sumExisting, newW });
+                console.warn(err.message, { listId: list.id, sumExisting, newW });
                 return Promise.reject(err);
             }
         } else {
             // if no new weight provided but existing explicit sum already >= 100, block new card creation
             if (sumExisting >= 100) {
                 const err = new Error(`Cannot create card: existing explicit contributions already total ${sumExisting}%`);
-                console.warn(err.message, { listId, sumExisting });
+                console.warn(err.message, { listId: list.id, sumExisting });
                 return Promise.reject(err);
             }
         }
 
         try {
-            const res = handleCreateCardForList(listId);
+            // Provide the cardOverride from the Modal so it completely replaces the newCardInputs dependency
+            const res = handleCreateCardForList({
+                listId: list.id,
+                cardOverride: cardData
+            });
             return Promise.resolve(res);
         } catch (err) {
             return Promise.reject(err);
@@ -434,7 +435,7 @@ export default function ListColumn({
                 </div>
 
                 <div className="list-header-meta">
-                    <div className="list-count">{(cards || []).length} cards</div>
+                    <div className="list-count">{(progressCards || []).length} cards</div>
                     <div style={{ minWidth: 140 }}>
                         <div className="list-progress-track">
                             <div
@@ -630,7 +631,6 @@ export default function ListColumn({
                                 </div>
 
                                 <div className="pagination-controls">
-                                    <div className="pagination-info">{activeCards.length} items</div>
                                     <select
                                         className="pagination-select"
                                         value={pageSize}
@@ -728,259 +728,40 @@ export default function ListColumn({
                     )}
 
                     {_canCreateCard && (
-                        // quick-add: disabled when listProgress >= 100
-                        <div className={`quick-add-wrapper ${isListComplete ? ' disabled' : ''}`}>
-                            {/* Toggle Header */}
+                        <div className={`quick-add-wrapper ${isListComplete ? ' disabled' : ''}`} style={{ marginTop: '1rem' }}>
                             <button
-                                className={`quick-add-toggle ${isQuickAddExpanded ? 'expanded' : ''}`}
-                                onClick={() => setIsQuickAddExpanded((prev) => !prev)}
+                                className="action-btn action-primary"
+                                onClick={() => setShowCreateModal(true)}
                                 disabled={isListComplete}
-                                title={isQuickAddExpanded ? "Collapse quick add" : "Expand quick add"}
+                                style={{
+                                    width: '100%',
+                                    justifyContent: 'center',
+                                    padding: '12px', /* Taller, more click area */
+                                    fontSize: '0.95rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
                             >
-                                <span className="toggle-icon">{isQuickAddExpanded ? '▼' : '▶'}</span>
-                                <span className="toggle-text">Quick Add Task</span>
+                                <span style={{ fontSize: '1.2rem', lineHeight: '1', fontWeight: 'bold' }}>+</span>
+                                Add Task
                             </button>
 
-                            {isQuickAddExpanded && (
-                                <div className="quick-add-form">
-                                    <input
-                                        placeholder="Title"
-                                value={(newCardInputs[list.id] || {}).title || ''}
-                                onChange={(e) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), title: e.target.value } }))}
+                            <CreateTaskModal
+                                isOpen={showCreateModal}
+                                onClose={() => setShowCreateModal(false)}
+                                listName={list.name}
+                                isLocked={isListComplete}
+                                onCreate={async (cardData) => {
+                                    await safeCreateCardForList(cardData);
+                                }}
                             />
-                            <div className="quick-meta-row">
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                            <label className="quick-label">Start</label>
-                                    <input
-                                        type="date"
-                                        title="Start Date"
-                                        value={(newCardInputs[list.id] || {}).startDate || ''}
-                                        onChange={(e) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), startDate: e.target.value } }))}
-                                    />
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                            <label className="quick-label">Due</label>
-                                    <input
-                                        type="date"
-                                        title="Due Date"
-                                        value={(newCardInputs[list.id] || {}).dueDate || ''}
-                                        onChange={(e) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), dueDate: e.target.value } }))}
-                                    />
-                                </div>
-
-                                {/* Priority selector replaced with CustomSelect */}
-                                <div style={{ minWidth: 120, flex: 1 }}>
-                                            <label className="quick-label" style={{ display: 'block' }}>Priority</label>
-                                    <CustomSelect
-                                        options={priorityOptions}
-                                        value={(newCardInputs[list.id] || {}).priority ?? 'medium'}
-                                        onChange={(val) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), priority: val } }))}
-                                        placeholder="Priority"
-                                        searchable={false}
-                                        ariaLabel="Card priority"
-                                        width="100%"
-                                        // Some CustomSelect implementations ignore `disabled`, so also prevent pointer events when list is complete
-                                        style={isListComplete ? { pointerEvents: 'none' } : undefined}
-                                    />
-                                </div>
-
-                                {/* Optional: weight (contribution to list total) */}
-                                <div style={{ width: 80 }}>
-                                            <label className="quick-label">Weight %</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max="100"
-                                        placeholder="%"
-                                        className="weight-input"
-                                        value={(newCardInputs[list.id] || {}).weight ?? ''}
-                                        onChange={(e) => setNewCardInputs((p) => ({ ...p, [list.id]: { ...(p[list.id] || {}), weight: e.target.value } }))}
-                                        aria-label="Card weight"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="quick-actions">
-                                <button
-                                    onClick={async () => {
-                                        try {
-                                            await safeCreateCardForList(list.id);
-                                            // clear quick-add on success
-                                            setNewCardInputs((p) => ({ ...p, [list.id]: { title: '', startDate: '', dueDate: '', effort: 3, priority: 'medium', weight: '' } }));
-                                        } catch (err) {
-                                            // user-visible feedback when blocked (or handler failed)
-                                            try {
-                                                // prefer a non-blocking toast if you have one; fallback to alert
-                                                window.alert(err.message || 'Failed to create card');
-                                            } catch (e) {
-                                                // swallow (some environments may block alert)
-                                                console.warn(err);
-                                            }
-                                        }
-                                    }}
-                                >
-                                    Add
-                                </button>
-                                <button
-                                            onClick={() => {
-                                                setNewCardInputs((p) => ({ ...p, [list.id]: { title: '', dueDate: '', effort: 3, priority: 'medium', weight: '' } }));
-                                                setIsQuickAddExpanded(false); // Collapse on cancel
-                                            }}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-
-                            {/* Subtask addition UI */}
-                                    <div className="quick-subtasks">
-                                        <div className="subtask-section-header">
-                                    Subtasks ({((newCardInputs[list.id] || {}).subtasks || []).length})
-                                </div>
-
-                                        <div className="subtask-mini-list">
-                                    {((newCardInputs[list.id] || {}).subtasks || []).map((st, i) => (
-                                        <div key={st.id || i} className="mini-subtask-item">
-                                            <span className="mini-subtask-bullet">•</span>
-                                            <span className="mini-subtask-text">
-                                                {st.text}
-                                                <span className="mini-subtask-meta">
-                                                    ({st.weight > 0 ? st.weight : getProjectedWeight((newCardInputs[list.id] || {}).subtasks || [], i)}%)
-                                                </span>
-                                            </span>
-                                            <button
-                                                onClick={() => setNewCardInputs(p => {
-                                                    const prevSub = (p[list.id] || {}).subtasks || [];
-                                                    return {
-                                                        ...p,
-                                                        [list.id]: {
-                                                            ...(p[list.id] || {}),
-                                                            subtasks: prevSub.filter((_, idx) => idx !== i)
-                                                        }
-                                                    };
-                                                })}
-                                                className="mini-subtask-remove"
-                                                title="Remove subtask"
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                        <div className="subtask-add-row">
-                                    <input
-                                        placeholder="Subtask..."
-                                                className="subtask-add-input"
-                                        value={(newCardInputs[list.id] || {}).tempSubtaskText || ''}
-                                        onChange={(e) => setNewCardInputs(p => ({
-                                            ...p,
-                                            [list.id]: { ...(p[list.id] || {}), tempSubtaskText: e.target.value }
-                                        }))}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault();
-                                                const text = ((newCardInputs[list.id] || {}).tempSubtaskText || '').trim();
-                                                const weight = Number((newCardInputs[list.id] || {}).tempSubtaskWeight) || 0;
-                                                if (text) {
-                                                    setNewCardInputs(p => {
-                                                        const prevSub = (p[list.id] || {}).subtasks || [];
-                                                        return {
-                                                            ...p,
-                                                            [list.id]: {
-                                                                ...(p[list.id] || {}),
-                                                                subtasks: [...prevSub, { id: Date.now(), text, weight, completed: false }],
-                                                                tempSubtaskText: '',
-                                                                tempSubtaskWeight: ''
-                                                            }
-                                                        };
-                                                    });
-                                                    // Optional: focus back to text input? It's already there.
-                                                }
-                                            }
-                                        }}
-                                    />
-                                    <input
-                                        type="number"
-                                        placeholder={(getProjectedWeight((newCardInputs[list.id] || {}).subtasks || [], -1 /* placeholder for auto */) || 'Auto') + ''}
-                                                className="subtask-add-weight"
-                                        min="0"
-                                        max="100"
-                                        value={(newCardInputs[list.id] || {}).tempSubtaskWeight || ''}
-                                        onChange={(e) => setNewCardInputs(p => ({
-                                            ...p,
-                                            [list.id]: { ...(p[list.id] || {}), tempSubtaskWeight: e.target.value }
-                                        }))}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault();
-                                                const text = ((newCardInputs[list.id] || {}).tempSubtaskText || '').trim();
-                                                const weight = Number((newCardInputs[list.id] || {}).tempSubtaskWeight) || 0;
-                                                if (text) {
-                                                    setNewCardInputs(p => {
-                                                        const prevSub = (p[list.id] || {}).subtasks || [];
-                                                        const newSubList = [...prevSub, { id: Date.now(), text, weight, completed: false }];
-
-                                                        const validCheck = validateTotalWeight(newSubList);
-                                                        // "also have a warning"
-                                                        if (!validCheck.valid) {
-                                                            alert(validCheck.message);
-                                                        }
-
-                                                        return {
-                                                            ...p,
-                                                            [list.id]: {
-                                                                ...(p[list.id] || {}),
-                                                                subtasks: newSubList,
-                                                                tempSubtaskText: '',
-                                                                tempSubtaskWeight: ''
-                                                            }
-                                                        };
-                                                    });
-                                                }
-                                            }
-                                        }}
-                                    />
-                                    <button
-                                        onClick={() => {
-                                            const text = ((newCardInputs[list.id] || {}).tempSubtaskText || '').trim();
-                                            const weight = Number((newCardInputs[list.id] || {}).tempSubtaskWeight) || 0;
-                                            if (text) {
-                                                setNewCardInputs(p => {
-                                                    const prevSub = (p[list.id] || {}).subtasks || [];
-                                                    const newSubList = [...prevSub, { id: Date.now(), text, weight, completed: false }];
-
-                                                    const validCheck = validateTotalWeight(newSubList);
-                                                    if (!validCheck.valid) {
-                                                        alert(validCheck.message);
-                                                    }
-
-                                                    return {
-                                                        ...p,
-                                                        [list.id]: {
-                                                            ...(p[list.id] || {}),
-                                                            subtasks: newSubList,
-                                                            tempSubtaskText: '',
-                                                            tempSubtaskWeight: ''
-                                                        }
-                                                    };
-                                                });
-                                            }
-                                        }}
-                                                className="subtask-add-btn"
-                                    >
-                                        +
-                                    </button>
-                                </div>
-                            </div>
-
-                                </div>
-                            )}
+                        </div>
+                    )}
 
                             {isListComplete && (
                                 <div className="list-complete-msg">
-                                    This list is 100% complete — new card creation is disabled.
-                                </div>
-                            )}
+                            This list is 100% complete — new card creation is disabled.
                         </div>
                     )}
                 </>

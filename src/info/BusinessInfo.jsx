@@ -571,7 +571,12 @@ export default function BusinessInfo({ simulateLoading = false }) {
 
         if (mountedRef.current) dispatch({ type: "SET", payload: { saving: true } });
         try {
-            await createRole(state.businessId, { name: state.newRole.name.trim(), level, capacity, permissions: {} });
+            // Auto-grant boards.read for low-level roles (level <= 1) so employees can see the board sidebar
+            const autoPermissions = {};
+            if (level <= 1) {
+                autoPermissions['boards.read'] = true;
+            }
+            await createRole(state.businessId, { name: state.newRole.name.trim(), level, capacity, permissions: autoPermissions });
             if (!mountedRef.current) return;
             dispatch({ type: "RESET_NEW_ROLE" });
             dispatch({ type: "SET", payload: { success: "Role created" } });

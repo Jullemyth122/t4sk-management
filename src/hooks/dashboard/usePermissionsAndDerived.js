@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import useHasPerm from "../useHasPerm";
 
 export function usePermissionsAndDerived({ profile, businessId, roles = [], members = [],boards, boardQuery, memberQuery, lists = [], uid, userEmail, getMemberLevel, businessOwnerUid }) {
@@ -47,6 +47,43 @@ export function usePermissionsAndDerived({ profile, businessId, roles = [], memb
         return (boards || []).filter((b) => ((b.name || '') + ' ' + (b.description || '')).toLowerCase().includes(q));
     }, [boards, boardQuery]);
 
+    // For low-level users: filter boards to only show boards where user has assigned tasks
+    // This requires cardsMap from the parent - we receive it indirectly through the filtering functions
+    // We expose a helper that the parent can call to filter boards after cardsMap is populated
+    const filterBoardsByAssignee = useCallback((allBoards, allLists, allCardsMap) => {
+        // High-level users or owners see all boards
+        if (userLevel > 2) return allBoards;
+        
+        const userIdentifiers = new Set();
+        if (uid) userIdentifiers.add(String(uid).toLowerCase());
+        if (userEmail) userIdentifiers.add(String(userEmail).toLowerCase());
+        if (userIdentifiers.size === 0) return allBoards;
+
+        // Build a set of boardIds that have at least one card assigned to this user
+        const boardsWithAssignedCards = new Set();
+        (allLists || []).forEach(list => {
+            const cards = allCardsMap[list.id] || [];
+            cards.forEach(card => {
+                const assignees = card.assignees || [];
+                const hasUser = assignees.some(a => userIdentifiers.has(String(a).toLowerCase()));
+                if (hasUser && list.boardId) {
+                    boardsWithAssignedCards.add(list.boardId);
+                }
+            });
+        });
+
+        // Also check list-level assignees (user is assigned to a list in this board)
+        (allLists || []).forEach(list => {
+            const listAssignees = list.assignees || [];
+            const hasUser = listAssignees.some(a => userIdentifiers.has(String(a).toLowerCase()));
+            if (hasUser && list.boardId) {
+                boardsWithAssignedCards.add(list.boardId);
+            }
+        });
+
+        return allBoards.filter(b => boardsWithAssignedCards.has(b.id));
+    }, [userLevel, uid, userEmail]);
+
     const membersFiltered = useMemo(() => {
         const q = (memberQuery || '').toLowerCase();
         const filtered = (members || []).filter((m) => {
@@ -66,39 +103,76 @@ export function usePermissionsAndDerived({ profile, businessId, roles = [], memb
 
     const listsVisible = useMemo(() => {
         if (!Array.isArray(lists)) return [];
-        // if user has general "boards.read" (or lists.read?), they typically see all lists in that board
-        // Assuming if they can view the board, they can view lists.
-        // But let's check if we want to restrict personal lists?
-        // For now, let's say if you can 'boards.read', you see all.
-        // Or keep legacy check: userLevel > 2 sees all.
-        // Let's use 'boards.read' as "Member Access".
-        if (can('boards.read')) return lists; 
-        
+        // High-level users see all lists
+        if (userLevel > 2) return lists;
+        // For boards.read permission holders who are low-level: filter by assignee
+        if (can('boards.read')) {
+            const userIdentifiers = new Set();
+            if (uid) userIdentifiers.add(String(uid).toLowerCase());
+            if (userEmail) userIdentifiers.add(String(userEmail).toLowerCase());
+            if (userIdentifiers.size === 0) return [];
+            return lists.filter(l => {
+                const assignees = l.assignees || [];
+                return assignees.some(x => userIdentifiers.has(String(x).trim().toLowerCase()));
+            });
+        }
         // Fallback for restricted users: only see lists they are assigned to
         return lists.filter(l => (l.assignees || []).some(x => String(x).trim() === uid || String(x).trim().toLowerCase() === userEmail));
-    }, [lists, can, uid, userEmail]);
+    }, [lists, can, uid, userEmail, userLevel]);
+
+    // Card-level filtering: for low-level users, only show cards assigned to them
+    const filterCardsByAssignee = useCallback((cardsMap) => {
+        // High-level users see all cards
+        if (userLevel > 2) return cardsMap;
+
+        const userIdentifiers = new Set();
+        if (uid) userIdentifiers.add(String(uid).toLowerCase());
+        if (userEmail) userIdentifiers.add(String(userEmail).toLowerCase());
+        if (userIdentifiers.size === 0) return {};
+
+        const filtered = {};
+        Object.keys(cardsMap).forEach(listId => {
+            const cards = cardsMap[listId] || [];
+            filtered[listId] = cards.filter(card => {
+                const assignees = card.assignees || [];
+                return assignees.some(a => userIdentifiers.has(String(a).toLowerCase()));
+            });
+        });
+        return filtered;
+    }, [userLevel, uid, userEmail]);
 
     const reviewerOptions = useMemo(() => {
         if (!Array.isArray(members) || members.length === 0) return null;
         const opts = [];
         const seen = new Set();
+        let ownerIncluded = false;
+
         members.forEach((m) => {
             const mUid = m.uid || m.id || null;
             const mEmail = (m.email || '').toLowerCase();
             const level = getMemberLevel(m);
             const isOwner = businessOwnerUid && mUid && String(mUid) === String(businessOwnerUid);
-            // Hide very low level members from reviewers? Or just show everyone?
-            // Legacy was level <= 2 hidden unless owner.
-            // Maybe keep that for noise reduction, or allow configuration?
-            // Let's keep it but relax if we want full list.
-            if (!isOwner && level <= 0) return; // only hide level 0 (guests?)
+            const roleDoc = roles.find((r) => r.id === m.roleId || r.name === m.roleId || r.id === m.roleName || r.name === m.roleName);
+            const roleLabel = m.roleName || (roleDoc ? roleDoc.name : m.roleId) || '';
+            const isElevated = ['owner', 'admin', 'manager', 'lead', 'director', 'supervisor', 'staff'].includes(String(roleLabel).toLowerCase());
+            
+            // Determine if they can receive reviews
+            let canReceive = false;
+            if (isOwner) canReceive = true;
+            else if (roleDoc && String(roleDoc.name).toLowerCase() === 'owner') canReceive = true;
+            else if (roleDoc && roleDoc.permissions && roleDoc.permissions['reviews.receive']) canReceive = true;
+            else if (isElevated) canReceive = true; // Fallback for elevated roles if permissions not yet saved
+
+            // Only hide explicit guests, or level < 0 if strictly enforced.
+            const isGuest = String(roleLabel).toLowerCase() === 'guest' || level < 0;
+            if (isGuest || !canReceive) return;
             
             const val = mUid || mEmail;
             if (!val || seen.has(val)) return;
             seen.add(val);
-            const roleDoc = roles.find((r) => r.id === m.roleId || r.name === m.roleId || r.id === m.roleName || r.name === m.roleName);
-            const roleLabel = m.roleName || (roleDoc ? roleDoc.name : m.roleId) || '';
-            const levelNum = isOwner ? 999 : level;
+            if (isOwner) ownerIncluded = true;
+
+            const levelNum = isOwner ? 999 : (isElevated && level <= 0 ? 5 : level);
             opts.push({
                 value: val,
                 label: m.name || m.email || val,
@@ -107,6 +181,21 @@ export function usePermissionsAndDerived({ profile, businessId, roles = [], memb
                 owner: isOwner
             });
         });
+
+        // If the business owner wasn't found in the members array, force inject them!
+        if (businessOwnerUid && !ownerIncluded) {
+            const ownerVal = businessOwnerUid;
+            if (!seen.has(ownerVal)) {
+                opts.push({
+                    value: ownerVal,
+                    label: 'Business Owner',
+                    subtitle: 'Owner',
+                    level: 999,
+                    owner: true
+                });
+            }
+        }
+
         opts.sort((a, b) => b.level - a.level || a.label.localeCompare(b.label));
         return [{ value: '', label: '— none —', subtitle: '' }, ...opts];
     }, [members, roles, businessOwnerUid, getMemberLevel]);
@@ -149,6 +238,8 @@ export function usePermissionsAndDerived({ profile, businessId, roles = [], memb
         listsVisible,
         reviewerOptions,
         membersMap,
-        emailMap
+        emailMap,
+        filterBoardsByAssignee,
+        filterCardsByAssignee
     };
 }

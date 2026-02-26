@@ -42,6 +42,7 @@ const initialState = {
 
   lists: [],
   cardsMap: {},
+  allBoardsListsMap: null,
 
   roles: [],
   members: [],
@@ -88,8 +89,8 @@ const initialState = {
   previewFile: null,
   previewUrl: null,
 
-  // Board view mode: 'kanban' | 'list'
-  listViewMode: 'kanban',
+  // Board view mode: 'kanban' | 'list' | 'calendar'
+  listViewMode: localStorage.getItem('t4sk_listViewMode') || 'kanban',
 
   // AI Co-Pilot
   copilotOpen: false,
@@ -128,7 +129,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
     return () => clearTimeout(timer);
   }, [highlightCardIds.size]);
 
-  const { businessId, businessName, businessOwnerUid, boards, selectedBoardId, lists, cardsMap, roles, members, membersLoading, membersError, uiError, boardQuery, boardView, memberQuery, editingBoard, boardDraft, newBoardName, newListName, newListAssignees, assigneeSearch, assigneeDropdownOpen, listNameEditing, listNameDrafts, cardEditing, cardDrafts, newCardInputs, copiedEmailId, loading, ocrRaw, ocrResult, ocrError, showHeaderActions, sidebarCollapsed, sidebarTab, previewFile, previewUrl, listViewMode, copilotOpen } = state;
+  const { businessId, businessName, businessOwnerUid, boards, selectedBoardId, lists, cardsMap, allBoardsListsMap, roles, members, membersLoading, membersError, uiError, boardQuery, boardView, memberQuery, editingBoard, boardDraft, newBoardName, newListName, newListAssignees, assigneeSearch, assigneeDropdownOpen, listNameEditing, listNameDrafts, cardEditing, cardDrafts, newCardInputs, copiedEmailId, loading, ocrRaw, ocrResult, ocrError, showHeaderActions, sidebarCollapsed, sidebarTab, previewFile, previewUrl, listViewMode, copilotOpen } = state;
 
   const getMemberLevel = useCallback((m, rolesList = roles) => {
     if (typeof m.level === 'number') return m.level;
@@ -138,13 +139,13 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
     return 0;
   }, [roles]);
 
-  const { userRoleId, userLevel, userRoleName, canEditBoardValue, canCreateBoard, canCreateList, canViewMembers, canAssignTasks, canDeleteBoard, canDeleteList, canUpdateList, canCreateCard, canUseOCR, canUseAI, canViewBoards, boardsFiltered, membersFiltered, listsVisible, reviewerOptions, membersMap, emailMap } = usePermissionsAndDerived({ profile, businessId, roles, members, boards, boardQuery, memberQuery, lists, uid, userEmail, getMemberLevel, businessOwnerUid });
+  const { userRoleId, userLevel, userRoleName, canEditBoardValue, canCreateBoard, canCreateList, canViewMembers, canAssignTasks, canDeleteBoard, canDeleteList, canUpdateList, canCreateCard, canUseOCR, canUseAI, canViewBoards, boardsFiltered, membersFiltered, listsVisible, reviewerOptions, membersMap, emailMap, filterBoardsByAssignee, filterCardsByAssignee } = usePermissionsAndDerived({ profile, businessId, roles, members, boards, boardQuery, memberQuery, lists, uid, userEmail, getMemberLevel, businessOwnerUid });
 
   useBusinessLoading({ businessId, dispatchSet, profile, uid });
   useRolesAndMembers({ businessId, dispatchSet, businessOwnerUid, members });
 
 
-  useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards, highlightBoardId });
+  useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards, highlightBoardId, uid, userEmail });
   const { loadMoreCards, resetLimitCards, cardsLimitsMap, cardsHasMoreMap, cardsBaseLimit } = useCards({
     businessId,
     selectedBoardId,
@@ -153,6 +154,9 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
   });
 
   const { workloadMap, isOverloaded } = useMemberWorkload({ cardsMap, lists });
+
+  // For low-level users, filter cards to only show ones assigned to them
+  const filteredCardsMap = useMemo(() => filterCardsByAssignee(cardsMap), [cardsMap, filterCardsByAssignee]);
 
 
   // State for advanced filtering
@@ -190,14 +194,29 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
 
   const finalBoardsFiltered = useMemo(() => {
     let res = [...boardsFiltered];
+
+    // For low-level users: filter boards to only show ones where user has assigned lists
+    if (userLevel <= 2 && allBoardsListsMap) {
+      const userIdentifiers = new Set();
+      if (uid) userIdentifiers.add(String(uid).toLowerCase());
+      if (userEmail) userIdentifiers.add(String(userEmail).toLowerCase());
+
+      if (userIdentifiers.size > 0) {
+        res = res.filter(board => {
+          const boardLists = allBoardsListsMap[board.id] || [];
+          return boardLists.some(list => {
+            const assignees = list.assignees || [];
+            return assignees.some(a => userIdentifiers.has(String(a).trim().toLowerCase()));
+          });
+        });
+      }
+    }
+
     if (boardSort === 'alpha') {
       res.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    } else {
-      // default 'recent' or other: keep original order (assuming API returns recent first) or sort by id/date if available
-      // If no date, maybe just keep as is.
     }
     return res;
-  }, [boardsFiltered, boardSort]);
+  }, [boardsFiltered, boardSort, userLevel, allBoardsListsMap, uid, userEmail]);
 
 
   const { page: boardPage, perPage: boardsPerPage, setPerPage: setBoardsPerPage, totalPages: boardsTotalPages, visible: visibleBoards, goto: gotoBoardPage, setPage: setBoardPage } = usePagination(finalBoardsFiltered, 6);
@@ -265,6 +284,11 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
   const { handleUpload } = useOCRHandling({ dispatchSet, members, getMemberLevel, roles, businessOwnerUid, candidateEmails, excludedEmails });
 
   const { handleApplyOCRToBoard } = useApplyOCR({ selectedBoardId, canCreateList, ocrResult, lists, businessId, uid, dispatchSet, cardsMap, emailMap, members, membersMap, getMemberLevel, roles, businessOwnerUid });
+
+  // Save view mode
+  useEffect(() => {
+    localStorage.setItem('t4sk_listViewMode', listViewMode);
+  }, [listViewMode]);
 
   // AI Co-Pilot
   const copilot = useAICopilot({
@@ -396,32 +420,36 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
           </div>
 
           {/* Tabs */}
-          <div className="bd-sidebar-tabs">
-            <button
-              className={`bd-tab-btn ${sidebarTab === 'boards' ? 'active' : ''}`}
-              onClick={() => dispatchSet('sidebarTab', 'boards')}
-              title="Boards"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="bd-tab-icon">
-                <rect x="3" y="3" width="7" height="18" rx="1.5" fill="currentColor" />
-                <rect x="13" y="3" width="8" height="11" rx="1.5" fill="currentColor" opacity="0.7" />
-              </svg>
-              <span className="bd-tab-label">Boards</span>
-            </button>
-            <button
-              className={`bd-tab-btn ${sidebarTab === 'members' ? 'active' : ''}`}
-              onClick={() => dispatchSet('sidebarTab', 'members')}
-              title="Members"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="bd-tab-icon">
-                <circle cx="9" cy="7" r="4" fill="currentColor" />
-                <path d="M1 21v-2a7 7 0 0 1 14 0v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="19" cy="7" r="3" fill="currentColor" opacity="0.6" />
-                <path d="M22 21v-1.5a5 5 0 0 0-3-4.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.6" />
-              </svg>
-              <span className="bd-tab-label">Members</span>
-            </button>
-          </div>
+
+          {canCreateBoard || canViewMembers &&
+            <div className="bd-sidebar-tabs">
+              <button
+                className={`bd-tab-btn ${sidebarTab === 'boards' ? 'active' : ''}`}
+                onClick={() => dispatchSet('sidebarTab', 'boards')}
+                title="Boards"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="bd-tab-icon">
+                  <rect x="3" y="3" width="7" height="18" rx="1.5" fill="currentColor" />
+                  <rect x="13" y="3" width="8" height="11" rx="1.5" fill="currentColor" opacity="0.7" />
+                </svg>
+                <span className="bd-tab-label">Boards</span>
+              </button>
+              <button
+                className={`bd-tab-btn ${sidebarTab === 'members' ? 'active' : ''}`}
+                onClick={() => dispatchSet('sidebarTab', 'members')}
+                title="Members"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="bd-tab-icon">
+                  <circle cx="9" cy="7" r="4" fill="currentColor" />
+                  <path d="M1 21v-2a7 7 0 0 1 14 0v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <circle cx="19" cy="7" r="3" fill="currentColor" opacity="0.6" />
+                  <path d="M22 21v-1.5a5 5 0 0 0-3-4.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.6" />
+                </svg>
+                <span className="bd-tab-label">Members</span>
+              </button>
+            </div>
+
+          }
 
           {/* Tab content */}
           <div className="bd-sidebar-content">
@@ -765,26 +793,48 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                     const LIST_COLORS = [
                       '#538fff', '#f59e0b', '#10b981', '#6366f1', '#ec4899', '#14b8a6', '#f97316', '#8b5cf6'
                     ];
-                    const allEmpty = listsVisible.every(l => (cardsMap[l.id] || []).length === 0);
+                    const allEmpty = listsVisible.every(l => (filteredCardsMap[l.id] || []).length === 0);
                     if (allEmpty) {
                       return <div className="bd-listview-empty">No tasks found in this board.</div>;
                     }
                     return (
                       <div className="bd-listview-layout">
                         {listsVisible.map((l, li) => {
-                          const allCards = cardsMap[l.id] || [];
-                          if (allCards.length === 0) return null;
+                          const myCards = filteredCardsMap[l.id] || [];
+                          const totalCards = cardsMap[l.id] || [];
+                          if (myCards.length === 0) return null;
                           const listColor = LIST_COLORS[li % LIST_COLORS.length];
                           return (
                             <div key={l.id} className="bd-listview-group">
                               <div className="bd-listview-group-header">
                                 <span className="bd-lv-dot" style={{ background: listColor }} />
                                 <span className="bd-lv-group-name">{l.name}</span>
-                                <span className="bd-lv-count">{allCards.length}</span>
+                                <span className="bd-lv-count">{totalCards.length}</span>
+
+                                <div style={{ marginLeft: "auto", display: "flex", gap: "8px" }}>
+                                  {loadMoreCards && cardsHasMoreMap[l.id] && (
+                                    <button
+                                      className="bd-btn bd-btn--small"
+                                      style={{ backgroundColor: "#2d3748", color: "#e2e8f0", border: "1px solid #4a5568", fontSize: "0.75rem", padding: "4px 8px" }}
+                                      onClick={() => loadMoreCards(l.id)}
+                                    >
+                                      ↓ Load More
+                                    </button>
+                                  )}
+                                  {resetLimitCards && (cardsLimitsMap[l.id] || cardsBaseLimit) > cardsBaseLimit && (
+                                    <button
+                                      className="bd-btn bd-btn--small"
+                                      style={{ backgroundColor: "transparent", color: "#a0aec0", border: "1px solid #4a5568", fontSize: "0.75rem", padding: "4px 8px" }}
+                                      onClick={() => resetLimitCards(l.id)}
+                                    >
+                                      ↑ Show Less
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                               {/* Cards with FULL interaction — Details, Submit, Review modals all included */}
                               <div className="bd-listview-cards-grid">
-                                {allCards.map(card => (
+                                {myCards.map(card => (
                                   <CardItem
                                     key={card.id}
                                     card={card}
@@ -820,7 +870,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                   /* ── CALENDAR VIEW ── */
                   <BoardCalendar
                     lists={listsVisible}
-                    cardsMap={cardsMap}
+                      cardsMap={filteredCardsMap}
                     membersMap={membersMap}
                     emailMap={emailMap}
                     businessOwnerUid={businessOwnerUid}
@@ -832,6 +882,10 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                     handleReviewAction={handleReviewAction}
                     canEdit={canEditBoardValue}
                     reviewerOptions={reviewerOptions}
+                      loadMoreCards={loadMoreCards}
+                      cardsHasMoreMap={cardsHasMoreMap}
+                      highlightCardIds={highlightCardIds}
+                      highlightColor={highlightColor}
                   />
                 ) : (
                 /* ── KANBAN VIEW (default) ── */
@@ -842,7 +896,8 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                       boardId={selectedBoardId}
                       list={l}
                       lists={lists}
-                      cards={cardsMap[l.id] || []}
+                      cards={filteredCardsMap[l.id] || []}
+                      allCards={cardsMap[l.id] || []}
                       listNameEditing={listNameEditing}
                       listNameDrafts={listNameDrafts}
                       setListNameDrafts={(p) => dispatchSet('listNameDrafts', p)}

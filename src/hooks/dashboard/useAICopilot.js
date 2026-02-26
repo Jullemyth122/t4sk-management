@@ -64,6 +64,7 @@ export function useAICopilot({
         members,
         workloadMap,
         currentUserEmail,
+        currentUserUid: uid,
       });
 
       // Get current history for multi-turn

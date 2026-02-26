@@ -39,12 +39,20 @@ export default function SubmissionModal({
     }, [open, defaultNote]);
 
     // preselect default reviewer when modal opens
+    // Priority: explicit default → owner → first non-none option → none
     useEffect(() => {
         if (open) {
-            if (defaultReviewerUid) setReviewerUid(defaultReviewerUid);
-            else setReviewerUid('');
+            if (defaultReviewerUid) {
+                setReviewerUid(defaultReviewerUid);
+            } else {
+                // use the raw prop list to avoid TDZ (reviewerOptions useMemo is declared below)
+                const opts = Array.isArray(reviewerOptionsProp) ? reviewerOptionsProp : [];
+                const ownerOpt = opts.find(o => o?.owner && o?.value);
+                const firstOpt = !ownerOpt && opts.find(o => o?.value);
+                setReviewerUid(ownerOpt?.value || firstOpt?.value || '');
+            }
         }
-    }, [open, defaultReviewerUid]);
+    }, [open, defaultReviewerUid, reviewerOptionsProp]);
 
     // drag-drop visuals - attach listeners once
     useEffect(() => {
@@ -103,18 +111,15 @@ export default function SubmissionModal({
             reviewerOptionsProp.forEach((opt) => {
                 if (!opt) return;
                 const val = opt.value === undefined || opt.value === null ? '' : String(opt.value);
-                if (seen.has(val)) return;
+                if (!val || seen.has(val)) return; // skip empty/none entries
                 seen.add(val);
                 out.push(opt);
             });
-            if (!out.length || out[0].value !== '') {
-                out.unshift({ value: '', label: '— none —', subtitle: '' });
-            }
             return out;
         }
 
         // fallback to assignees list
-        const fallback = [{ value: '', label: '— none —', subtitle: '' }];
+        const fallback = [];
         (assignees || []).forEach(a => {
             const val = a.uid || a.id || (a.email ? String(a.email).toLowerCase() : (a.id || ''));
             const label = a.name || a.email || String(a.id || a.uid || '');
@@ -178,6 +183,29 @@ export default function SubmissionModal({
                                 <span className={`p-1 rounded-sm pill pill-${(card?.priority||'medium').toLowerCase()}`}>{card?.priority || 'medium'}</span>
                             </div>
                         </div>
+
+                        {/* Feedback Note Preview */}
+                        {card?.submission?.reviewNote && (
+                            <div style={{
+                                marginTop: 16,
+                                padding: '12px',
+                                borderRadius: '8px',
+                                background: card.submission.reviewStatus === 'rejected' ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.08)',
+                                borderLeft: `3px solid ${card.submission.reviewStatus === 'rejected' ? '#ef4444' : '#10b981'}`
+                            }}>
+                                <strong style={{
+                                    display: 'block',
+                                    fontSize: '0.8rem',
+                                    color: card.submission.reviewStatus === 'rejected' ? '#ef4444' : '#10b981',
+                                    marginBottom: 4
+                                }}>
+                                    {card.submission.reviewStatus === 'rejected' ? 'Rejection Feedback:' : 'Approval Note:'}
+                                </strong>
+                                <span style={{ fontSize: '0.85rem', color: 'var(--bd-text-main)', opacity: 0.9 }}>
+                                    "{card.submission.reviewNote}"
+                                </span>
+                            </div>
+                        )}
 
                         <div className="sd-assignees">
                             <strong>Assignees</strong>

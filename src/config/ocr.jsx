@@ -378,9 +378,14 @@ export async function processImageForTasks(imageFile, details = {}, options = {}
         *   Ignore the text "start" or "due" in the subtask text itself if it's purely a metadata marker.
     - Subtasks: Look for indented lines, bullet points. Group them as subtasks.
     - Metadata Lines: Any line starting with "assign" or "due" or "start" is metadata for the PARENT task.
-    - Weights: 
-        *   Main Tasks: If implied (e.g. "- 10%"), use it as weight.
+    - Weights & Effort: 
+        *   Main Tasks: If implied (e.g. "- 10%"), use it as weight. Otherwise leave null.
         *   Subtasks: If subtasks have explicit percentage or weight mentioned, use it.
+    - Priority / Hardness: VERY IMPORTANT. You must evaluate the difficulty/complexity of the task based on its title and description.
+        *   "high" = Complex engineering, major design, urgent timelines, or blocking infrastructure work.
+        *   "medium" = Standard operational work, moderate planning, testing, or multi-step execution.
+        *   "low" = Routine, simple, administrative work, OR if there is not enough detailed context to justify it being harder. 
+        *   SET THIS VALUE in the "priority" field for EVERY task. Always default to "low" if unsure.
     - Assignees: Look for patterns like "assign task - [email]".
     - Labels: return any tokens like "weekly", "invoice", "meeting".
 
