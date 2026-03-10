@@ -32,6 +32,9 @@ export function useAICopilot({
   handleCreateCardForList,
   handleUpdateCard,
   dispatchSet,
+  checkLimit,
+  incrementUsage,
+  onLimitReached,
 }) {
   const [messages, setMessages] = useState([]);
   const [isThinking, setIsThinking] = useState(false);
@@ -40,9 +43,17 @@ export function useAICopilot({
 
   /**
    * Send a message to the AI co-pilot.
+   * Enforces per-message usage limit for Free-plan users.
    */
   const sendMessage = useCallback(async (text) => {
     if (!text?.trim() || isThinking) return;
+
+    // ── Per-message limit check ──
+    if (checkLimit && !checkLimit()) {
+      if (onLimitReached) onLimitReached();
+      return;
+    }
+
     setError(null);
     abortRef.current = false;
 
@@ -76,6 +87,9 @@ export function useAICopilot({
 
       if (abortRef.current) return; // user may have cleared
 
+      // ── Increment usage only after successful response ──
+      if (incrementUsage) incrementUsage();
+
       const assistantMsg = {
         role: 'assistant',
         content: response.text,
@@ -98,7 +112,7 @@ export function useAICopilot({
     } finally {
       setIsThinking(false);
     }
-  }, [isThinking, selectedBoard, lists, cardsMap, members, workloadMap, currentUserEmail, messages]);
+  }, [isThinking, selectedBoard, lists, cardsMap, members, workloadMap, currentUserEmail, messages, checkLimit, incrementUsage, onLimitReached]);
 
   /**
    * Execute a structured action from the AI (e.g., create a card).

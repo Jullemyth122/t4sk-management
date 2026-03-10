@@ -612,3 +612,63 @@
   background: #e2e8f0;
   color: #94a3b8;
 }
+
+
+/* ──────────────────────────────────────────────────────────
+   5. Usage Counter Bar (Free Plan)
+   ────────────────────────────────────────────────────────── */
+.ai-copilot-usage-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.15);
+  font-size: 0.8rem;
+  animation: slideUpFade 0.3s ease forwards;
+}
+
+[data-theme="light"] .ai-copilot-usage-bar {
+  background: #faf5ff;
+  border-color: #e9d5ff;
+}
+
+.ai-copilot-usage-bar.limit-reached {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+[data-theme="light"] .ai-copilot-usage-bar.limit-reached {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.ai-usage-label {
+  color: var(--bd-text-sub, #94a3b8);
+  font-weight: 500;
+}
+
+.ai-copilot-usage-bar.limit-reached .ai-usage-label {
+  color: #ef4444;
+}
+
+.ai-usage-upgrade-btn {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff;
+  border: none;
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.45);
+  }
+}

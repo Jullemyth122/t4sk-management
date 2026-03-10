@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from "react";
 import useHasPerm from "../useHasPerm";
 
-export function usePermissionsAndDerived({ profile, businessId, roles = [], members = [],boards, boardQuery, memberQuery, lists = [], uid, userEmail, getMemberLevel, businessOwnerUid }) {
+export function usePermissionsAndDerived({ profile, businessId, planType = 'free', roles = [], members = [],boards, boardQuery, memberQuery, lists = [], uid, userEmail, getMemberLevel, businessOwnerUid }) {
     const userRoleId = useMemo(() => {
         if (!profile || !Array.isArray(profile.businessAffiliations) || !businessId) return null;
         const a = profile.businessAffiliations.find((x) => x.businessId === businessId);
@@ -37,10 +37,20 @@ export function usePermissionsAndDerived({ profile, businessId, roles = [], memb
     const canDeleteList = can('lists.delete');
     const canUpdateList = can('lists.update');
     const canCreateCard = can('cards.create');
-    const canUseOCR = can('ocr.use');
-    const canViewBoards = can('boards.read');
-    const canUseAI = can('ai.chat');
+    
+    // Determine if the current user is the business owner
+    const isOwner = String(uid) === String(businessOwnerUid) || userRoleId === 'owner';
 
+    // Feature Gating
+    const isPremium = planType === 'pro' || planType === 'enterprise';
+    
+    // For Free plan, only the business owner gets limited access to premium features (OCR, AI, Calendar)
+    const canUseOCR = can('ocr.use') && (isPremium || isOwner);
+    const canViewBoards = can('boards.read');
+    const canUseAI = can('ai.chat') && (isPremium || isOwner);
+    
+    // Premium features
+    const canUseCalendar = isPremium;
     const boardsFiltered = useMemo(() => {
         if (!boardQuery) return boards || [];
         const q = boardQuery.toLowerCase();
@@ -232,6 +242,9 @@ export function usePermissionsAndDerived({ profile, businessId, roles = [], memb
         canCreateCard, 
         canUseOCR,     
         canUseAI,
+        canUseCalendar,
+        isOwner,
+        isPremium,
         canViewBoards, 
         boardsFiltered,
         membersFiltered,
