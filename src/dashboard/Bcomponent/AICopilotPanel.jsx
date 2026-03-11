@@ -290,6 +290,10 @@ export default function AICopilotPanel({
   onExecuteAction,
   onClearHistory,
   boardName = 'Board',
+  remainingUses = Infinity,
+  maxUses = 3,
+  isPremium = false,
+  onUpgrade,
 }) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
@@ -309,11 +313,13 @@ export default function AICopilotPanel({
     }
   }, [open]);
 
+  const limitReached = !isPremium && remainingUses <= 0;
+
   const handleSend = useCallback(() => {
-    if (!input.trim() || isThinking) return;
+    if (!input.trim() || isThinking || limitReached) return;
     onSendMessage(input.trim());
     setInput('');
-  }, [input, isThinking, onSendMessage]);
+  }, [input, isThinking, onSendMessage, limitReached]);
 
   const handleKeyDown = useCallback((e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -432,21 +438,38 @@ export default function AICopilotPanel({
           {error && (
             <div className="ai-copilot-error-banner">{error}</div>
           )}
+
+          {/* Usage counter — Free plan only */}
+          {!isPremium && (
+            <div className={`ai-copilot-usage-bar ${limitReached ? 'limit-reached' : ''}`}>
+              <span className="ai-usage-label">
+                {limitReached
+                  ? '🚫 Message limit reached'
+                  : `✨ ${remainingUses}/${maxUses} messages remaining`}
+              </span>
+              {limitReached && onUpgrade && (
+                <button className="ai-usage-upgrade-btn" onClick={onUpgrade}>
+                  Upgrade
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="ai-copilot-input-wrap">
             <textarea
               ref={inputRef}
               className="ai-copilot-input"
-              placeholder="Ask me anything about this board..."
+              placeholder={limitReached ? 'Upgrade to continue chatting...' : 'Ask me anything about this board...'}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={1}
-              disabled={isThinking}
+              disabled={isThinking || limitReached}
             />
             <button
               className="ai-copilot-send-btn"
               onClick={handleSend}
-              disabled={!input.trim() || isThinking}
+              disabled={!input.trim() || isThinking || limitReached}
               title="Send message"
             >
               <SendIcon size={16} />

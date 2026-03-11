@@ -156,7 +156,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import * as boardSvc from '../services/boardService';
 
 // subscribe to cards with diffing: only subscribe new lists, unsubscribe removed ones
-export default function useCardsSubscriptions({ businessId, boardId, lists, setCardsMap }) {
+export default function useCardsSubscriptions({ businessId, uid, boardId, lists, setCardsMap }) {
     const unsubsRef = useRef({});
     const baseLimit = 3;
 
@@ -252,7 +252,7 @@ export default function useCardsSubscriptions({ businessId, boardId, lists, setC
             try {
                 const unsub = boardSvc.subscribeCardsForList({
                 businessId,
-                uid: null,
+                uid: uid || null,
                 boardId,
                 listId: l.id,
                 limitCount: queryLimit,

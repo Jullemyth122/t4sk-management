@@ -29,13 +29,15 @@ import { useOCRHandling } from '../hooks/dashboard/useOCRHandling';
 import { useApplyOCR } from '../hooks/dashboard/useApplyOCR';
 import { useMemberWorkload } from '../hooks/dashboard/useMemberWorkload';
 import { useAICopilot } from '../hooks/dashboard/useAICopilot';
-
+import { useFeatureLimiter } from '../hooks/dashboard/useFeatureLimiter';
+import UpgradeModal from '../components/UpgradeModal';
 
 // Extracted initial state for clarity
 const initialState = {
   businessId: null,
   businessName: null,
   businessOwnerUid: null,
+  planType: 'free',
 
   boards: [],
   selectedBoardId: null,
@@ -129,7 +131,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
     return () => clearTimeout(timer);
   }, [highlightCardIds.size]);
 
-  const { businessId, businessName, businessOwnerUid, boards, selectedBoardId, lists, cardsMap, allBoardsListsMap, roles, members, membersLoading, membersError, uiError, boardQuery, boardView, memberQuery, editingBoard, boardDraft, newBoardName, newListName, newListAssignees, assigneeSearch, assigneeDropdownOpen, listNameEditing, listNameDrafts, cardEditing, cardDrafts, newCardInputs, copiedEmailId, loading, ocrRaw, ocrResult, ocrError, showHeaderActions, sidebarCollapsed, sidebarTab, previewFile, previewUrl, listViewMode, copilotOpen } = state;
+  const { businessId, businessName, businessOwnerUid, planType, boards, selectedBoardId, lists, cardsMap, allBoardsListsMap, roles, members, membersLoading, membersError, uiError, boardQuery, boardView, memberQuery, editingBoard, boardDraft, newBoardName, newListName, newListAssignees, assigneeSearch, assigneeDropdownOpen, listNameEditing, listNameDrafts, cardEditing, cardDrafts, newCardInputs, copiedEmailId, loading, ocrRaw, ocrResult, ocrError, showHeaderActions, sidebarCollapsed, sidebarTab, previewFile, previewUrl, listViewMode, copilotOpen } = state;
 
   const getMemberLevel = useCallback((m, rolesList = roles) => {
     if (typeof m.level === 'number') return m.level;
@@ -139,7 +141,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
     return 0;
   }, [roles]);
 
-  const { userRoleId, userLevel, userRoleName, canEditBoardValue, canCreateBoard, canCreateList, canViewMembers, canAssignTasks, canDeleteBoard, canDeleteList, canUpdateList, canCreateCard, canUseOCR, canUseAI, canViewBoards, boardsFiltered, membersFiltered, listsVisible, reviewerOptions, membersMap, emailMap, filterBoardsByAssignee, filterCardsByAssignee } = usePermissionsAndDerived({ profile, businessId, roles, members, boards, boardQuery, memberQuery, lists, uid, userEmail, getMemberLevel, businessOwnerUid });
+  const { userRoleId, userLevel, userRoleName, canEditBoardValue, canCreateBoard, canCreateList, canViewMembers, canAssignTasks, canDeleteBoard, canDeleteList, canUpdateList, canCreateCard, canUseOCR, canUseAI, canUseCalendar, isOwner, isPremium, canViewBoards, boardsFiltered, membersFiltered, listsVisible, reviewerOptions, membersMap, emailMap, filterBoardsByAssignee, filterCardsByAssignee } = usePermissionsAndDerived({ profile, businessId, planType, roles, members, boards, boardQuery, memberQuery, lists, uid, userEmail, getMemberLevel, businessOwnerUid });
 
   useBusinessLoading({ businessId, dispatchSet, profile, uid });
   useRolesAndMembers({ businessId, dispatchSet, businessOwnerUid, members });
@@ -228,7 +230,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
 
   const selectedBoard = useMemo(() => boards.find((b) => b.id === selectedBoardId) || null, [boards, selectedBoardId]);
 
-  const { handleRefreshBoard, handleUpdateBoard, handleDeleteBoard, handleCreateBoard } = useBoardHandlers({ businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName });
+  const { handleRefreshBoard, handleUpdateBoard, handleDeleteBoard, handleCreateBoard } = useBoardHandlers({ businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName, planType });
 
   const { handleCreateList, handleDeleteList, handleUpdateList } = useListHandlers({ businessId, uid, dispatchSet, selectedBoardId, cardsMap, lists, newListName, newListAssignees, canCreateList, canEditBoardValue, userLevel, userEmail });
 
@@ -285,6 +287,20 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
 
   const { handleApplyOCRToBoard } = useApplyOCR({ selectedBoardId, canCreateList, ocrResult, lists, businessId, uid, dispatchSet, cardsMap, emailMap, members, membersMap, getMemberLevel, roles, businessOwnerUid });
 
+  const { checkLimit, incrementUsage, getRemainingUses, maxUses } = useFeatureLimiter(businessId, uid, planType, isOwner);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [upgradeFeatureName, setUpgradeFeatureName] = useState('');
+
+  const handleOpenUpgrade = (featureName) => {
+    setUpgradeFeatureName(featureName);
+    setUpgradeModalOpen(true);
+  };
+
+  // Panel always opens freely; the limit is enforced per-message inside useAICopilot
+  const handleOpenCopilot = () => {
+    dispatchSet('copilotOpen', prev => !prev);
+  };
+
   // Save view mode
   useEffect(() => {
     localStorage.setItem('t4sk_listViewMode', listViewMode);
@@ -303,6 +319,9 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
     handleCreateCardForList,
     handleUpdateCard,
     dispatchSet,
+    checkLimit,
+    incrementUsage,
+    onLimitReached: () => handleOpenUpgrade('AI Co-Pilot'),
   });
 
 
@@ -421,7 +440,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
 
           {/* Tabs */}
 
-          {canCreateBoard || canViewMembers &&
+          {(canCreateBoard || canViewMembers) && (
             <div className="bd-sidebar-tabs">
               <button
                 className={`bd-tab-btn ${sidebarTab === 'boards' ? 'active' : ''}`}
@@ -448,8 +467,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                 <span className="bd-tab-label">Members</span>
               </button>
             </div>
-
-          }
+          )}
 
           {/* Tab content */}
           <div className="bd-sidebar-content">
@@ -560,7 +578,15 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                       <input
                         type="file"
                         accept="image/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                        onChange={handleFileSelect}
+                        onChange={(e) => {
+                          if (!checkLimit()) {
+                            handleOpenUpgrade('Document OCR');
+                            e.target.value = null;
+                            return;
+                          }
+                          incrementUsage();
+                          handleFileSelect(e);
+                        }}
                         style={{ display: 'none' }}
                         disabled={loading}
                       />
@@ -669,7 +695,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                 <button
                   className={`bd-action-btn bd-action-btn--copilot ${copilotOpen ? 'active' : ''}`}
                   title="AI Co-Pilot"
-                  onClick={() => { dispatchSet('copilotOpen', prev => !prev); dispatchSet('showHeaderActions', false); }}
+                  onClick={() => { handleOpenCopilot(); dispatchSet('showHeaderActions', false); }}
                 >
                   <span className="bd-action-btn-icon" aria-hidden>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -711,8 +737,14 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                 </button>
                 <button
                   className={`bd-view-btn ${listViewMode === 'calendar' ? 'active' : ''}`}
-                  title="Calendar View"
-                  onClick={() => dispatchSet('listViewMode', 'calendar')}
+                  title="Calendar View (Pro)"
+                  onClick={() => {
+                    if (!canUseCalendar) {
+                      handleOpenUpgrade('Calendar View');
+                      return;
+                    }
+                    dispatchSet('listViewMode', 'calendar');
+                  }}
                   aria-label="Calendar view"
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -759,6 +791,8 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
             </div>
           </div>
         )}
+
+        <UpgradeModal isOpen={upgradeModalOpen} onClose={() => setUpgradeModalOpen(false)} featureName={upgradeFeatureName} />
 
         {/* Board content area */}
         <div className="bd-board-area">
@@ -1032,6 +1066,10 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
         onExecuteAction={copilot.executeAction}
         onClearHistory={copilot.clearHistory}
         boardName={selectedBoard?.name || 'Board'}
+        remainingUses={getRemainingUses()}
+        maxUses={maxUses}
+        isPremium={isPremium}
+        onUpgrade={() => handleOpenUpgrade('AI Co-Pilot')}
       />
     </div>
   );

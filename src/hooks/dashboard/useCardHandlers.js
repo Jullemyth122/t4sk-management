@@ -85,6 +85,11 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
     const handleUpdateCard = useCallback(async ({ listId, cardId, updates, listAssignees }) => {
         if (!cardId || !listId) return dispatchSet('uiError', 'Invalid card/list');
         
+        if (String(cardId).startsWith('tmp-')) {
+            console.warn('Ignored attempt to update temporary card:', cardId);
+            return;
+        }
+        
         const updateKeys = Object.keys(updates || {});
         const isSubtaskOnlyUpdate = updateKeys.length > 0 && updateKeys.every(k => k === 'subtasks' || k === 'progress');
         

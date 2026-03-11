@@ -11,6 +11,8 @@ import PersonalInfo from "./info/PersonalInfo";
 import BusinessInfo from "./info/BusinessInfo";
 import BusinessDashboardSimple from "./dashboard/BusinessDashboard";
 import PersonalDashboard from "./dashboard/PersonalDashboard";
+import Pricing from "./components/Pricing";
+import PaymentSuccess from "./components/PaymentSuccess";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 import TermsPage from "./components/authentication/TermsPage";
@@ -64,6 +66,22 @@ const router = createBrowserRouter([
         element: (
           <AuthGuard requireAuth={true} requireType="present">
             <BusinessDashboardSimple simulateLoading={true} />
+          </AuthGuard>
+        )
+      },
+      {
+        path: "pricing",
+        element: (
+          <AuthGuard requireAuth={true} requireType="present">
+            <Pricing />
+          </AuthGuard>
+        )
+      },
+      {
+        path: "payment-success",
+        element: (
+          <AuthGuard requireAuth={true} requireType="present">
+            <PaymentSuccess />
           </AuthGuard>
         )
       },

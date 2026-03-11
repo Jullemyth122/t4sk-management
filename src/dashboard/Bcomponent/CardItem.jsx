@@ -80,6 +80,7 @@ export default function CardItem({
 
     // Trigger Notification if newly overdue
     useEffect(() => {
+        if (String(card.id).startsWith('tmp-')) return;
         if (isOverdue && !card.overdueNotified) {
             import('../../services/accountService').then(({ sendNotification }) => {
                 const title = `Task Overdue: ${card.title || 'Untitled'}`;

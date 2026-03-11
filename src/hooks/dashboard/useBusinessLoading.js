@@ -36,6 +36,7 @@ export function useBusinessLoading({ businessId, dispatchSet, profile, uid }) {
         if (!businessId) {
             dispatchSet('businessName', null);
             dispatchSet('businessOwnerUid', null);
+            dispatchSet('planType', 'free');
             return;
         }
         let mounted = true;
@@ -45,11 +46,13 @@ export function useBusinessLoading({ businessId, dispatchSet, profile, uid }) {
                 if (!mounted) return;
                 dispatchSet('businessName', biz?.name || null);
                 dispatchSet('businessOwnerUid', biz?.ownerUid || null);
+                dispatchSet('planType', biz?.planType || 'free');
             } catch (err) {
                 console.warn('Failed to load business', err);
                 if (mounted) {
                     dispatchSet('businessName', null);
                     dispatchSet('businessOwnerUid', null);
+                    dispatchSet('planType', 'free');
                 }
             }
         })();

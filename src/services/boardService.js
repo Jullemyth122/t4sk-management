@@ -12,9 +12,10 @@ import {
     orderBy,
     onSnapshot,
     runTransaction,
-    writeBatch,
     setDoc,
     limit,
+    collectionGroup,
+    where,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { COLLECTIONS, ensure, sendNotification, sanitizeString } from "./accountService"; // Assuming cross-import if needed; otherwise, duplicate or import from a shared helpers.
@@ -165,7 +166,6 @@ export const updateList = async ({ businessId = null, uid = null, boardId, listI
     return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 };
 
-// --- Cards Section ---
 export const subscribeCardsForList = ({ businessId = null, uid = null, boardId, listId, limitCount = 10, cb }) => {
     ensure(boardId && listId, "subscribeCardsForList: boardId & listId required");
     const col = collection(db, businessId ? COLLECTIONS.BUSINESSES : COLLECTIONS.ACCOUNT, businessId ?? uid, "boards", boardId, "lists", listId, "cards");
@@ -179,6 +179,64 @@ export const subscribeCardsForList = ({ businessId = null, uid = null, boardId, 
         }
     );
     return unsub;
+};
+
+export const getTodayTasks = async ({ uid }) => {
+    if (!uid) return [];
+    try {
+        const q = query(collectionGroup(db, "cards"), where("createdBy", "==", uid));
+        const snaps = await getDocs(q);
+        
+        const localNow = new Date();
+        const year = localNow.getFullYear();
+        const month = String(localNow.getMonth() + 1).padStart(2, '0');
+        const day = String(localNow.getDate()).padStart(2, '0');
+        const todayLocal = `${year}-${month}-${day}`;
+
+        return snaps.docs.map(d => {
+            const data = d.data();
+            
+            const parseDate = (dateVal) => {
+                if (!dateVal) return null;
+                if (typeof dateVal === 'object' && dateVal.seconds) {
+                    const dObj = new Date(dateVal.seconds * 1000);
+                    return `${dObj.getFullYear()}-${String(dObj.getMonth() + 1).padStart(2, '0')}-${String(dObj.getDate()).padStart(2, '0')}`;
+                } else {
+                    const dStr = String(dateVal);
+                    if (dStr.includes('T')) {
+                        const dObj = new Date(dStr);
+                        if (!isNaN(dObj.getTime())) {
+                            return `${dObj.getFullYear()}-${String(dObj.getMonth() + 1).padStart(2, '0')}-${String(dObj.getDate()).padStart(2, '0')}`;
+                        }
+                    } else if (dStr.length >= 10) {
+                        return dStr.slice(0, 10);
+                    }
+                }
+                return null;
+            };
+
+            const cDate = parseDate(data.dueDate);
+            const sDate = parseDate(data.startDate);
+
+            const isDueToday = cDate === todayLocal;
+            const isOverdue = cDate && cDate < todayLocal;
+            const isStartToday = sDate === todayLocal;
+
+            return {
+                id: d.id,
+                ...data,
+                listId: d.ref.parent.parent.id,
+                boardId: d.ref.parent.parent.parent.parent.id,
+                isToday: isDueToday,
+                isStartToday,
+                isOverdue,
+                isTodayOrOverdue: (isDueToday || isOverdue || isStartToday) && data.status !== 'done'
+            };
+        }).filter(c => c.isTodayOrOverdue);
+    } catch (err) {
+        console.error("getTodayTasks failed", err);
+        return [];
+    }
 };
 
 export const createCard = async ({ businessId = null, uid = null, boardId, listId, card, actorName = "A user", boardName = "Board" }) => {
@@ -372,28 +430,34 @@ export const deleteCard = async ({ businessId = null, uid = null, boardId, listI
     return true;
 };
 
-export const moveCardBetweenLists = async ({ businessId = null, uid = null, boardId, fromListId, toListId, cardId, newPosition = 0 }) => {
+export const moveCardBetweenLists = async ({ businessId = null, uid = null, boardId, fromListId, toListId, cardId, newPosition = 0, newPriorityRank }) => {
     ensure(fromListId && toListId && cardId && boardId, "moveCardBetweenLists: missing args");
 
     const srcRef = doc(db, businessId ? COLLECTIONS.BUSINESSES : COLLECTIONS.ACCOUNT, businessId ?? uid, "boards", boardId, "lists", fromListId, "cards", cardId);
     const destCol = collection(db, businessId ? COLLECTIONS.BUSINESSES : COLLECTIONS.ACCOUNT, businessId ?? uid, "boards", boardId, "lists", toListId, "cards");
-    const destRef = doc(destCol);
+    // Preserve the exact same cardId!
+    const destRef = doc(destCol, cardId);
 
-    await runTransaction(db, async (tx) => {
-        const srcSnap = await tx.get(srcRef);
-        if (!srcSnap.exists()) throw new Error("moveCardBetweenLists: card missing");
-        const data = srcSnap.data();
+    const srcSnap = await getDoc(srcRef);
+    if (!srcSnap.exists()) throw new Error("moveCardBetweenLists: card missing");
+    const data = srcSnap.data();
 
-        const payload = {
-            ...data,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-        };
-        delete payload.__name__;
+    const payload = {
+        ...data,
+        updatedAt: serverTimestamp(),
+    };
+    
+    if (newPriorityRank !== undefined) {
+        payload.priorityRank = newPriorityRank;
+    }
 
-        tx.set(destRef, payload);
-        tx.delete(srcRef);
-    });
+    delete payload.__name__;
+    delete payload.id;
+
+    const batch = writeBatch(db);
+    batch.set(destRef, payload);
+    batch.delete(srcRef);
+    await batch.commit();
 
     return { newCardId: destRef.id };
 };

@@ -1,4 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+
+const COLOR_PRESETS = [
+    '#f59e0b', '#ef4444', '#10b981', '#6366f1',
+    '#ec4899', '#8b5cf6', '#3b82f6', '#14b8a6',
+    '#f97316', '#84cc16', '#06b6d4', '#a855f7',
+];
+
+const SORT_OPTIONS = [
+    { value: 'priority', label: 'By Priority' },
+    { value: 'date', label: 'By Due Date' },
+    { value: 'title', label: 'By Title (A-Z)' },
+];
 
 const MENU_ITEMS = [
     { id: 'rename', label: 'Rename List', icon: (
@@ -45,8 +57,22 @@ const MENU_ITEMS = [
     )},
 ];
 
-export default function PersonalListMenu({ anchorRef, onClose, listName }) {
+export default function PersonalListMenu({
+    anchorRef,
+    onClose,
+    listId,
+    listName,
+    allLists,
+    onRename,
+    onChangeColor,
+    onDuplicate,
+    onSort,
+    onMoveAll,
+    onArchive,
+    onDelete,
+}) {
     const menuRef = useRef(null);
+    const [subView, setSubView] = useState(null); // 'color' | 'sort' | 'move' | null
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -55,7 +81,13 @@ export default function PersonalListMenu({ anchorRef, onClose, listName }) {
             }
         };
         const handleEsc = (e) => {
-            if (e.key === 'Escape') onClose();
+            if (e.key === 'Escape') {
+                if (subView) {
+                    setSubView(null);
+                } else {
+                    onClose();
+                }
+            }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
@@ -64,8 +96,157 @@ export default function PersonalListMenu({ anchorRef, onClose, listName }) {
             document.removeEventListener('mousedown', handleClickOutside);
             document.removeEventListener('keydown', handleEsc);
         };
-    }, [onClose]);
+    }, [onClose, subView]);
 
+    const handleItemClick = (itemId) => {
+        switch (itemId) {
+            case 'rename':
+                onRename && onRename();
+                break;
+            case 'color':
+                setSubView('color');
+                break;
+            case 'duplicate':
+                onDuplicate && onDuplicate();
+                break;
+            case 'sort':
+                setSubView('sort');
+                break;
+            case 'move':
+                setSubView('move');
+                break;
+            case 'archive':
+                onArchive && onArchive();
+                break;
+            case 'delete':
+                onDelete && onDelete();
+                break;
+            default:
+                onClose();
+        }
+    };
+
+    // Sub-view: Color Picker
+    if (subView === 'color') {
+        return (
+            <div className="pd-list-menu" ref={menuRef}>
+                <div className="pd-list-menu-header">
+                    <button className="pd-list-menu-back" onClick={() => setSubView(null)}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 3L5 7l4 4" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </button>
+                    <span className="pd-list-menu-title">Choose Color</span>
+                    <button className="pd-list-menu-close" onClick={onClose}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M3 3l8 8M11 3L3 11" strokeLinecap="round" />
+                        </svg>
+                    </button>
+                </div>
+                <div className="pd-color-picker-grid">
+                    {COLOR_PRESETS.map(clr => (
+                        <button
+                            key={clr}
+                            className="pd-color-swatch"
+                            style={{ background: clr }}
+                            onClick={() => onChangeColor && onChangeColor(clr)}
+                            title={clr}
+                        />
+                    ))}
+                </div>
+                <div style={{ marginTop: '12px', padding: '0 12px 12px' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '4px' }}>Custom Hex</div>
+                    <input 
+                        type="text" 
+                        placeholder="#FFFFFF"
+                        style={{ width: '100%', padding: '6px 8px', borderRadius: '4px', border: '1px solid #374151', background: '#111827', color: '#f3f4f6', fontSize: '0.8rem' }}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                const val = e.target.value.trim();
+                                if (/^#[0-9A-F]{6}$/i.test(val) || /^#[0-9A-F]{3}$/i.test(val)) {
+                                    onChangeColor && onChangeColor(val);
+                                } else {
+                                    alert('Please enter a valid hex color code (e.g. #ff0000)');
+                                }
+                            }
+                        }}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    // Sub-view: Sort Options
+    if (subView === 'sort') {
+        return (
+            <div className="pd-list-menu" ref={menuRef}>
+                <div className="pd-list-menu-header">
+                    <button className="pd-list-menu-back" onClick={() => setSubView(null)}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 3L5 7l4 4" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </button>
+                    <span className="pd-list-menu-title">Sort Cards</span>
+                    <button className="pd-list-menu-close" onClick={onClose}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M3 3l8 8M11 3L3 11" strokeLinecap="round" />
+                        </svg>
+                    </button>
+                </div>
+                <div className="pd-list-menu-items">
+                    {SORT_OPTIONS.map(opt => (
+                        <button
+                            key={opt.value}
+                            className="pd-list-menu-item"
+                            onClick={() => onSort && onSort(opt.value)}
+                        >
+                            <span>{opt.label}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    // Sub-view: Move to list
+    if (subView === 'move') {
+        const otherLists = (allLists || []).filter(l => l.id !== listId);
+        return (
+            <div className="pd-list-menu" ref={menuRef}>
+                <div className="pd-list-menu-header">
+                    <button className="pd-list-menu-back" onClick={() => setSubView(null)}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 3L5 7l4 4" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </button>
+                    <span className="pd-list-menu-title">Move To</span>
+                    <button className="pd-list-menu-close" onClick={onClose}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M3 3l8 8M11 3L3 11" strokeLinecap="round" />
+                        </svg>
+                    </button>
+                </div>
+                <div className="pd-list-menu-items">
+                    {otherLists.length === 0 ? (
+                        <div className="pd-list-menu-empty">No other lists</div>
+                    ) : (
+                        otherLists.map(l => (
+                            <button
+                                key={l.id}
+                                className="pd-list-menu-item"
+                                onClick={() => onMoveAll && onMoveAll(l.id)}
+                            >
+                                <span className="pd-list-dot pd-list-dot--small" style={{ background: l.color }} />
+                                <span>{l.name}</span>
+                            </button>
+                        ))
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    // Main menu
     return (
         <div className="pd-list-menu" ref={menuRef}>
             <div className="pd-list-menu-header">
@@ -86,10 +267,7 @@ export default function PersonalListMenu({ anchorRef, onClose, listName }) {
                         <button
                             key={item.id}
                             className={`pd-list-menu-item ${item.danger ? 'danger' : ''}`}
-                            onClick={() => {
-                                // Static — just close
-                                onClose();
-                            }}
+                            onClick={() => handleItemClick(item.id)}
                         >
                             <span className="pd-list-menu-icon">{item.icon}</span>
                             <span>{item.label}</span>
