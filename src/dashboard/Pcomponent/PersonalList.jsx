@@ -2,14 +2,23 @@ import React, { useState, useRef } from 'react';
 import PersonalCard from './PersonalCard';
 import PersonalListMenu from './PersonalListMenu';
 
-export default function PersonalList({ list, onCardClick, onAddTask }) {
+export default function PersonalList({ list, onCardClick, onAddTask, highlightItemId }) {
 
-    const { name, color, cards } = list;
+    const { id, name, color, cards } = list;
     const [menuOpen, setMenuOpen] = useState(false);
     const menuBtnRef = useRef(null);
 
+    const highlightClass = id === highlightItemId ? 'pd-highlight-pulse' : '';
+
+    React.useEffect(() => {
+        if (highlightItemId === id) {
+            const el = document.getElementById(`list-${id}`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [highlightItemId, id]);
+
     return (
-        <div className="pd-list">
+        <div id={`list-${id}`} className={`pd-list ${highlightClass}`}>
             {/* List Header */}
             <div className="pd-list-header">
                 <div className="pd-list-header-left">
@@ -50,6 +59,7 @@ export default function PersonalList({ list, onCardClick, onAddTask }) {
                         card={card}
                         listColor={color}
                         onClick={() => onCardClick && onCardClick(card, name, color)}
+                        highlightItemId={highlightItemId}
                     />
                 ))}
             </div>

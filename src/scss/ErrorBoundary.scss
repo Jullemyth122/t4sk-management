@@ -1,0 +1,176 @@
+/* src/scss/ErrorBoundary.scss */
+
+.error-boundary-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--bg-color, #0f172a);
+  color: var(--text-main, #f8fafc);
+  overflow: hidden;
+  position: relative;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+[data-theme="light"] .error-boundary-wrapper {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+.error-boundary-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.eb-shape {
+  position: absolute;
+  filter: blur(80px);
+  opacity: 0.5;
+  border-radius: 50%;
+  animation: floatShape 10s infinite ease-in-out alternate;
+}
+
+.eb-shape1 {
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background-color: rgba(83, 143, 255, 0.4);
+  animation-delay: 0s;
+}
+
+.eb-shape2 {
+  bottom: -20%;
+  right: -10%;
+  width: 60vw;
+  height: 60vw;
+  background-color: rgba(43, 8, 161, 0.3);
+  animation-delay: -3s;
+}
+
+.eb-shape3 {
+  top: 40%;
+  left: 60%;
+  width: 40vw;
+  height: 40vw;
+  background-color: rgba(14, 165, 233, 0.3);
+  animation-delay: -6s;
+}
+
+[data-theme="light"] .eb-shape1 {
+  background-color: rgba(59, 130, 246, 0.2);
+}
+
+[data-theme="light"] .eb-shape2 {
+  background-color: rgba(139, 92, 246, 0.15);
+}
+
+[data-theme="light"] .eb-shape3 {
+  background-color: rgba(14, 165, 233, 0.15);
+}
+
+@keyframes floatShape {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(5%, 5%) scale(1.05); }
+  100% { transform: translate(-5%, -5%) scale(0.95); }
+}
+
+.error-boundary-content {
+  position: relative;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3rem 4rem;
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+[data-theme="light"] .error-boundary-content {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.05);
+}
+
+.error-boundary-code {
+  font-size: 4rem;
+  font-weight: 800;
+  letter-spacing: 0.5rem;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+  display: flex;
+  gap: 4px;
+}
+
+[data-theme="light"] .error-boundary-code {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.error-boundary-code span {
+  animation: bounceLetter 2s infinite ease-in-out;
+}
+
+.error-boundary-code span:nth-child(2) { animation-delay: 0.1s; }
+.error-boundary-code span:nth-child(3) { animation-delay: 0.2s; }
+.error-boundary-code span:nth-child(4) { animation-delay: 0.3s; }
+.error-boundary-code span:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes bounceLetter {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.error-boundary-msg {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 300px;
+  line-height: 1.6;
+}
+
+[data-theme="light"] .error-boundary-msg {
+  color: #475569;
+}
+
+.error-boundary-btn {
+  margin-top: 1rem;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, rgba(83, 143, 255, 0.9), rgba(65, 124, 200, 0.9));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  box-shadow: 0 4px 15px rgba(83, 143, 255, 0.3);
+}
+
+.error-boundary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(83, 143, 255, 0.4);
+  filter: brightness(1.1);
+}
+
+.error-boundary-btn:active {
+  transform: translateY(0);
+}

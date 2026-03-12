@@ -7,6 +7,9 @@ import BoardSidebar from './Bcomponent/BoardSidebar';
 import MembersPanel from './Bcomponent/MembersPanel';
 import BoardTop from './Bcomponent/BoardTop';
 import ListColumn from './Bcomponent/ListColumn';
+import CardItem from './Bcomponent/CardItem';
+import BoardCalendar from './Bcomponent/BoardCalendar'; // NEW: Imported Calendar
+import AICopilotPanel from './Bcomponent/AICopilotPanel';
 import '../scss/business-dashboard.scss';
 
 // NEW: import the OCR service
@@ -25,19 +28,23 @@ import { useSubmissionHandlers } from '../hooks/dashboard/useSubmissionHandlers'
 import { useOCRHandling } from '../hooks/dashboard/useOCRHandling';
 import { useApplyOCR } from '../hooks/dashboard/useApplyOCR';
 import { useMemberWorkload } from '../hooks/dashboard/useMemberWorkload';
-
+import { useAICopilot } from '../hooks/dashboard/useAICopilot';
+import { useFeatureLimiter } from '../hooks/dashboard/useFeatureLimiter';
+import UpgradeModal from '../components/UpgradeModal';
 
 // Extracted initial state for clarity
 const initialState = {
   businessId: null,
   businessName: null,
   businessOwnerUid: null,
+  planType: 'free',
 
   boards: [],
   selectedBoardId: null,
 
   lists: [],
   cardsMap: {},
+  allBoardsListsMap: null,
 
   roles: [],
   members: [],
@@ -82,7 +89,13 @@ const initialState = {
 
   // OCR Preview
   previewFile: null,
-  previewUrl: null
+  previewUrl: null,
+
+  // Board view mode: 'kanban' | 'list' | 'calendar'
+  listViewMode: localStorage.getItem('t4sk_listViewMode') || 'kanban',
+
+  // AI Co-Pilot
+  copilotOpen: false,
 };
 
 export default function BusinessDashboard({ businessId: propBusinessId = null }) {
@@ -118,7 +131,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
     return () => clearTimeout(timer);
   }, [highlightCardIds.size]);
 
-  const { businessId, businessName, businessOwnerUid, boards, selectedBoardId, lists, cardsMap, roles, members, membersLoading, membersError, uiError, boardQuery, boardView, memberQuery, editingBoard, boardDraft, newBoardName, newListName, newListAssignees, assigneeSearch, assigneeDropdownOpen, listNameEditing, listNameDrafts, cardEditing, cardDrafts, newCardInputs, copiedEmailId, loading, ocrRaw, ocrResult, ocrError, showHeaderActions, sidebarCollapsed, sidebarTab, previewFile, previewUrl } = state;
+  const { businessId, businessName, businessOwnerUid, planType, boards, selectedBoardId, lists, cardsMap, allBoardsListsMap, roles, members, membersLoading, membersError, uiError, boardQuery, boardView, memberQuery, editingBoard, boardDraft, newBoardName, newListName, newListAssignees, assigneeSearch, assigneeDropdownOpen, listNameEditing, listNameDrafts, cardEditing, cardDrafts, newCardInputs, copiedEmailId, loading, ocrRaw, ocrResult, ocrError, showHeaderActions, sidebarCollapsed, sidebarTab, previewFile, previewUrl, listViewMode, copilotOpen } = state;
 
   const getMemberLevel = useCallback((m, rolesList = roles) => {
     if (typeof m.level === 'number') return m.level;
@@ -128,16 +141,24 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
     return 0;
   }, [roles]);
 
-  const { userRoleId, userLevel, userRoleName, canEditBoardValue, canCreateBoard, canCreateList, canViewMembers, canAssignTasks, canDeleteBoard, canDeleteList, canUpdateList, canCreateCard, canUseOCR, canViewBoards, boardsFiltered, membersFiltered, listsVisible, reviewerOptions, membersMap, emailMap } = usePermissionsAndDerived({ profile, businessId, roles, members, boards, boardQuery, memberQuery, lists, uid, userEmail, getMemberLevel, businessOwnerUid });
+  const { userRoleId, userLevel, userRoleName, canEditBoardValue, canCreateBoard, canCreateList, canViewMembers, canAssignTasks, canDeleteBoard, canDeleteList, canUpdateList, canCreateCard, canUseOCR, canUseAI, canUseCalendar, isOwner, isPremium, canViewBoards, boardsFiltered, membersFiltered, listsVisible, reviewerOptions, membersMap, emailMap, filterBoardsByAssignee, filterCardsByAssignee } = usePermissionsAndDerived({ profile, businessId, planType, roles, members, boards, boardQuery, memberQuery, lists, uid, userEmail, getMemberLevel, businessOwnerUid });
 
   useBusinessLoading({ businessId, dispatchSet, profile, uid });
   useRolesAndMembers({ businessId, dispatchSet, businessOwnerUid, members });
 
 
-  useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards, highlightBoardId });
-  useCards({ businessId, selectedBoardId, lists, dispatchSet });
+  useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards, highlightBoardId, uid, userEmail });
+  const { loadMoreCards, resetLimitCards, cardsLimitsMap, cardsHasMoreMap, cardsBaseLimit } = useCards({
+    businessId,
+    selectedBoardId,
+    lists,
+    dispatchSet
+  });
 
   const { workloadMap, isOverloaded } = useMemberWorkload({ cardsMap, lists });
+
+  // For low-level users, filter cards to only show ones assigned to them
+  const filteredCardsMap = useMemo(() => filterCardsByAssignee(cardsMap), [cardsMap, filterCardsByAssignee]);
 
 
   // State for advanced filtering
@@ -175,14 +196,29 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
 
   const finalBoardsFiltered = useMemo(() => {
     let res = [...boardsFiltered];
+
+    // For low-level users: filter boards to only show ones where user has assigned lists
+    if (userLevel <= 2 && allBoardsListsMap) {
+      const userIdentifiers = new Set();
+      if (uid) userIdentifiers.add(String(uid).toLowerCase());
+      if (userEmail) userIdentifiers.add(String(userEmail).toLowerCase());
+
+      if (userIdentifiers.size > 0) {
+        res = res.filter(board => {
+          const boardLists = allBoardsListsMap[board.id] || [];
+          return boardLists.some(list => {
+            const assignees = list.assignees || [];
+            return assignees.some(a => userIdentifiers.has(String(a).trim().toLowerCase()));
+          });
+        });
+      }
+    }
+
     if (boardSort === 'alpha') {
       res.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    } else {
-      // default 'recent' or other: keep original order (assuming API returns recent first) or sort by id/date if available
-      // If no date, maybe just keep as is.
     }
     return res;
-  }, [boardsFiltered, boardSort]);
+  }, [boardsFiltered, boardSort, userLevel, allBoardsListsMap, uid, userEmail]);
 
 
   const { page: boardPage, perPage: boardsPerPage, setPerPage: setBoardsPerPage, totalPages: boardsTotalPages, visible: visibleBoards, goto: gotoBoardPage, setPage: setBoardPage } = usePagination(finalBoardsFiltered, 6);
@@ -194,7 +230,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
 
   const selectedBoard = useMemo(() => boards.find((b) => b.id === selectedBoardId) || null, [boards, selectedBoardId]);
 
-  const { handleRefreshBoard, handleUpdateBoard, handleDeleteBoard, handleCreateBoard } = useBoardHandlers({ businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName });
+  const { handleRefreshBoard, handleUpdateBoard, handleDeleteBoard, handleCreateBoard } = useBoardHandlers({ businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName, planType });
 
   const { handleCreateList, handleDeleteList, handleUpdateList } = useListHandlers({ businessId, uid, dispatchSet, selectedBoardId, cardsMap, lists, newListName, newListAssignees, canCreateList, canEditBoardValue, userLevel, userEmail });
 
@@ -250,6 +286,43 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
   const { handleUpload } = useOCRHandling({ dispatchSet, members, getMemberLevel, roles, businessOwnerUid, candidateEmails, excludedEmails });
 
   const { handleApplyOCRToBoard } = useApplyOCR({ selectedBoardId, canCreateList, ocrResult, lists, businessId, uid, dispatchSet, cardsMap, emailMap, members, membersMap, getMemberLevel, roles, businessOwnerUid });
+
+  const { checkLimit, incrementUsage, getRemainingUses, maxUses } = useFeatureLimiter(businessId, uid, planType, isOwner);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [upgradeFeatureName, setUpgradeFeatureName] = useState('');
+
+  const handleOpenUpgrade = (featureName) => {
+    setUpgradeFeatureName(featureName);
+    setUpgradeModalOpen(true);
+  };
+
+  // Panel always opens freely; the limit is enforced per-message inside useAICopilot
+  const handleOpenCopilot = () => {
+    dispatchSet('copilotOpen', prev => !prev);
+  };
+
+  // Save view mode
+  useEffect(() => {
+    localStorage.setItem('t4sk_listViewMode', listViewMode);
+  }, [listViewMode]);
+
+  // AI Co-Pilot
+  const copilot = useAICopilot({
+    selectedBoard,
+    lists: listsVisible,
+    cardsMap,
+    members,
+    workloadMap,
+    businessId,
+    uid,
+    currentUserEmail: userEmail,
+    handleCreateCardForList,
+    handleUpdateCard,
+    dispatchSet,
+    checkLimit,
+    incrementUsage,
+    onLimitReached: () => handleOpenUpgrade('AI Co-Pilot'),
+  });
 
 
 
@@ -323,170 +396,81 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
   const showAside = canViewBoards || canViewMembers;
 
   return (
-    <main className={`bd-root p-4 ${showAside ? '' : 'no-aside'} ${sidebarCollapsed ? 'collapsed-sidebar' : ''}`}>
-      {/* Sidebar Toggle Button - Fixed position */}
+    <div className={`bd-root ${sidebarCollapsed ? 'bd-sidebar-collapsed' : ''} ${showAside ? '' : 'no-aside'}`}>
+
+      {/* ────── LEFT SIDEBAR ────── */}
       {showAside && (
-        <button
-          className="bd-sidebar-toggle"
-          onClick={() => dispatchSet('sidebarCollapsed', prev => !prev)}
-          aria-label={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-          title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {sidebarCollapsed ? (
-              // Chevron right (expand)
-              <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            ) : (
-              // Chevron left (collapse)
-              <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            )}
-          </svg>
-        </button>
-      )}
-
-      <div className="bd-header" onClick={() => { if (showHeaderActions) dispatchSet('showHeaderActions', false); }}>
-        {/* LEFT: title + subtitle */}
-        <div className="bd-head-left" role="banner">
-          <h1 className="bd-title">Business Dashboard</h1>
-          <div className="bd-sub">
-            {businessName ? businessName : businessId || "—"}: {currentUser?.email || "—"}
-            {userRoleName ? ` • Role: ${userRoleName}` : userRoleId ? ` • Role: ${userRoleId}` : ""}
-          </div>
-        </div>
-
-        {/* RIGHT: actions (desktop) + mobile toggle */}
-        <div className="bd-head-right">
-          {/* mobile toggle (visible only on small screens via CSS) */}
-          <button
-            className="bd-mobile-toggle"
-            aria-expanded={showHeaderActions}
-            aria-label="Toggle header actions"
-            onClick={(e) => { e.stopPropagation(); dispatchSet('showHeaderActions', s => !s); }}
-            type="button"
-          >
-            {/* simple hamburger / actions icon */}
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-              <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-
-          {/* actions container: visible in desktop; becomes a popover in mobile when .open */}
-          <div className={`bd-actions ${showHeaderActions ? 'open' : ''}`} onClick={(e) => e.stopPropagation()}>
-            {selectedBoard && (
-              <>
-                {canUseOCR && (
-                  <label className={`bd-btn inline-flex items-center gap-2 px-3 py-2 rounded text-sm ${loading ? 'opacity-60' : 'hover:bg-gray-800'}`}>
-                    <input
-                      type="file"
-                      accept="image/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                      disabled={loading}
-                    />
-                    <span className="btn-icon" aria-hidden>
-                      {loading ? '⏳' :
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M18.5 11V6.5C18.5 5.37283 18.0519 4.29215 17.2549 3.49512C16.4579 2.69809 15.3772 2.25 14.25 2.25H5.75C4.62283 2.25 3.54215 2.69809 2.74512 3.49512C1.94809 4.29215 1.5 5.37283 1.5 6.5V13.5C1.5 14.058 1.60979 14.6105 1.82324 15.126C2.03682 15.6416 2.35047 16.1102 2.74512 16.5049C3.54215 17.3019 4.62283 17.75 5.75 17.75H12.0098C12.424 17.75 12.7598 18.0858 12.7598 18.5C12.7598 18.9142 12.424 19.25 12.0098 19.25H5.75C4.22501 19.25 2.7629 18.6438 1.68457 17.5654C1.15063 17.0315 0.726465 16.3978 0.4375 15.7002C0.148609 15.0026 0 14.255 0 13.5V6.5C0 4.97501 0.606236 3.5129 1.68457 2.43457C2.7629 1.35624 4.22501 0.75 5.75 0.75H14.25C15.775 0.75 17.2371 1.35624 18.3154 2.43457C19.3938 3.5129 20 4.97501 20 6.5V11C20 11.4142 19.6642 11.75 19.25 11.75C18.8358 11.75 18.5 11.4142 18.5 11Z" />
-                          <path d="M14.0585 7.01957C15.1106 6.93192 16.16 7.19728 17.0419 7.77055L17.2157 7.88969L17.2382 7.90629L19.7089 9.81645C20.0363 10.0699 20.096 10.5406 19.8427 10.8682C19.5893 11.1959 19.1186 11.2563 18.7909 11.003L16.3368 9.10454C15.7113 8.65963 14.9477 8.45093 14.1825 8.51469C13.4149 8.57878 12.6951 8.91347 12.1513 9.45903L9.81825 11.792C9.33575 12.2712 8.7021 12.5688 8.02529 12.6348C7.34852 12.7007 6.66932 12.5313 6.10341 12.1543C5.82524 11.9691 5.49173 11.8846 5.15907 11.917C4.83191 11.949 4.52555 12.0916 4.28993 12.3204L1.579 15.4873C1.30958 15.8019 0.83598 15.8388 0.52138 15.5694C0.207001 15.2999 0.170999 14.8263 0.440325 14.5118L3.17958 11.3116C3.19271 11.2962 3.20726 11.2818 3.22157 11.2676C3.70401 10.7886 4.33689 10.4909 5.01357 10.4248C5.69038 10.3589 6.36949 10.5283 6.93544 10.9053C7.21357 11.0906 7.54716 11.174 7.87978 11.1416C8.21247 11.1092 8.52445 10.9631 8.76161 10.7276L11.0897 8.39946C11.8846 7.60236 12.9366 7.11306 14.0585 7.01957ZM5.98525 4.09965C6.30154 4.09776 6.61513 4.15816 6.9081 4.27739C7.20109 4.39669 7.46818 4.57266 7.69325 4.79496C7.91839 5.01741 8.09772 5.2826 8.2206 5.57426C8.34342 5.86587 8.40814 6.17875 8.41005 6.49516C8.41196 6.81164 8.35069 7.12587 8.23134 7.41899C8.112 7.71188 7.93605 7.97818 7.71376 8.20317C7.49136 8.42827 7.22705 8.60764 6.93544 8.73051C6.64389 8.85334 6.3309 8.91801 6.01454 8.91996C5.37538 8.92382 4.76024 8.67291 4.30556 8.22368C3.85114 7.77453 3.59366 7.16338 3.58974 6.52446C3.58589 5.88529 3.83581 5.27016 4.28505 4.81547C4.73428 4.36083 5.34611 4.1035 5.98525 4.09965ZM5.99404 5.59965C5.75275 5.60114 5.52203 5.69852 5.35243 5.87016C5.18291 6.04174 5.08841 6.27351 5.08974 6.51469C5.09119 6.75604 5.18856 6.98764 5.36025 7.15727C5.53183 7.32669 5.76366 7.42132 6.00478 7.41997C6.12428 7.41925 6.24328 7.39507 6.35341 7.34868C6.46345 7.30228 6.56343 7.2344 6.64736 7.14946C6.73131 7.06446 6.79762 6.96323 6.84267 6.85258C6.88765 6.74199 6.91077 6.62335 6.91005 6.50395C6.9093 6.38457 6.8851 6.26632 6.83876 6.15629C6.79239 6.04623 6.72448 5.94631 6.63954 5.86235C6.55453 5.77835 6.45335 5.7121 6.34267 5.66704C6.23201 5.62199 6.11351 5.59893 5.99404 5.59965Z" />
-                          <path d="M15.957 18V13C15.957 12.5858 16.2928 12.25 16.707 12.25C17.1212 12.25 17.457 12.5858 17.457 13V18C17.457 18.4142 17.1212 18.75 16.707 18.75C16.2928 18.75 15.957 18.4142 15.957 18Z" />
-                          <path d="M16.707 12.2529C16.8662 12.2529 17.0238 12.2846 17.1708 12.3457C17.3175 12.4067 17.4512 12.4959 17.5634 12.6084L19.5302 14.5752C19.8231 14.8681 19.8231 15.3429 19.5302 15.6357C19.2373 15.9286 18.7625 15.9286 18.4697 15.6357L16.707 13.873L14.9443 15.6357C14.6514 15.9286 14.1766 15.9286 13.8837 15.6357C13.5908 15.3429 13.5909 14.8681 13.8837 14.5752L15.8505 12.6084C15.9627 12.4959 16.0963 12.4067 16.2431 12.3457L16.3554 12.3057C16.4692 12.2711 16.5876 12.2529 16.707 12.2529Z" />
-                        </svg>
-                      }
-                    </span>
-                    <span className="btn-text">Upload</span>
-                  </label>
-                )}
-
-                {canEditBoardValue && (
-                  <button
-                    className="bd-btn"
-                    onClick={() => {
-                      dispatchSet('editingBoard', true);
-                      dispatchSet('boardDraft', { name: selectedBoard.name || "", description: selectedBoard.description || "" });
-                      dispatchSet('showHeaderActions', false);
-                    }}
-                  >
-                    <span className="btn-text">Edit Board</span>
-                  </button>
-                )}
-
-                {canDeleteBoard && (
-                  <button className="bd-btn" onClick={() => { handleDeleteBoard(selectedBoard.id); dispatchSet('showHeaderActions', false); }} style={{ marginLeft: 8 }}>
-                    <span className="btn-text">Delete Board</span>
-                  </button>
-                )}
-
-                {ocrResult && (
-                  <>
-                    <button
-                      className="bd-btn"
-                      onClick={() => { handleApplyOCRToBoard(); dispatchSet('showHeaderActions', false); }}
-                      disabled={!canCreateList || !selectedBoardId || loading}
-                      style={{ marginLeft: 8 }}
-                    >
-                      <span className="btn-text">Import OCR → Board</span>
-                    </button>
-                    <button
-                      className="bd-btn"
-                      onClick={() => { console.log('OCR preview', ocrResult); dispatchSet('showHeaderActions', false); }}
-                      style={{ marginLeft: 8 }}
-                    >
-                      <span className="btn-text">Preview OCR JSON</span>
-                    </button>
-                  </>
-                )}
-
-                {ocrError && <div className="bd-ocr-error" style={{ color: 'var(--bd-error)', marginTop: 6 }}>{ocrError}</div>}
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* OCR Preview Modal */}
-      {previewFile && (
-        <div className="ocr-preview-overlay">
-          <div className="ocr-preview-modal">
-            <h3 className="modal-title">Confirm Upload</h3>
-            <p className="modal-desc">
-              Please review the image before processing. <br />
-              <strong>Security Warning:</strong> Ensure this image does not contain sensitive data like passwords or PI keys.
-            </p>
-
-            <div className="preview-container">
-              {previewUrl && <img src={previewUrl} alt="Preview" className="preview-img" />}
-            </div>
-
-            <div className="modal-actions">
-              <button className="bd-btn plain" onClick={cancelUpload}>Cancel</button>
-              <button className="bd-btn primary" onClick={confirmUpload}>
-                Confirm Upload
-              </button>
+        <aside className="bd-sidebar">
+          {/* Sidebar header */}
+          <div className="bd-sidebar-header">
+            <div className="bd-sidebar-logo">
+              <div
+                className="bd-sidebar-logo-mark"
+                onClick={() => dispatchSet('sidebarCollapsed', prev => !prev)}
+                aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                style={{ cursor: 'pointer' }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  {sidebarCollapsed ? (
+                    /* Show expand icon when collapsed (optional, adapting from old svg) */
+                    <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  ) : (
+                    /* Default logo */
+                    <path d="M3 9L12 2L21 9V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V9Z" fill="currentColor" opacity="0.9" />
+                  )}
+                </svg>
+              </div>
+              <span className="bd-sidebar-logo-text">T4SK</span>
             </div>
           </div>
-        </div>
-      )}
 
-      {uiError && <div className="bd-uierror">{uiError}</div>}
+          {/* Business info chip */}
+          <div className="bd-sidebar-biz-chip">
+            <div className="bd-biz-avatar">
+              {(businessName || 'B')[0].toUpperCase()}
+            </div>
+            <div className="bd-biz-info">
+              <div className="bd-biz-name">{businessName || businessId || '—'}</div>
+              <div className="bd-biz-role">
+                {userRoleName ? `Role: ${userRoleName}` : userRoleId ? `Role: ${userRoleId}` : 'Business'}
+              </div>
+            </div>
+          </div>
 
-      <div className="bd-grid">
-        {showAside ? (
-          <div className="bd-aside">
-            <div className="sidebar-tabs">
+          {/* Tabs */}
+
+          {(canCreateBoard || canViewMembers) && (
+            <div className="bd-sidebar-tabs">
               <button
-                className={`tab-btn ${sidebarTab === 'boards' ? 'active' : ''}`}
+                className={`bd-tab-btn ${sidebarTab === 'boards' ? 'active' : ''}`}
                 onClick={() => dispatchSet('sidebarTab', 'boards')}
+                title="Boards"
               >
-                Boards
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="bd-tab-icon">
+                  <rect x="3" y="3" width="7" height="18" rx="1.5" fill="currentColor" />
+                  <rect x="13" y="3" width="8" height="11" rx="1.5" fill="currentColor" opacity="0.7" />
+                </svg>
+                <span className="bd-tab-label">Boards</span>
               </button>
               <button
-                className={`tab-btn ${sidebarTab === 'members' ? 'active' : ''}`}
+                className={`bd-tab-btn ${sidebarTab === 'members' ? 'active' : ''}`}
                 onClick={() => dispatchSet('sidebarTab', 'members')}
+                title="Members"
               >
-                Members
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="bd-tab-icon">
+                  <circle cx="9" cy="7" r="4" fill="currentColor" />
+                  <path d="M1 21v-2a7 7 0 0 1 14 0v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <circle cx="19" cy="7" r="3" fill="currentColor" opacity="0.6" />
+                  <path d="M22 21v-1.5a5 5 0 0 0-3-4.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.6" />
+                </svg>
+                <span className="bd-tab-label">Members</span>
               </button>
             </div>
+          )}
 
+          {/* Tab content */}
+          <div className="bd-sidebar-content">
             {sidebarTab === 'boards' && (
               <BoardSidebar
                 boards={boards}
@@ -494,7 +478,6 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                 setBoardQuery={(v) => dispatchSet('boardQuery', v)}
                 boardView={boardView}
                 setBoardView={(v) => dispatchSet('boardView', v)}
-                // NEW: sorting
                 boardSort={boardSort}
                 setBoardSort={setBoardSort}
                 visibleBoards={visibleBoards}
@@ -521,7 +504,6 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                   membersError={membersError}
                   memberQuery={memberQuery}
                   setMemberQuery={(v) => dispatchSet('memberQuery', v)}
-                  // NEW: filtering
                   memberRoleFilter={memberRoleFilter}
                   setMemberRoleFilter={setMemberRoleFilter}
                   membersPerPage={membersPerPage}
@@ -536,31 +518,411 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                   workloadMap={workloadMap}
                 />
               ) : (
-                  <div className="bd-section members-panel restricted">
-                    <div className="muted" style={{ padding: 20 }}>Members list is restricted for your role.</div>
-                  </div>
-                )
+                <div className="bd-section members-panel restricted">
+                  <div className="muted" style={{ padding: 20 }}>Members list is restricted for your role.</div>
+                </div>
+              )
             )}
           </div>
-        ) : null}
+        </aside>
+      )}
 
-        <section className="bd-main">
-          <div className="board-content">
-            {!selectedBoard ? (
-              <div className="bd-empty">{(!canViewBoards) ? "No board selected." : "Select a board from the left."}</div>
-            ) : (
-              <>
-                <BoardTop
-                  selectedBoard={selectedBoard}
-                  editingBoard={editingBoard}
-                  setEditingBoard={(v) => dispatchSet('editingBoard', v)}
-                  boardDraft={boardDraft}
-                  setBoardDraft={(d) => dispatchSet('boardDraft', d)}
-                  handleUpdateBoard={handleUpdateBoard}
-                  handleRefreshBoard={handleRefreshBoard}
-                  canEditBoardValue={canEditBoardValue}
-                />
+      {/* ────── RIGHT: MAIN AREA ────── */}
+      <div className="bd-main-area">
 
+        {/* Top Header Bar */}
+        <header className="bd-header" onClick={() => { if (showHeaderActions) dispatchSet('showHeaderActions', false); }}>
+          <div className="bd-head-left">
+            {/* Collapse toggle inline with header on mobile */}
+            {showAside && (
+              <button
+                className="bd-header-sidebar-toggle"
+                onClick={(e) => { e.stopPropagation(); dispatchSet('sidebarCollapsed', prev => !prev); }}
+                aria-label={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+                title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
+            )}
+            <div className="bd-header-title-group">
+              <h1 className="bd-title">Business Dashboard</h1>
+              <div className="bd-sub">
+                <span className="bd-sub-email">{currentUser?.email || '—'}</span>
+                {userRoleName && <span className="bd-sub-role"> · {userRoleName}</span>}
+              </div>
+            </div>
+          </div>
+
+          <div className="bd-head-right">
+            {/* Mobile toggle */}
+            <button
+              className="bd-mobile-toggle"
+              aria-expanded={showHeaderActions}
+              aria-label="Toggle header actions"
+              onClick={(e) => { e.stopPropagation(); dispatchSet('showHeaderActions', s => !s); }}
+              type="button"
+            >
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden>
+                <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
+            {/* Actions */}
+            <div className={`bd-actions ${showHeaderActions ? 'open' : ''}`} onClick={(e) => e.stopPropagation()}>
+              {selectedBoard && (
+                <>
+                  {canUseOCR && (
+                    <label className={`bd-action-btn ${loading ? 'bd-action-btn--disabled' : ''}`} title="Upload file for OCR">
+                      <input
+                        type="file"
+                        accept="image/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        onChange={(e) => {
+                          if (!checkLimit()) {
+                            handleOpenUpgrade('Document OCR');
+                            e.target.value = null;
+                            return;
+                          }
+                          incrementUsage();
+                          handleFileSelect(e);
+                        }}
+                        style={{ display: 'none' }}
+                        disabled={loading}
+                      />
+                      <span className="bd-action-btn-icon" aria-hidden>
+                        {loading ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="bd-spin">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" opacity="0.25" />
+                            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          </svg>
+                        ) : (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <polyline points="17 8 12 3 7 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          </svg>
+                        )}
+                      </span>
+                      <span className="bd-action-btn-text">Upload</span>
+                    </label>
+                  )}
+
+                  {canEditBoardValue && (
+                    <button
+                      className="bd-action-btn"
+                      title="Edit board details"
+                      onClick={() => {
+                        dispatchSet('editingBoard', true);
+                        dispatchSet('boardDraft', { name: selectedBoard.name || '', description: selectedBoard.description || '' });
+                        dispatchSet('showHeaderActions', false);
+                      }}
+                    >
+                      <span className="bd-action-btn-icon" aria-hidden>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </span>
+                      <span className="bd-action-btn-text">Edit Board</span>
+                    </button>
+                  )}
+
+                  {canDeleteBoard && (
+                    <button
+                      className="bd-action-btn bd-action-btn--danger"
+                      title="Delete this board"
+                      onClick={() => { handleDeleteBoard(selectedBoard.id); dispatchSet('showHeaderActions', false); }}
+                    >
+                      <span className="bd-action-btn-icon" aria-hidden>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </span>
+                      <span className="bd-action-btn-text">Delete Board</span>
+                    </button>
+                  )}
+
+                  {ocrResult && (
+                    <>
+                      <button
+                        className="bd-action-btn bd-action-btn--accent"
+                        title="Import OCR result to board"
+                        onClick={() => { handleApplyOCRToBoard(); dispatchSet('showHeaderActions', false); }}
+                        disabled={!canCreateList || !selectedBoardId || loading}
+                      >
+                        <span className="bd-action-btn-icon" aria-hidden>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 5v14M5 12l7 7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </span>
+                        <span className="bd-action-btn-text">Import OCR</span>
+                      </button>
+                      <button
+                        className="bd-action-btn"
+                        title="Preview OCR JSON output"
+                        onClick={() => { console.log('OCR preview', ocrResult); dispatchSet('showHeaderActions', false); }}
+                      >
+                        <span className="bd-action-btn-icon" aria-hidden>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <polyline points="16 18 22 12 16 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <polyline points="8 6 2 12 8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </span>
+                        <span className="bd-action-btn-text">Preview OCR</span>
+                      </button>
+                    </>
+                  )}
+
+                  {ocrError && (
+                    <div className="bd-ocr-error-badge" title={ocrError}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                        <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
+                      OCR Error
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* AI Co-Pilot Toggle */}
+              {canUseAI && selectedBoard && (
+                <button
+                  className={`bd-action-btn bd-action-btn--copilot ${copilotOpen ? 'active' : ''}`}
+                  title="AI Co-Pilot"
+                  onClick={() => { handleOpenCopilot(); dispatchSet('showHeaderActions', false); }}
+                >
+                  <span className="bd-action-btn-icon" aria-hidden>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z" />
+                    </svg>
+                  </span>
+                  <span className="bd-action-btn-text">AI Co-Pilot</span>
+                </button>
+              )}
+            </div>
+
+            {/* User avatar */}
+            {/* View switcher — Kanban / List */}
+            {selectedBoard && (
+              <div className="bd-view-switcher" title="Switch view">
+                <button
+                  className={`bd-view-btn ${(listViewMode || 'kanban') === 'kanban' ? 'active' : ''}`}
+                  title="Kanban View"
+                  onClick={() => dispatchSet('listViewMode', 'kanban')}
+                  aria-label="Kanban view"
+                >
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor">
+                    <rect x="1" y="1" width="4" height="14" rx="1" />
+                    <rect x="6" y="1" width="4" height="10" rx="1" />
+                    <rect x="11" y="1" width="4" height="12" rx="1" />
+                  </svg>
+                </button>
+                <button
+                  className={`bd-view-btn ${listViewMode === 'list' ? 'active' : ''}`}
+                  title="List View"
+                  onClick={() => dispatchSet('listViewMode', 'list')}
+                  aria-label="List view"
+                >
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor">
+                    <rect x="1" y="2" width="14" height="2.5" rx="1" />
+                    <rect x="1" y="6.5" width="14" height="2.5" rx="1" />
+                    <rect x="1" y="11" width="14" height="2.5" rx="1" />
+                  </svg>
+                </button>
+                <button
+                  className={`bd-view-btn ${listViewMode === 'calendar' ? 'active' : ''}`}
+                  title="Calendar View (Pro)"
+                  onClick={() => {
+                    if (!canUseCalendar) {
+                      handleOpenUpgrade('Calendar View');
+                      return;
+                    }
+                    dispatchSet('listViewMode', 'calendar');
+                  }}
+                  aria-label="Calendar view"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            <div className="bd-user-chip" title={currentUser?.email || ''}>
+              <div className="bd-chip-avatar">
+                {currentUser?.photoURL ? (
+                  <img src={currentUser.photoURL} alt="" />
+                ) : (
+                  <span>{currentUser?.displayName?.[0] || currentUser?.email?.[0]?.toUpperCase() || 'U'}</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Error banner */}
+        {uiError && <div className="bd-uierror">{uiError}</div>}
+
+        {/* OCR Preview Modal */}
+        {previewFile && (
+          <div className="ocr-preview-overlay">
+            <div className="ocr-preview-modal">
+              <h3 className="modal-title">Confirm Upload</h3>
+              <p className="modal-desc">
+                Please review the file before processing.<br />
+                <strong>Security Warning:</strong> Ensure this does not contain sensitive data like passwords or API keys.
+              </p>
+              <div className="preview-container">
+                {previewUrl && <img src={previewUrl} alt="Preview" className="preview-img" />}
+              </div>
+              <div className="modal-actions">
+                <button className="bd-btn plain" onClick={cancelUpload}>Cancel</button>
+                <button className="bd-btn primary" onClick={confirmUpload}>Confirm Upload</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <UpgradeModal isOpen={upgradeModalOpen} onClose={() => setUpgradeModalOpen(false)} featureName={upgradeFeatureName} />
+
+        {/* Board content area */}
+        <div className="bd-board-area">
+          {!selectedBoard ? (
+            <div className="bd-empty-state">
+              <div className="bd-empty-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="3" width="7" height="18" rx="1.5" stroke="currentColor" strokeWidth="1.5" opacity="0.4" />
+                  <rect x="13" y="3" width="8" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.5" opacity="0.4" />
+                </svg>
+              </div>
+              <p className="bd-empty-text">
+                {!canViewBoards ? 'You do not have access to any boards.' : 'Select a board from the sidebar to get started.'}
+              </p>
+            </div>
+          ) : (
+            <>
+              <BoardTop
+                selectedBoard={selectedBoard}
+                editingBoard={editingBoard}
+                setEditingBoard={(v) => dispatchSet('editingBoard', v)}
+                boardDraft={boardDraft}
+                setBoardDraft={(d) => dispatchSet('boardDraft', d)}
+                handleUpdateBoard={handleUpdateBoard}
+                handleRefreshBoard={handleRefreshBoard}
+                canEditBoardValue={canEditBoardValue}
+              />
+
+                {listViewMode === 'list' ? (
+                  /* ── LIST VIEW ── full CardItem rendering grouped by list */
+                  (() => {
+                    const LIST_COLORS = [
+                      '#538fff', '#f59e0b', '#10b981', '#6366f1', '#ec4899', '#14b8a6', '#f97316', '#8b5cf6'
+                    ];
+                    const allEmpty = listsVisible.every(l => (filteredCardsMap[l.id] || []).length === 0);
+                    if (allEmpty) {
+                      return <div className="bd-listview-empty">No tasks found in this board.</div>;
+                    }
+                    return (
+                      <div className="bd-listview-layout">
+                        {listsVisible.map((l, li) => {
+                          const myCards = filteredCardsMap[l.id] || [];
+                          const totalCards = cardsMap[l.id] || [];
+                          if (myCards.length === 0) return null;
+                          const listColor = LIST_COLORS[li % LIST_COLORS.length];
+                          return (
+                            <div key={l.id} className="bd-listview-group">
+                              <div className="bd-listview-group-header">
+                                <span className="bd-lv-dot" style={{ background: listColor }} />
+                                <span className="bd-lv-group-name">{l.name}</span>
+                                <span className="bd-lv-count">{totalCards.length}</span>
+
+                                <div style={{ marginLeft: "auto", display: "flex", gap: "8px" }}>
+                                  {loadMoreCards && cardsHasMoreMap[l.id] && (
+                                    <button
+                                      className="bd-btn bd-btn--small"
+                                      style={{ backgroundColor: "#2d3748", color: "#e2e8f0", border: "1px solid #4a5568", fontSize: "0.75rem", padding: "4px 8px" }}
+                                      onClick={() => loadMoreCards(l.id)}
+                                    >
+                                      ↓ Load More
+                                    </button>
+                                  )}
+                                  {resetLimitCards && (cardsLimitsMap[l.id] || cardsBaseLimit) > cardsBaseLimit && (
+                                    <button
+                                      className="bd-btn bd-btn--small"
+                                      style={{ backgroundColor: "transparent", color: "#a0aec0", border: "1px solid #4a5568", fontSize: "0.75rem", padding: "4px 8px" }}
+                                      onClick={() => resetLimitCards(l.id)}
+                                    >
+                                      ↑ Show Less
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                              {/* Cards with FULL interaction — Details, Submit, Review modals all included */}
+                              <div className="bd-listview-cards-grid">
+                                {myCards.map(card => (
+                                  <CardItem
+                                    key={card.id}
+                                    card={card}
+                                    listId={l.id}
+                                    viewMode="row"
+                                    listColor={listColor}
+                                    listName={l.name}
+                                    cardDrafts={cardDrafts}
+                                    setCardDrafts={(p) => dispatchSet('cardDrafts', p)}
+                                    handleUpdateCard={handleUpdateCard}
+                                    handleDeleteCard={handleDeleteCard}
+                                    handleSubmitCard={handleSubmitCard}
+                                    handleReviewAction={handleReviewAction}
+                                    canEdit={canEditBoardValue}
+                                    membersMap={membersMap}
+                                    emailMap={emailMap}
+                                    businessOwnerUid={businessOwnerUid}
+                                    currentUserUid={uid}
+                                    currentUserEmail={userEmail}
+                                    reviewerOptions={reviewerOptions}
+                                    highlightColor={highlightCardIds.has(card.id) ? highlightColor : undefined}
+                                    listAssignees={l.assignees}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()
+                ) : listViewMode === 'calendar' ? (
+                  /* ── CALENDAR VIEW ── */
+                  <BoardCalendar
+                    lists={listsVisible}
+                    cardsMap={filteredCardsMap}
+                    membersMap={membersMap}
+                    emailMap={emailMap}
+                    businessOwnerUid={businessOwnerUid}
+                    currentUserUid={uid}
+                    currentUserEmail={userEmail}
+                    handleUpdateCard={handleUpdateCard}
+                    handleDeleteCard={handleDeleteCard}
+                    handleSubmitCard={handleSubmitCard}
+                    handleReviewAction={handleReviewAction}
+                    canEdit={canEditBoardValue}
+                    reviewerOptions={reviewerOptions}
+                    loadMoreCards={loadMoreCards}
+                    cardsHasMoreMap={cardsHasMoreMap}
+                    highlightCardIds={highlightCardIds}
+                    highlightColor={highlightColor}
+                  />
+                ) : (
+                /* ── KANBAN VIEW (default) ── */
                 <div className="lists-wrap">
                   {listsVisible.map((l) => (
                     <ListColumn
@@ -568,17 +930,18 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                       boardId={selectedBoardId}
                       list={l}
                       lists={lists}
-                      cards={cardsMap[l.id] || []}
+                      cards={filteredCardsMap[l.id] || []}
+                      allCards={cardsMap[l.id] || []}
                       listNameEditing={listNameEditing}
                       listNameDrafts={listNameDrafts}
                       setListNameDrafts={(p) => dispatchSet('listNameDrafts', p)}
                       setListNameEditing={(p) => dispatchSet('listNameEditing', p)}
                       handleUpdateList={handleUpdateList}
                       handleDeleteList={handleDeleteList}
-                      canEdit={canEditBoardValue} // Keeping for legacy/fallback
-                      canUpdateList={canUpdateList} // NEW
-                      canDeleteList={canDeleteList} // NEW
-                      canCreateCard={canCreateCard} // NEW
+                      canEdit={canEditBoardValue}
+                      canUpdateList={canUpdateList}
+                      canDeleteList={canDeleteList}
+                      canCreateCard={canCreateCard}
                       cardEditing={cardEditing}
                       cardDrafts={cardDrafts}
                       setCardDrafts={(p) => dispatchSet('cardDrafts', p)}
@@ -596,79 +959,81 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                       members={members}
                       membersMap={membersMap}
                       emailMap={emailMap}
-
                       reviewerOptions={reviewerOptions}
                       reviewerOptionsSource="higher"
-                      roles={roles} // NEW: pass roles to ListColumn
+                      roles={roles}
                       workloadMap={workloadMap}
                       isOverloaded={isOverloaded}
                       businessOwnerUid={businessOwnerUid}
                       highlightCardIds={highlightCardIds}
                       highlightColor={highlightColor}
+                      loadMoreCards={loadMoreCards}
+                      resetLimitCards={resetLimitCards}
+                      cardsHasMoreMap={cardsHasMoreMap}
+                      cardsLimitsMap={cardsLimitsMap || {}}
+                      cardsBaseLimit={cardsBaseLimit || 3}
                     />
                   ))}
 
                   {canCreateList && (
                     <div className="list-col add-list">
                       <div className="add-list-head">Add list</div>
-                        <input
-                          className="add-list-name-input"
-                          value={newListName}
-                          onChange={(e) => dispatchSet('newListName', e.target.value)}
-                          placeholder="New list name"
-                        />
-
-                        <div className="assignee-search-wrapper" ref={assigneeRef}>
+                            <input
+                              className="add-list-name-input"
+                              value={newListName}
+                              onChange={(e) => dispatchSet('newListName', e.target.value)}
+                              placeholder="New list name"
+                            />
+                            <div className="assignee-search-wrapper" ref={assigneeRef}>
                         <input
                           placeholder="Search members to assign..."
                           value={assigneeSearch}
                           onChange={(e) => { dispatchSet('assigneeSearch', e.target.value); dispatchSet('assigneeDropdownOpen', true); }}
                           onFocus={() => dispatchSet('assigneeDropdownOpen', true)}
-                            className="add-list-assignee-input"
+                                className="add-list-assignee-input"
                           aria-expanded={assigneeDropdownOpen}
                           aria-haspopup="listbox"
                         />
                         {assigneeDropdownOpen && (
-                            <div className="add-list-dropdown" role="listbox">
+                                <div className="add-list-dropdown" role="listbox">
                             {assigneeCandidates.length === 0 ? (
-                                <div className="add-list-no-members">No members found</div>
-                            ) :
-                              assigneeCandidates.map((cand) => {
-                                const key = cand.id || cand.email;
-                                const value = (cand.email || '').toLowerCase();
-                                const checked = newListAssignees.includes(value);
-                                return (
-                                  <div
-                                    key={String(key)}
-                                    className="add-list-dropdown-item"
-                                    role="option"
-                                    aria-selected={checked}
-                                    onClick={() => {
-                                      toggleAssignee(value);
-                                      dispatchSet('assigneeSearch', '');
-                                      dispatchSet('assigneeDropdownOpen', false);
-                                    }}
-                                  >
-                                    <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                                      <div className="assignee-avatar-small">
-                                        {(cand.name || cand.email || '').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()}
+                                    <div className="add-list-no-members">No members found</div>
+                                  ) : assigneeCandidates.map((cand) => {
+                                    const key = cand.id || cand.email;
+                                    const value = (cand.email || '').toLowerCase();
+                                    const checked = newListAssignees.includes(value);
+                                    return (
+                                      <div
+                                        key={String(key)}
+                                        className="add-list-dropdown-item"
+                                        role="option"
+                                        aria-selected={checked}
+                                        onClick={() => {
+                                          toggleAssignee(value);
+                                          dispatchSet('assigneeSearch', '');
+                                          dispatchSet('assigneeDropdownOpen', false);
+                                        }}
+                                      >
+                                        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                                          <div className="assignee-avatar-small">
+                                            {(cand.name || cand.email || '').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()}
+                                          </div>
+                                          <div className="assignee-info">
+                                            <div className="assignee-name">{cand.name || cand.email}</div>
+                                            <div className="assignee-email">{cand.email}</div>
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <input type="checkbox" readOnly checked={checked} />
+                                        </div>
                                       </div>
-                                      <div className="assignee-info">
-                                        <div className="assignee-name">{cand.name || cand.email}</div>
-                                        <div className="assignee-email">{cand.email}</div>
-                                      </div>
-                                    </div>
-                                    <div>
-                                      <input type="checkbox" readOnly checked={checked} />
-                                    </div>
-                                  </div>
-                                );
-                              })}
+                                    );
+                                  })}
                           </div>
                         )}
                       </div>
 
-                        <div className="selected-assignees-container">
+                            <div className="selected-assignees-container">
                         {newListAssignees.map(a => {
                           const label = (a && a.includes('@')) ? a : (membersMap[a] ? (membersMap[a].email || membersMap[a].name || a) : a);
                           return (
@@ -680,16 +1045,32 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                         })}
                       </div>
 
-                        <button onClick={handleCreateList} className="create-list-btn">Create list</button>
+                            <button onClick={handleCreateList} className="create-list-btn">Create list</button>
                     </div>
-                  )}
-
+                        )}
                 </div>
-              </>
-            )}
-          </div>
-        </section>
+                )}
+            </>
+          )}
+        </div>
       </div>
-    </main>
+
+      {/* AI Co-Pilot Panel */}
+      <AICopilotPanel
+        open={copilotOpen}
+        onClose={() => dispatchSet('copilotOpen', false)}
+        messages={copilot.messages}
+        isThinking={copilot.isThinking}
+        error={copilot.error}
+        onSendMessage={copilot.sendMessage}
+        onExecuteAction={copilot.executeAction}
+        onClearHistory={copilot.clearHistory}
+        boardName={selectedBoard?.name || 'Board'}
+        remainingUses={getRemainingUses()}
+        maxUses={maxUses}
+        isPremium={isPremium}
+        onUpgrade={() => handleOpenUpgrade('AI Co-Pilot')}
+      />
+    </div>
   );
 }

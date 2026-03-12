@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { clearNotifications } from '../services/accountService';
 import '../scss/notifications.scss';
 
+const BELL_COOLDOWN_MS = 3 * 60 * 1; // 3 minutes
+
 const IconBell = ({ size = 20 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -13,6 +15,29 @@ const IconBell = ({ size = 20 }) => (
 const NotificationDropdown = ({ notifications = [], uid }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
+    const prevCountRef = useRef(notifications.length);
+    const lastBellTimeRef = useRef(null);
+
+    // Play bell sound when new notifications arrive, with a 3-minute cooldown
+    useEffect(() => {
+        const currentCount = notifications.length;
+        const prevCount = prevCountRef.current;
+
+        if (currentCount > prevCount) {
+            const now = Date.now();
+            const timeSinceLast = lastBellTimeRef.current ? now - lastBellTimeRef.current : Infinity;
+
+            if (timeSinceLast >= BELL_COOLDOWN_MS) {
+                const audio = new Audio('./service-bell.wav');
+                audio.play().catch(() => {
+                    // Browser may block autoplay before user interaction — silently ignore
+                });
+                lastBellTimeRef.current = now;
+            }
+        }
+
+        prevCountRef.current = currentCount;
+    }, [notifications.length]);
 
     // Close on click outside
     useEffect(() => {
