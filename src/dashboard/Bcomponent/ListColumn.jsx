@@ -1,11 +1,9 @@
 // ListColumn.jsx
 
 // src/pages/dashboard/Bcomponent/ListColumn.jsx
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import CardItem from './CardItem';
-import CustomSelect from './CustomSelect';
 import CreateTaskModal from './CreateTaskModal';
-import { getProjectedWeight, validateTotalWeight } from '../utils/subtaskUtils';
 
 export default function ListColumn({
     boardId,

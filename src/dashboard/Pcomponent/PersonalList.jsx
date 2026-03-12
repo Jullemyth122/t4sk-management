@@ -2,50 +2,23 @@ import React, { useState, useRef, useEffect } from 'react';
 import PersonalCard from './PersonalCard';
 import PersonalListMenu from './PersonalListMenu';
 
-export default function PersonalList({
-    list,
-    allLists,
-    onCardClick,
-    onAddTask,
-    onRenameList,
-    onUpdateListColor,
-    onDeleteList,
-    onDuplicateList,
-    onSortCards,
-    onMoveAllCards,
-    onMoveCard,
-    highlightItemId,
-}) {
-    const { name, color, cards } = list;
+export default function PersonalList({ list, onCardClick, onAddTask, highlightItemId }) {
+
+    const { id, name, color, cards } = list;
     const [menuOpen, setMenuOpen] = useState(false);
     const menuBtnRef = useRef(null);
 
-    // Inline rename state
-    const [isRenaming, setIsRenaming] = useState(false);
-    const [renameValue, setRenameValue] = useState(name);
+    const highlightClass = id === highlightItemId ? 'pd-highlight-pulse' : '';
 
-    const handleStartRename = () => {
-        setRenameValue(name);
-        setIsRenaming(true);
-        setMenuOpen(false);
-    };
-
-    const handleConfirmRename = () => {
-        if (renameValue.trim() && renameValue.trim() !== name) {
-            onRenameList && onRenameList(list.id, renameValue.trim());
-        }
-        setIsRenaming(false);
-    };
-
-    useEffect(() => {
-        if (highlightItemId === list.id) {
-            const el = document.getElementById(`list-${list.id}`);
+    React.useEffect(() => {
+        if (highlightItemId === id) {
+            const el = document.getElementById(`list-${id}`);
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-    }, [highlightItemId, list.id]);
+    }, [highlightItemId, id]);
 
     return (
-        <div id={`list-${list.id}`} className={`pd-list ${list.id === highlightItemId ? 'pd-highlight-pulse' : ''}`}>
+        <div id={`list-${id}`} className={`pd-list ${highlightClass}`}>
             {/* List Header */}
             <div className="pd-list-header">
                 <div className="pd-list-header-left">
@@ -134,7 +107,6 @@ export default function PersonalList({
                         listId={list.id}
                         allLists={allLists}
                         onClick={() => onCardClick && onCardClick(card, name, color)}
-                        onMoveCard={onMoveCard}
                         highlightItemId={highlightItemId}
                     />
                 ))}

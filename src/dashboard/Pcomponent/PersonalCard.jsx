@@ -26,6 +26,8 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
         dueDate,
         startDate,
         tags = [],
+        status,
+        progress: cardProgress,
         subtasksCompleted = 0,
         subtasksTotal = 0,
     } = card;
@@ -61,8 +63,8 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
     };
 
     const ps = priority ? (PRIORITY_STYLES[priority] || null) : null;
-    const progress = subtasksTotal > 0 ? Math.round((subtasksCompleted / subtasksTotal) * 100) : 0;
-    const isDone = subtasksTotal > 0 && subtasksCompleted === subtasksTotal;
+    const progress = subtasksTotal > 0 ? Math.round((subtasksCompleted / subtasksTotal) * 100) : (cardProgress || 0);
+    const isDone = status === 'done' || (cardProgress != null && cardProgress >= 100) || (subtasksTotal > 0 && subtasksCompleted === subtasksTotal);
 
     const formattedDue = formatCardDate(dueDate);
     const formattedStart = formatCardDate(startDate);
@@ -86,7 +88,7 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
             }
         }
         if (!cDate) return false;
-        
+
         const localNow = new Date();
         const todayLocal = `${localNow.getFullYear()}-${String(localNow.getMonth() + 1).padStart(2, '0')}-${String(localNow.getDate()).padStart(2, '0')}`;
         return cDate < todayLocal;
@@ -109,13 +111,13 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
             }
         }
         if (!sDate) return false;
-        
+
         const localNow = new Date();
         const todayLocal = `${localNow.getFullYear()}-${String(localNow.getMonth() + 1).padStart(2, '0')}-${String(localNow.getDate()).padStart(2, '0')}`;
         return sDate === todayLocal;
     })();
 
-    const highlightClass = card.id === highlightItemId 
+    const highlightClass = card.id === highlightItemId
         ? (isOverdue ? 'pd-highlight-pulse--overdue' : (isStartToday ? 'pd-highlight-pulse--start' : 'pd-highlight-pulse'))
         : '';
 
@@ -229,6 +231,11 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
                             Overdue
                         </span>
                     )}
+                    {isDone && (
+                        <span className="pd-due-badge" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
+                            ✓ Done
+                        </span>
+                    )}
                 </div>
             </div>
         );
@@ -317,6 +324,11 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
                             <path d="M6 3v3.5l2.5 1" strokeLinecap="round" />
                         </svg>
                         Overdue
+                    </span>
+                )}
+                {isDone && (
+                    <span className="pd-due-badge" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
+                        ✓ Done
                     </span>
                 )}
             </div>

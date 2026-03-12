@@ -9,12 +9,14 @@ const NAV_ITEMS = [
             <rect x="10" y="7" width="7" height="7" rx="2" />
         </svg>
     )},
-    { id: 'today', label: 'Today', icon: (
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <circle cx="9" cy="9" r="6" />
-            <path d="M9 5v4l2.5 2.5" strokeLinecap="round" />
-        </svg>
-    )},
+    {
+        id: 'today', label: 'Today', icon: (
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="9" cy="9" r="6" />
+                <path d="M9 5v4l2.5 2.5" strokeLinecap="round" />
+            </svg>
+        )
+    },
     { id: 'calendar', label: 'Calendar', icon: (
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
             <rect x="2" y="3" width="14" height="13" rx="2" />

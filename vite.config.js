@@ -3,39 +3,52 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
-
-import express from 'express';
-import createStripeHandler from './api/create-stripe.js';
-import createPaymongoHandler from './api/create-paymongo.js';
-import verifyPaymongoHandler from './api/verify-paymongo.js';
-import webhookPaymongoHandler from './api/webhook-paymongo.js';
-
-function vercelApiMockPlugin(envMap = {}) {
-  return {
-    name: 'vercel-api-mock',
-    configureServer(server) {
-      if (envMap.STRIPE_SECRET_KEY) process.env.STRIPE_SECRET_KEY = envMap.STRIPE_SECRET_KEY;
-      if (envMap.PAYMONGO_SECRET_KEY) process.env.PAYMONGO_SECRET_KEY = envMap.PAYMONGO_SECRET_KEY;
-      
-      const app = express();
-      app.use(express.json());
-      app.post('/api/create-stripe', createStripeHandler);
-      app.post('/api/create-paymongo', createPaymongoHandler);
-      app.post('/api/verify-paymongo', verifyPaymongoHandler);
-      app.post('/api/webhook-paymongo', webhookPaymongoHandler);
-      server.middlewares.use(app);
-    }
-  }
-}
+import express from 'express'
+import fs from 'node:fs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
+function apiPlugin() {
+  return {
+    name: 'api-plugin',
+    configureServer(server) {
+      const app = express()
+      app.use('/api', express.json())
+
+      app.all('/api/:route', async (req, res) => {
+        try {
+          const routeFile = resolve(__dirname, 'api', `${req.params.route}.js`)
+          if (fs.existsSync(routeFile)) {
+            const moduleUrl = `file://${routeFile}?t=${Date.now()}`
+            const module = await import(moduleUrl)
+            const handler = module.default
+            
+            if (typeof handler === 'function') {
+              return handler(req, res)
+            } else {
+              return res.status(500).json({ error: 'Default export is not a function' })
+            }
+          }
+          res.status(404).json({ error: 'API route not found' })
+        } catch (err) {
+          console.error('[API Error]:', err)
+          res.status(500).json({ error: err.message })
+        }
+      })
+
+      server.middlewares.use(app)
+    }
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
+  const env = loadEnv(mode, process.cwd(), '')
+  process.env = { ...process.env, ...env }
+
   return {
-    plugins: [react(), tailwindcss(), vercelApiMockPlugin(env)],
+    plugins: [react(), tailwindcss(), apiPlugin()],
 
   server: {
     port: 5173,

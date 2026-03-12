@@ -21,7 +21,7 @@
     --bd-panel-bg: rgba(0, 0, 0, 0.2);
     --bd-card-bg: rgba(255, 255, 255, 0.035);
     --bd-card-border: rgba(255, 255, 255, 0.06);
-    --bd-card-hover: rgba(255, 255, 255, 0.05);
+    --bd-card-hover: rgba(252, 216, 216, 0.05);
     
     --bd-btn-bg: rgba(255, 255, 255, 0.02);
     --bd-btn-border: rgba(255, 255, 255, 0.04);
@@ -991,21 +991,34 @@
                 font-weight: 600;
             }
 
-            .pag-btn[disabled] {
-                opacity: .45;
-                cursor: not-allowed;
-            }
-
-            .pag-page.active {
-                background: linear-gradient(90deg, var(--task-modalbtnBG), var(--task-modalbtnBG1));
-                color: var(--task-modalColor2);
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
-                border: none;
-            }
-        }
+    /* make the columns slightly translucent to feel like cards placed on the show-content canvas */
+    .list-col {
+        background: var(--bd-card-bg); /* was linear-gradient */
+        border: 1px solid var(--bd-card-border);
     }
 
+    /* board empty state */
+    .bd-empty {
+        color: var(--bd-text-sub);
+        font-size: 0.95rem;
+        padding: 40px;
+        text-align: center;
+    }
 
+    /* ensure inner controls still stand out — slightly lift primary buttons */
+    .bd-btn {
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    /* small helper: inner panels (e.g., editing area) mimic content2 / content1 in home.scss */
+    .board-editor {
+        margin: 8px 0;
+        padding: 12px;
+        background: var(--bd-input-bg);
+        border-radius: 8px;
+        position: relative;
+        z-index: 3;
+    }
 }
 
 /* Boards & members header */
@@ -1813,6 +1826,7 @@
     
     strong {
         color: var(--bd-text-main);
+        letter-spacing: -0.3px;
     }
     span {
         font-size: 12px;
@@ -1849,7 +1863,6 @@
         color: var(--bd-text-sub);
         font-weight: 500;
     }
-}
 
 .load-more-group {
     display: flex;
@@ -2038,6 +2051,7 @@
 
 .mini-subtask-item {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     gap: 6px;
     font-size: 0.8rem;
@@ -2324,6 +2338,10 @@
 
         // hide label to save space
     }
+
+    /* optional: visually tone down collapsed list */
+    box-shadow: none;
+    opacity: 0.95;
 }
 
 
@@ -2393,6 +2411,7 @@
     &[data-priority="urgent"]::before {
         background: linear-gradient(180deg, #FF7A2D, #FF4A00);
     }
+}
 
     &[data-priority="medium"]::before {
         background: linear-gradient(180deg, #FFD166, #F9C74F);
@@ -5491,6 +5510,5 @@ select:focus {
         }
     }
 }
-
 
 

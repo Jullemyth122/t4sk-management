@@ -161,6 +161,9 @@ export default function PersonalDashboard() {
                         title: card.title, description: card.description || '',
                         priority: card.priority || null, startDate: card.startDate || null,
                         dueDate: card.dueDate || null, status: 'todo', subtasks: card.subtasks || [],
+                        recurrence: card.recurrence || null,
+                        tags: card.tags || [],
+                        youtubeLink: card.youtubeLink || '',
                     },
                     actorName: currentUser?.displayName || 'Me',
                     boardName: selectedBoard?.name || 'Board',
@@ -290,7 +293,7 @@ export default function PersonalDashboard() {
                 const matchTitle = (card.title || '').toLowerCase().includes(q);
                 const matchDesc = (card.description || '').toLowerCase().includes(q);
                 const matchTag = card.tags && card.tags.some(t => t.toLowerCase().includes(q));
-                
+
                 if (matchTitle || matchDesc || matchTag) {
                     c.push(card);
                 }
@@ -471,6 +474,10 @@ export default function PersonalDashboard() {
                                         if (taskData.description) cardProps.description = taskData.description;
                                         if (taskData.subtasks && taskData.subtasks.length > 0) cardProps.subtasks = taskData.subtasks;
                                         if (taskData.progress != null) cardProps.progress = taskData.progress;
+                                        if (taskData.recurrence) cardProps.recurrence = taskData.recurrence;
+                                        if (taskData.timeSpent) cardProps.timeSpent = taskData.timeSpent;
+                                        if (taskData.tags && taskData.tags.length > 0) cardProps.tags = taskData.tags;
+                                        if (taskData.youtubeLink) cardProps.youtubeLink = taskData.youtubeLink;
                                     }
 
                                     await boardSvc.createCard({
