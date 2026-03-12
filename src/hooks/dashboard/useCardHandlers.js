@@ -7,8 +7,17 @@ import { serverTimestamp } from "firebase/firestore";
 export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs, actorName, boardName }) {
     const snapshotRef = useRef({});
 
-    const handleCreateCardForList = useCallback(async (listId) => {
-        const inputs = newCardInputs[listId] || {};
+    const handleCreateCardForList = useCallback(async (argOrListId) => {
+        // Support both: plain listId string AND { listId, cardOverride } from CreateTaskModal
+        let listId, cardOverride;
+        if (typeof argOrListId === 'object' && argOrListId !== null && argOrListId.listId) {
+            listId = argOrListId.listId;
+            cardOverride = argOrListId.cardOverride || null;
+        } else {
+            listId = argOrListId;
+            cardOverride = null;
+        }
+        const inputs = cardOverride || newCardInputs[listId] || {};
         const title = (inputs.title || '').trim();
         if (!title || !selectedBoardId) {
             dispatchSet('uiError', 'Title or board required');
@@ -75,6 +84,11 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
 
     const handleUpdateCard = useCallback(async ({ listId, cardId, updates, listAssignees }) => {
         if (!cardId || !listId) return dispatchSet('uiError', 'Invalid card/list');
+        
+        if (String(cardId).startsWith('tmp-')) {
+            console.warn('Ignored attempt to update temporary card:', cardId);
+            return;
+        }
         
         const updateKeys = Object.keys(updates || {});
         const isSubtaskOnlyUpdate = updateKeys.length > 0 && updateKeys.every(k => k === 'subtasks' || k === 'progress');

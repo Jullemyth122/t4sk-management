@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import * as boardSvc from '../../services/boardService'
-export function useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards, highlightBoardId }) {
+export function useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards, highlightBoardId, uid, userEmail }) {
     // Subscribe to boards
     useEffect(() => {
         if (!businessId) {
@@ -11,7 +11,6 @@ export function useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, us
         return unsub;
     }, [businessId, dispatchSet]);
 
-    // Auto-select first board for low-level users
     // Auto-select first board for low-level users (OR handle highlightBoardId)
     useEffect(() => {
         if (!boards || boards.length === 0) return;
@@ -42,4 +41,39 @@ export function useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, us
         const unsub = boardSvc.subscribeLists({ businessId, uid: null, boardId: selectedBoardId, cb: (ls) => dispatchSet('lists', ls || []) });
         return unsub;
     }, [businessId, selectedBoardId, dispatchSet]);
+
+    // For low-level users: subscribe to lists for ALL boards to determine which boards are relevant
+    const unsubsRef = useRef({});
+    useEffect(() => {
+        // High-level users see all boards, no filtering needed
+        if (userLevel > 2 || !businessId || !boards || boards.length === 0) {
+            dispatchSet('allBoardsListsMap', null);
+            return;
+        }
+
+        const currentUnsubs = {};
+        const listsData = {};
+
+        boards.forEach(board => {
+            const unsub = boardSvc.subscribeLists({
+                businessId,
+                uid: null,
+                boardId: board.id,
+                cb: (ls) => {
+                    listsData[board.id] = ls || [];
+                    // Dispatch a shallow copy so React detects the change
+                    dispatchSet('allBoardsListsMap', { ...listsData });
+                }
+            });
+            currentUnsubs[board.id] = unsub;
+        });
+
+        unsubsRef.current = currentUnsubs;
+
+        return () => {
+            Object.values(currentUnsubs).forEach(unsub => {
+                if (typeof unsub === 'function') unsub();
+            });
+        };
+    }, [businessId, boards, userLevel, dispatchSet]);
 }

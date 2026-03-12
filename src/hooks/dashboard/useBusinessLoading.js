@@ -36,6 +36,7 @@ export function useBusinessLoading({ businessId, dispatchSet, profile, uid }) {
         if (!businessId) {
             dispatchSet('businessName', null);
             dispatchSet('businessOwnerUid', null);
+            dispatchSet('planType', 'free');
             return;
         }
         let mounted = true;
@@ -51,6 +52,7 @@ export function useBusinessLoading({ businessId, dispatchSet, profile, uid }) {
                 if (mounted) {
                     dispatchSet('businessName', null);
                     dispatchSet('businessOwnerUid', null);
+                    dispatchSet('planType', 'free');
                 }
             }
         })();

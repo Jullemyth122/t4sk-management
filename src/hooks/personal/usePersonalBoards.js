@@ -16,9 +16,33 @@ export function usePersonalBoards(uid) {
             setBoards([]);
             return;
         }
+        
+        let hasInitialized = false;
+
         const unsub = boardSvc.subscribeBoards({
             uid,
-            cb: (data) => setBoards(data || []),
+            cb: async (data) => {
+                const userBoards = data || [];
+                
+                // If it's the very first load and no boards exist, auto-create one
+                if (userBoards.length === 0 && !hasInitialized) {
+                    hasInitialized = true;
+                    try {
+                        await boardSvc.createBoard({
+                            uid,
+                            name: "My Tasks",
+                            description: "My personal tasks dashboard",
+                            settings: { isDefaultPersonal: true }
+                        });
+                        // The onSnapshot will fire again with the new board
+                    } catch (err) {
+                        console.error("Failed to auto-create personal board", err);
+                    }
+                } else {
+                    hasInitialized = true;
+                    setBoards(userBoards);
+                }
+            },
         });
         return () => unsub && unsub();
     }, [uid]);

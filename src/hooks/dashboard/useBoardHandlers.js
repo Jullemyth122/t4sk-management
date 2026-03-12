@@ -1,7 +1,7 @@
 import { useCallback, useRef } from "react";
 import * as boardSvc from '../../services/boardService'
 
-export function useBoardHandlers({ businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName }) {
+export function useBoardHandlers({ businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName, planType = 'free' }) {
     const snapshotRef = useRef({});
 
     const handleRefreshBoard = useCallback(async (boardIdArg) => {
@@ -47,6 +47,12 @@ export function useBoardHandlers({ businessId, uid, dispatchSet, boards, selecte
 
     const handleCreateBoard = useCallback(async () => {
         if (!newBoardName || !businessId) return dispatchSet('uiError', 'Board name or business required');
+        
+        // Free tier board limit check
+        if (planType === 'free' && boards.length >= 10) {
+            return dispatchSet('uiError', 'Free plan is limited to 10 boards. Please upgrade to Pro or Enterprise to unlock unlimited boards.');
+        }
+
         dispatchSet('uiError', '');
         snapshotRef.current.boards = boards;
         const tempId = `tmp-board-${Date.now()}`;
