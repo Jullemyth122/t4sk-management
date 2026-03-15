@@ -5,7 +5,9 @@ import { getFirestore } from 'firebase-admin/firestore';
 let db;
 try {
     if (!getApps().length) {
-        initializeApp();
+        initializeApp({
+            projectId: process.env.VITE_FIREBASE_PROJECT_ID || 't4sk-management'
+        });
     }
     db = getFirestore();
 } catch (e) {

@@ -16,7 +16,9 @@ export default async function handler(req, res) {
     // PayMongo expects amounts in cents (₱232 = 23200, ₱493 = 49300)
     const amountInCents = planType === 'enterprise' ? 49300 : 23200;
     const planName = planType === 'enterprise' ? 'Enterprise Plan' : 'Pro Plan';
-    const originUrl = req.headers.origin || 'http://localhost:5173';
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    const host = req.headers.host || 'localhost:5173';
+    const originUrl = req.headers.origin || `${protocol}://${host}`;
 
     // Auto-Mock for Local Testing: If no PayMongo Key is present, bypass the real gateway 
     // and teleport the user directly to the success page to test the UI flow.
