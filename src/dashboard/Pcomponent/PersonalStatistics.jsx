@@ -35,7 +35,7 @@ export default function PersonalStatistics({ lists }) {
 
     // 4. Time Tracking
     const totalTimeSpent = allCards.reduce((sum, c) => sum + (Number(c.timeSpent) || 0), 0);
-    const formattedTime = totalTimeSpent >= 60 ? `${Math.floor(totalTimeSpent/60)}h ${totalTimeSpent%60}m` : `${totalTimeSpent}m`;
+    const formattedTime = totalTimeSpent >= 60 ? `${Math.floor(totalTimeSpent / 60)}h ${totalTimeSpent % 60}m` : `${totalTimeSpent}m`;
 
     // 5. Velocity (Completed over last 7 days)
     const today = new Date();
@@ -61,7 +61,7 @@ export default function PersonalStatistics({ lists }) {
             if (!isNaN(d.getTime())) cDate = d.toISOString().slice(0, 10);
             if (!cDate || cDate > today.toISOString().slice(0, 10)) cDate = today.toISOString().slice(0, 10); // cap fallback to today
         }
-        
+
         if (cDate) {
             const dayObj = last7Days.find(d => d.dateStr === cDate);
             if (dayObj) dayObj.completed++;
@@ -143,11 +143,11 @@ export default function PersonalStatistics({ lists }) {
                                 <XAxis dataKey="display" axisLine={false} tickLine={false} />
                                 <YAxis axisLine={false} tickLine={false} allowDecimals={false} />
                                 <Tooltip />
-                                <Line 
-                                    type="monotone" 
-                                    dataKey="completed" 
-                                    stroke="#3b82f6" 
-                                    strokeWidth={3} 
+                                <Line
+                                    type="monotone"
+                                    dataKey="completed"
+                                    stroke="#3b82f6"
+                                    strokeWidth={3}
                                     dot={{ r: 4, fill: '#3b82f6', stroke: '#fff', strokeWidth: 2 }}
                                     activeDot={{ r: 6 }}
                                 />

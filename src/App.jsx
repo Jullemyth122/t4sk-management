@@ -29,9 +29,9 @@ const router = createBrowserRouter([
     element: (
       // Wrap Task so logged-in users without accountType are forced to /choose-account
       <ErrorBoundary>
-        <AuthGuard requireAuth={false} requireType="present">
-          <Task />
-        </AuthGuard>
+      <AuthGuard requireAuth={false} requireType="present">
+        <Task />
+      </AuthGuard>
       </ErrorBoundary>
     ),
     errorElement: <ErrorBoundary />,
@@ -97,9 +97,9 @@ const router = createBrowserRouter([
     path: "choose-account",
     element: (
       <ErrorBoundary>
-        <AuthGuard requireAuth={true} requireType="absent">
-          <ChooseAccountType />
-        </AuthGuard>
+      <AuthGuard requireAuth={true} requireType="absent">
+        <ChooseAccountType />
+      </AuthGuard>
       </ErrorBoundary>
     )
   },

@@ -293,7 +293,7 @@ export default function PersonalDashboard() {
                 const matchTitle = (card.title || '').toLowerCase().includes(q);
                 const matchDesc = (card.description || '').toLowerCase().includes(q);
                 const matchTag = card.tags && card.tags.some(t => t.toLowerCase().includes(q));
-                
+
                 if (matchTitle || matchDesc || matchTag) {
                     c.push(card);
                 }

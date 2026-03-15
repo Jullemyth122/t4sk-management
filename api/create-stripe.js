@@ -12,7 +12,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing businessId or planType' });
     }
 
-    const originUrl = req.headers.origin || 'http://localhost:5173';
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    const host = req.headers.host || 'localhost:5173';
+    const originUrl = req.headers.origin || `${protocol}://${host}`;
 
     // Auto-Mock for Local Testing: If no Stripe Key is present, bypass the real gateway 
     // and teleport the user directly to the success page to test the UI flow.
@@ -52,8 +54,8 @@ export default async function handler(req, res) {
         planType: planType
       },
       // When deployed or running via standard `vercel dev`, req.headers.origin has the base URL.
-      success_url: `${req.headers.origin || 'http://localhost:5173'}/payment-success?session_id={CHECKOUT_SESSION_ID}&plan=${planType}&biz=${businessId}`,
-      cancel_url: `${req.headers.origin || 'http://localhost:5173'}/pricing`,
+      success_url: `${originUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}&plan=${planType}&biz=${businessId}`,
+      cancel_url: `${originUrl}/pricing`,
     });
 
     return res.status(200).json({ url: session.url });

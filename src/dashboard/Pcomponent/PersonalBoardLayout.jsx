@@ -56,7 +56,7 @@ function ListViewRow({ card, listName, listColor, onClick, highlightItemId }) {
             }
         }
         if (!cDate) return false;
-        
+
         const localNow = new Date();
         const todayLocal = `${localNow.getFullYear()}-${String(localNow.getMonth() + 1).padStart(2, '0')}-${String(localNow.getDate()).padStart(2, '0')}`;
         return cDate < todayLocal;
@@ -84,9 +84,9 @@ function ListViewRow({ card, listName, listColor, onClick, highlightItemId }) {
         return sDate === todayLocal;
     })();
 
-    const highlightClass = card.id === highlightItemId 
-       ? (isOverdue ? 'pd-highlight-pulse--overdue' : (isStartToday ? 'pd-highlight-pulse--start' : 'pd-highlight-pulse'))
-       : '';
+    const highlightClass = card.id === highlightItemId
+        ? (isOverdue ? 'pd-highlight-pulse--overdue' : (isStartToday ? 'pd-highlight-pulse--start' : 'pd-highlight-pulse'))
+        : '';
 
     useEffect(() => {
         if (highlightItemId === card.id) {

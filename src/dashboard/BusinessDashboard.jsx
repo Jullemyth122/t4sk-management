@@ -904,7 +904,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                   /* ── CALENDAR VIEW ── */
                   <BoardCalendar
                     lists={listsVisible}
-                      cardsMap={filteredCardsMap}
+                    cardsMap={filteredCardsMap}
                     membersMap={membersMap}
                     emailMap={emailMap}
                     businessOwnerUid={businessOwnerUid}
@@ -916,10 +916,10 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                     handleReviewAction={handleReviewAction}
                     canEdit={canEditBoardValue}
                     reviewerOptions={reviewerOptions}
-                      loadMoreCards={loadMoreCards}
-                      cardsHasMoreMap={cardsHasMoreMap}
-                      highlightCardIds={highlightCardIds}
-                      highlightColor={highlightColor}
+                    loadMoreCards={loadMoreCards}
+                    cardsHasMoreMap={cardsHasMoreMap}
+                    highlightCardIds={highlightCardIds}
+                    highlightColor={highlightColor}
                   />
                 ) : (
                 /* ── KANBAN VIEW (default) ── */
