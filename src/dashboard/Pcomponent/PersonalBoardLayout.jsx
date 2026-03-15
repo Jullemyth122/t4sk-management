@@ -15,13 +15,15 @@ function ListViewRow({ card, listName, listColor, onClick, highlightItemId }) {
         dueDate,
         startDate,
         tags = [],
+        status,
+        progress: cardProgress,
         subtasksCompleted = 0,
         subtasksTotal = 0,
     } = card;
 
     const ps = priority ? (PRIORITY_STYLES[priority] || PRIORITY_STYLES.medium) : null;
-    const progress = subtasksTotal > 0 ? Math.round((subtasksCompleted / subtasksTotal) * 100) : 0;
-    const isDone = subtasksTotal > 0 && subtasksCompleted === subtasksTotal;
+    const progress = subtasksTotal > 0 ? Math.round((subtasksCompleted / subtasksTotal) * 100) : (cardProgress || 0);
+    const isDone = status === 'done' || (cardProgress != null && cardProgress >= 100) || (subtasksTotal > 0 && subtasksCompleted === subtasksTotal);
 
     const formatDate = (d) => {
         if (!d) return null;
