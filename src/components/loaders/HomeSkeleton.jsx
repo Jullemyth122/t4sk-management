@@ -48,7 +48,6 @@ export default function HomeSkeleton() {
                         <SkeletonBlock style={{ width: '90%', height: 16, borderRadius: 4 }} />
                         <SkeletonBlock style={{ width: '75%', height: 16, borderRadius: 4 }} />
                     </div>
-                </div>
 
                     {/* CTA Buttons */}
                     <div className="cta-container">

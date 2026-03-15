@@ -990,7 +990,8 @@
                 cursor: pointer;
                 font-weight: 600;
             }
-
+        }
+    }
     /* make the columns slightly translucent to feel like cards placed on the show-content canvas */
     .list-col {
         background: var(--bd-card-bg); /* was linear-gradient */
@@ -1019,6 +1020,7 @@
         position: relative;
         z-index: 3;
     }
+    
 }
 
 /* Boards & members header */
@@ -5510,5 +5512,3 @@ select:focus {
         }
     }
 }
-
-
