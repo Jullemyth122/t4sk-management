@@ -290,7 +290,7 @@ const Home = ({ simulateLoading = false }) => {
 
                             {/* Honeycomb Data Grid */}
                             <div className="honeycomb-layout-wrapper">
-                                <h4 className="honeycomb-title">Neural Metric Array v1.0</h4>
+                                <h4 className="honeycomb-title">T 4 S K F I E L D S</h4>
                                 <div className="honeycomb-grid">
                                     {/* Map personal active features into Hex Cells */}
                                     {activeFeatures.map((feat, idx) => (

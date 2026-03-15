@@ -17,7 +17,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 
 import TermsPage from "./components/authentication/TermsPage";
 import PrivacyPolicy from "./components/authentication/PrivacyPolicy";
-import SignupTrial from "./components/authentication/SignUpTrial";
+import SignupTrial from "./components/authentication/SignupTrial";
 
 // import SecureRoute from "./routes/SecureRoute";
 // import RequireAccountType from "./routes/RequireAccountType";
