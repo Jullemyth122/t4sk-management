@@ -266,53 +266,158 @@ const Home = ({ simulateLoading = false }) => {
                                 <div className="hex-outer-spin">
                                     <svg viewBox="0 0 100 100" className="hex-svg"><polygon points="50 1 95 25 95 75 50 99 5 75 5 25" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="5,10" /></svg>
                                 </div>
-                                    <div className="hex-inner">
-                                        <div className="hex-pulse-ring"></div>
-                                        <svg viewBox="0 0 100 100" className="hex-svg-solid"><polygon points="50 3 93 25 93 75 50 97 7 75 7 25" fill="currentColor" opacity="0.1" stroke="currentColor" strokeWidth="2" /></svg>
-                                        <h2>Master Your <br /><span className="highlight-text-alt">Reality.</span></h2>
-                                    </div>
-                                </div>
-                                <p className="hex-subtitle">
-                                    A highly customizable, deeply private telemetry vault.<br />
-                                    Orchestrate life metrics, habits, and complex goals intuitively.
-                                </p>
-
-                                <div className="hex-cta-cluster">
-                                    <button className="btn-primary btn-teal hex-button">
-                                        <span className="hex-btn-bg"></span>
-                                        <span className="relative z-10 flex items-center gap-2">Initialize Vault <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
-                                    </button>
-                                    <button className="btn-secondary hex-button outline">
-                                        Enter Simulation
-                                    </button>
+                                <div className="hex-inner">
+                                    <div className="hex-pulse-ring"></div>
+                                    <svg viewBox="0 0 100 100" className="hex-svg-solid"><polygon points="50 3 93 25 93 75 50 97 7 75 7 25" fill="currentColor" opacity="0.1" stroke="currentColor" strokeWidth="2" /></svg>
+                                    <h2>Master Your <br/><span className="highlight-text-alt">Reality.</span></h2>
                                 </div>
                             </div>
+                            <p className="hex-subtitle">
+                                A highly customizable, deeply private telemetry vault.<br/>
+                                Orchestrate life metrics, habits, and complex goals intuitively.
+                            </p>
+                            
+                            <div className="hex-cta-cluster">
+                                <button className="btn-primary btn-teal hex-button">
+                                    <span className="hex-btn-bg"></span>
+                                    <span className="relative z-10 flex items-center gap-2">Initialize Vault <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+                                </button>
+                                <button className="btn-secondary hex-button outline">
+                                    Enter Simulation
+                                </button>
+                            </div>
+                        </div>
 
-                            {/* Honeycomb Data Grid */}
-                            <div className="honeycomb-layout-wrapper">
-                                <h4 className="honeycomb-title">Neural Metric Array v1.0</h4>
-                                <div className="honeycomb-grid">
-                                    {/* Map personal active features into Hex Cells */}
-                                    {activeFeatures.map((feat, idx) => (
-                                        <div className="hex-cell" key={feat.id}>
-                                            <div className="hex-cell-inner">
-                                                <div className={`hex-icon ${feat.iconClass}`}>
-                                                    {feat.iconSvg}
-                                                </div>
-                                                <div className="hc-content">
-                                                    <h5>{feat.title}</h5>
-                                                    <p className="clamp-2">{feat.desc}</p>
-                                                </div>
-                                                {/* Glitch Overlay for Personal Tech Theme */}
-                                                <div className="hex-glitch-layer"></div>
+                        {/* Honeycomb Data Grid */}
+                        <div className="honeycomb-layout-wrapper">
+                            <h4 className="honeycomb-title">Neural Metric Array v1.0</h4>
+                            <div className="honeycomb-grid">
+                                {/* Map personal active features into Hex Cells */}
+                                {activeFeatures.map((feat, idx) => (
+                                    <div className="hex-cell" key={feat.id}>
+                                        <div className="hex-cell-inner">
+                                            <div className={`hex-icon ${feat.iconClass}`}>
+                                                {feat.iconSvg}
                                             </div>
+                                            <div className="hc-content">
+                                                <h5>{feat.title}</h5>
+                                                <p className="clamp-2">{feat.desc}</p>
+                                            </div>
+                                            {/* Glitch Overlay for Personal Tech Theme */}
+                                            <div className="hex-glitch-layer"></div>
                                         </div>
-                                    ))}
+                                    </div>
+                                ))}
+                                
+                                {/* Additional Decorative Empty Hex for architecture */}
+                                <div className="hex-cell empty-node"><div className="hex-cell-inner wire"></div></div>
+                                <div className="hex-cell empty-node"><div className="hex-cell-inner wire"></div></div>
+                            </div>
+                        </div>
+                    </>
+                )}
 
-                                    {/* Additional Decorative Empty Hex for architecture */}
-                                    <div className="hex-cell empty-node"><div className="hex-cell-inner wire"></div></div>
-                                    <div className="hex-cell empty-node"><div className="hex-cell-inner wire"></div></div>
-                                </div>
+                {/* Processing Data Graphic (Isometric for Business, Tesseract for Personal) */}
+                <div className={`data-cube-section ${viewMode === 'personal' ? 'theme-teal' : 'theme-amber'}`}>
+                    <div className="cube-container">
+                        {viewMode === 'business' ? (
+                            <svg className="isometric-cube" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                {/* Glowing Core Matrix (Backdrop) */}
+                                <polygon className="core-glow" points="100,50 150,80 100,110 50,80" />
+                                <polygon className="core-glow" points="50,80 100,110 100,170 50,140" />
+                                <polygon className="core-glow" points="100,110 150,80 150,140 100,170" />
+
+                                {/* Outer Wireframe Box */}
+                                <path className="wire-edge pulse-slow" d="M100 20 L180 65 L100 110 L20 65 Z" fill="none" strokeWidth="2" strokeLinejoin="round"/>
+                                <path className="wire-edge pulse-med" d="M20 65 L20 155 L100 200 L100 110 Z" fill="none" strokeWidth="2" strokeLinejoin="round"/>
+                                <path className="wire-edge pulse-fast" d="M180 65 L180 155 L100 200 L100 110 Z" fill="none" strokeWidth="2" strokeLinejoin="round"/>
+
+                                {/* Inner Structure Lines */}
+                                <line className="wire-inner anim-dash-1" x1="100" y1="20" x2="100" y2="110" strokeWidth="1" strokeDasharray="4 4" />
+                                <line className="wire-inner anim-dash-2" x1="20" y1="155" x2="100" y2="110" strokeWidth="1" strokeDasharray="4 4" />
+                                <line className="wire-inner anim-dash-3" x1="180" y1="155" x2="100" y2="110" strokeWidth="1" strokeDasharray="4 4" />
+
+                                {/* Orbiting Data Packets */}
+                                <circle className="orbit-packet p1" cx="100" cy="20" r="3" />
+                                <circle className="orbit-packet p2" cx="180" cy="155" r="3" />
+                                <circle className="orbit-packet p3" cx="20" cy="155" r="3" />
+                            </svg>
+                        ) : (
+                            /* --- COMPLEX 4D TESSERACT HYPERCUBE --- */
+                            <svg className="tesseract-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                <g className="tesser-group-outer">
+                                    {/* Outer Hexagon (Projected 3D bounds) */}
+                                    <polygon className="tesser-edge glow-edge" points="100,10 180,50 180,150 100,190 20,150 20,50" fill="none" strokeWidth="1.5" />
+                                    {/* Inner Cube / Core Form */}
+                                    <polygon className="tesser-core glow-core" points="100,50 150,75 100,100 50,75" />
+                                    <polygon className="tesser-core glow-core" points="50,75 100,100 100,150 50,125" />
+                                    <polygon className="tesser-core glow-core" points="100,100 150,75 150,125 100,150" />
+                                </g>
+                                
+                                <g className="tesser-vertices">
+                                    {/* Connecting Vertices between Outer Hex and Inner Core (4D Mapping paths) */}
+                                    <line className="tesser-vert v1" x1="100" y1="10" x2="100" y2="50" strokeWidth="1" strokeDasharray="3 3"/>
+                                    <line className="tesser-vert v2" x1="180" y1="50" x2="150" y2="75" strokeWidth="1" strokeDasharray="3 3"/>
+                                    <line className="tesser-vert v3" x1="180" y1="150" x2="150" y2="125" strokeWidth="1" strokeDasharray="3 3"/>
+                                    <line className="tesser-vert v4" x1="100" y1="190" x2="100" y2="150" strokeWidth="1" strokeDasharray="3 3"/>
+                                    <line className="tesser-vert v5" x1="20" y1="150" x2="50" y2="125" strokeWidth="1" strokeDasharray="3 3"/>
+                                    <line className="tesser-vert v6" x1="20" y1="50" x2="50" y2="75" strokeWidth="1" strokeDasharray="3 3"/>
+                                </g>
+
+                                {/* HyperData Nodes traveling along vertices */}
+                                <circle className="hyper-node n-a" cx="100" cy="10" r="2.5" />
+                                <circle className="hyper-node n-b" cx="180" cy="150" r="2.5" />
+                                <circle className="hyper-node n-c" cx="20" cy="50" r="2.5" />
+                            </svg>
+                        )}
+                        <div className="cube-shadow"></div>
+                    </div>
+
+                    <div className="cube-text-content">
+                        <div className="processing-badge">
+                            <span className="dot"></span>
+                            PROCESSING {viewMode === 'business' ? 'ENTERPRISE DATA' : 'USER TELEMETRY'}
+                        </div>
+                        <h3>{viewMode === 'business' ? 'Multi-Tenant Processing Core' : 'Tesseract Pattern Aggregator'}</h3>
+                        <p>
+                            {viewMode === 'business' 
+                                ? 'All workspace data is aggressively encrypted via end-to-end proprietary algorithms. The multi-tenant core dynamically balances load across global nodes, ensuring zero downtime while computing real-time kanban synchronization.'
+                                : 'A local-first neural matrix recursively compiles your habits and actions into higher-dimensional insights. Your telemetry forms a hypercube geometry completely isolated from external servers, bounded only by strict biometric local decryption.'
+                            }
+                        </p>
+                        <ul className="spec-list">
+                            <li>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    {viewMode === 'business' ? <polyline points="20 6 9 17 4 12"></polyline> : <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>}
+                                </svg> 
+                                {viewMode === 'business' ? 'E2E Encryption Standards' : 'Fractal Local DB Storage'}
+                            </li>
+                            <li>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    {viewMode === 'business' ? <polyline points="20 6 9 17 4 12"></polyline> : <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>}
+                                </svg> 
+                                {viewMode === 'business' ? 'Global Edge Networking' : 'Isolated Core Computation'}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                {/* Elaborated Footer Section */}
+                <div className="footer-expanded-wrapper">
+                    <div className="footer-top-line animated-d-line"></div>
+                    <div className="footer-grid">
+
+                        {/* Brand Column */}
+                        <div className="f-col brand-col">
+                            <div className="f-logo">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                                <span>T4SK</span>
+                            </div>
+                            <p className="f-desc">Super-flexible task management for modern teams to orchestrate their workflow with precision.</p>
+                            <div className="social-icons">
+                                <a href="#" aria-label="Twitter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>
+                                <a href="#" aria-label="GitHub"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a>
+                                <a href="#" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
                             </div>
                     </>
                 )}
@@ -377,48 +482,6 @@ const Home = ({ simulateLoading = false }) => {
                         <div className="processing-badge">
                             <span className="dot"></span>
                             PROCESSING {viewMode === 'business' ? 'ENTERPRISE DATA' : 'USER TELEMETRY'}
-                        </div>
-                        <h3>{viewMode === 'business' ? 'Multi-Tenant Processing Core' : 'Tesseract Pattern Aggregator'}</h3>
-                        <p>
-                            {viewMode === 'business'
-                                ? 'All workspace data is aggressively encrypted via end-to-end proprietary algorithms. The multi-tenant core dynamically balances load across global nodes, ensuring zero downtime while computing real-time kanban synchronization.'
-                                : 'A local-first neural matrix recursively compiles your habits and actions into higher-dimensional insights. Your telemetry forms a hypercube geometry completely isolated from external servers, bounded only by strict biometric local decryption.'
-                            }
-                        </p>
-                        <ul className="spec-list">
-                            <li>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                    {viewMode === 'business' ? <polyline points="20 6 9 17 4 12"></polyline> : <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>}
-                                </svg>
-                                {viewMode === 'business' ? 'E2E Encryption Standards' : 'Fractal Local DB Storage'}
-                            </li>
-                            <li>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                    {viewMode === 'business' ? <polyline points="20 6 9 17 4 12"></polyline> : <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>}
-                                </svg>
-                                {viewMode === 'business' ? 'Global Edge Networking' : 'Isolated Core Computation'}
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                {/* Elaborated Footer Section */}
-                <div className="footer-expanded-wrapper">
-                    <div className="footer-top-line animated-d-line"></div>
-                    <div className="footer-grid">
-
-                        {/* Brand Column */}
-                        <div className="f-col brand-col">
-                            <div className="f-logo">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                                <span>T4SK</span>
-                            </div>
-                            <p className="f-desc">Super-flexible task management for modern teams to orchestrate their workflow with precision.</p>
-                            <div className="social-icons">
-                                <a href="#" aria-label="Twitter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>
-                                <a href="#" aria-label="GitHub"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a>
-                                <a href="#" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
-                            </div>
                         </div>
 
                         {/* About Us Column */}
