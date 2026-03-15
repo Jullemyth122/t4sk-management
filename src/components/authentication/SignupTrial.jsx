@@ -5,7 +5,7 @@ import gsap from 'gsap';
 import '../../scss/signup2.scss';
 import SignupSkeleton from '../loaders/SignupSkeleton';
 
-const Signup = ({ simulateLoading = false }) => {
+const SignupTrial = ({ simulateLoading = false }) => {
   const navigate = useNavigate();
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
@@ -148,17 +148,17 @@ const Signup = ({ simulateLoading = false }) => {
 
             <div className="ld-stats">
               <div className="stat">
-                <span className="stat-num">94<span>%</span></span>
+                <span className="stat-num">85<span>%</span></span>
                 <span className="stat-label">On-time delivery</span>
               </div>
               <div className="stat-divider" />
               <div className="stat">
-                <span className="stat-num">12k<span>+</span></span>
+                <span className="stat-num">100<span>+</span></span>
                 <span className="stat-label">Tasks completed</span>
               </div>
               <div className="stat-divider" />
               <div className="stat">
-                <span className="stat-num">3x</span>
+                <span className="stat-num">1.5x</span>
                 <span className="stat-label">Faster execution</span>
               </div>
             </div>
@@ -366,4 +366,4 @@ const Signup = ({ simulateLoading = false }) => {
   )
 }
 
-export default Signup
+export default SignupTrial

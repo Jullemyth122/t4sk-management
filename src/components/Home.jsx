@@ -290,7 +290,7 @@ const Home = ({ simulateLoading = false }) => {
 
                         {/* Honeycomb Data Grid */}
                         <div className="honeycomb-layout-wrapper">
-                            <h4 className="honeycomb-title">Neural Metric Array v1.0</h4>
+                                <h4 className="honeycomb-title"> T 4 S K F i e l d s </h4>
                             <div className="honeycomb-grid">
                                 {/* Map personal active features into Hex Cells */}
                                 {activeFeatures.map((feat, idx) => (
@@ -308,10 +308,6 @@ const Home = ({ simulateLoading = false }) => {
                                         </div>
                                     </div>
                                 ))}
-                                
-                                {/* Additional Decorative Empty Hex for architecture */}
-                                <div className="hex-cell empty-node"><div className="hex-cell-inner wire"></div></div>
-                                <div className="hex-cell empty-node"><div className="hex-cell-inner wire"></div></div>
                             </div>
                         </div>
                     </>
