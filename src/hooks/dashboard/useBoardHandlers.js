@@ -1,10 +1,13 @@
 import { useCallback, useRef } from "react";
 import * as boardSvc from '../../services/boardService'
 
-export function useBoardHandlers({ businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName }) {
+export function useBoardHandlers(props) {
+    const depsRef = useRef(props);
+    depsRef.current = props;
     const snapshotRef = useRef({});
 
     const handleRefreshBoard = useCallback(async (boardIdArg) => {
+        const { businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName } = depsRef.current;
         if (!boardIdArg) return;
         try {
             const b = await boardSvc.getBoard({ businessId, uid: null, boardId: boardIdArg });
@@ -13,9 +16,10 @@ export function useBoardHandlers({ businessId, uid, dispatchSet, boards, selecte
             console.warn('getBoard failed', err);
             dispatchSet('uiError', err?.message || 'Failed to refresh board');
         }
-    }, [businessId, dispatchSet]);
+    }, []);
 
     const handleUpdateBoard = useCallback(async (boardIdArg, updates) => {
+        const { businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName } = depsRef.current;
         if (!boardIdArg || !canEditBoardValue) return dispatchSet('uiError', 'Permission denied or invalid board');
         dispatchSet('uiError', '');
         snapshotRef.current.boards = boards;
@@ -28,9 +32,10 @@ export function useBoardHandlers({ businessId, uid, dispatchSet, boards, selecte
             dispatchSet('boards', snapshotRef.current.boards || []);
             dispatchSet('uiError', err?.message || 'Failed to update board');
         }
-    }, [businessId, uid, boards, canEditBoardValue, dispatchSet]);
+    }, []);
 
     const handleDeleteBoard = useCallback(async (boardIdArg) => {
+        const { businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName } = depsRef.current;
         if (!boardIdArg || !canEditBoardValue || !window.confirm('Delete board and all lists/cards?')) return;
         dispatchSet('uiError', '');
         snapshotRef.current.boards = boards;
@@ -43,9 +48,10 @@ export function useBoardHandlers({ businessId, uid, dispatchSet, boards, selecte
             dispatchSet('boards', snapshotRef.current.boards || []);
             dispatchSet('uiError', err?.message || 'Failed to delete board');
         }
-    }, [businessId, uid, boards, canEditBoardValue, selectedBoardId, dispatchSet]);
+    }, []);
 
     const handleCreateBoard = useCallback(async () => {
+        const { businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName } = depsRef.current;
         if (!newBoardName || !businessId) return dispatchSet('uiError', 'Board name or business required');
         dispatchSet('uiError', '');
         snapshotRef.current.boards = boards;
@@ -60,7 +66,7 @@ export function useBoardHandlers({ businessId, uid, dispatchSet, boards, selecte
             dispatchSet('boards', snapshotRef.current.boards || []);
             dispatchSet('uiError', err?.message || 'Failed to create board');
         }
-    }, [newBoardName, businessId, uid, boards, dispatchSet]);
+    }, []);
 
     return { handleRefreshBoard, handleUpdateBoard, handleDeleteBoard, handleCreateBoard };
 }

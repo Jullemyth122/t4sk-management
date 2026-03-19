@@ -215,13 +215,22 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
                         <span className="pd-card-date-value">{formattedDue || 'Not set'}</span>
                     </div>
                 </div>
-                {/* Footer: Priority */}
+                {/* Footer: Priority & Weight */}
                 <div className="pd-card-footer">
-                    {ps ? (
-                        <span className="pd-priority-badge" style={{ color: ps.color, background: ps.bg }}>{ps.label}</span>
-                    ) : (
-                        <span className="pd-priority-badge pd-priority-badge--none">No priority</span>
-                    )}
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        {ps ? (
+                            <span className="pd-priority-badge" style={{ color: ps.color, background: ps.bg }}>{ps.label}</span>
+                        ) : (
+                            <span className="pd-priority-badge pd-priority-badge--none">No priority</span>
+                        )}
+
+                        {/* Task Weight Display */}
+                        {card.weight != null && (
+                            <span className="pd-priority-badge pd-weight-badge" style={{ background: 'rgba(177, 182, 137, 0.15)', color: 'var(--task-modalbtnBG, #b1b689)' }}>
+                                P {card.weight}
+                            </span>
+                        )}
+                    </div>
                     {formattedDue && isOverdue && (
                         <span className="pd-due-badge overdue">
                             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2">
@@ -304,18 +313,27 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
                 </div>
             </div>
 
-            {/* Footer: Priority */}
+            {/* Footer: Priority & Weight */}
             <div className="pd-card-footer">
-                {ps ? (
-                    <span
-                        className="pd-priority-badge"
-                        style={{ color: ps.color, background: ps.bg }}
-                    >
-                        {ps.label}
-                    </span>
-                ) : (
-                    <span className="pd-priority-badge pd-priority-badge--none">No priority</span>
-                )}
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    {ps ? (
+                        <span
+                            className="pd-priority-badge"
+                            style={{ color: ps.color, background: ps.bg }}
+                        >
+                            {ps.label}
+                        </span>
+                    ) : (
+                        <span className="pd-priority-badge pd-priority-badge--none">No priority</span>
+                    )}
+
+                    {/* Task Weight Display */}
+                    {card.weight != null && (
+                        <span className="pd-priority-badge pd-weight-badge" style={{ background: 'rgba(177, 182, 137, 0.15)', color: 'var(--task-modalbtnBG, #b1b689)' }}>
+                            P {card.weight}
+                        </span>
+                    )}
+                </div>
 
                 {formattedDue && isOverdue && (
                     <span className="pd-due-badge overdue">

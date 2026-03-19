@@ -8,7 +8,17 @@ const PublicRoute = ({ children }) => {
 
     if (currentUser) {
         const type = currentUser?.profile?.accountType;
-        if (!type) return <Navigate to="/choose-account" replace />;
+        
+        // If they don't have an account type yet
+        if (!type) {
+             // If unverified, guide them to verification.
+             if (!currentUser.emailVerified) {
+                 return <Navigate to="/verify-email" replace />;
+             }
+             // Otherwise, choose account
+             return <Navigate to="/choose-account" replace />;
+        }
+        
         // If accountType exists, send them to their dashboard
         return <Navigate to={`/${type}`} replace />;
     }

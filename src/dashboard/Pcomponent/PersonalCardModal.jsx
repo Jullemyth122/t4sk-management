@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import SmartTaskInput from './SmartTaskInput';
-import MarkdownPreview from './MarkdownPreview';
 import PomodoroTimer from './PomodoroTimer';
+import MarkdownPreview from './MarkdownPreview';
 
 function getYouTubeVideoId(url) {
     if (!url) return null;

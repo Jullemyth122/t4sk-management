@@ -10,6 +10,7 @@ export default function CreateTaskModal({
     isLocked = false 
 }) {
     const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const [startDate, setStartDate] = useState('');
     const [dueDate, setDueDate] = useState('');
     const [priority, setPriority] = useState('medium');
@@ -69,6 +70,7 @@ export default function CreateTaskModal({
         try {
             await onCreate({
                 title,
+                description,
                 startDate,
                 dueDate,
                 priority,
@@ -77,6 +79,7 @@ export default function CreateTaskModal({
             });
             // Reset and close
             setTitle('');
+            setDescription('');
             setStartDate('');
             setDueDate('');
             setPriority('medium');
@@ -92,45 +95,99 @@ export default function CreateTaskModal({
         <div className="create-task-modal-overlay">
             <div className="create-task-modal">
                 <div className="modal-header">
-                    <h3>Create Task in "{listName}"</h3>
+                    <div className="modal-header-info">
+                        <span className="modal-context">IN LIST</span>
+                        <span className="modal-list-badge">{listName}</span>
+                    </div>
                     <button className="close-btn" onClick={onClose} title="Close">&times;</button>
                 </div>
                 
-                <div className="modal-body">
-                    {/* Left Column: Task Metadata */}
-                    <div className="form-column">
-                        <div className="form-group">
-                            <label>Task Title *</label>
-                            <input 
-                                type="text" 
-                                placeholder="What needs to be done?" 
-                                value={title}
-                                onChange={e => setTitle(e.target.value)}
-                                autoFocus
+                <div className="modal-body-layout">
+                    {/* Left/Main Column: Title, Description, Subtasks */}
+                    <div className="modal-main-column">
+                        <input 
+                            className="task-title-input"
+                            type="text" 
+                            placeholder="Task title" 
+                            value={title}
+                            onChange={e => setTitle(e.target.value)}
+                            autoFocus
+                        />
+                        
+                        <div className="desc-wrapper">
+                            <label className="section-label">Description</label>
+                            <textarea
+                                className="task-desc-input"
+                                placeholder="Add a more detailed description..."
+                                value={description}
+                                onChange={e => setDescription(e.target.value)}
+                                rows={4}
                             />
                         </div>
-                        
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <div className="form-group">
-                                <label>Start Date</label>
-                                <input 
-                                    type="date" 
-                                    value={startDate}
-                                    onChange={e => setStartDate(e.target.value)}
-                                />
+
+                        <div className="subtasks-section">
+                            <div className="section-label">
+                                <span>Subtasks</span>
+                                {subtasks.length > 0 && <span className="subtask-badge">{subtasks.length}</span>}
                             </div>
-                            <div className="form-group">
-                                <label>Due Date</label>
+                            
+                            <div className="subtask-list">
+                                {subtasks.length === 0 ? (
+                                    <div className="empty-subtasks">No subtasks added yet. Break down this task below.</div>
+                                ) : (
+                                    subtasks.map((st, i) => (
+                                        <div key={st.id} className="subtask-row">
+                                            <div className="subtask-bullet"></div>
+                                            <div className="subtask-text">{st.text}</div>
+                                            <div className="subtask-weight-badge">
+                                                {st.weight > 0 ? st.weight : getProjectedWeight(subtasks, i)}%
+                                            </div>
+                                            <button 
+                                                className="subtask-remove-btn" 
+                                                onClick={() => handleRemoveSubtask(i)}
+                                                title="Remove subtask"
+                                            >
+                                                &times;
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+
+                            <div className="subtask-add-row">
                                 <input 
-                                    type="date" 
-                                    value={dueDate}
-                                    onChange={e => setDueDate(e.target.value)}
+                                    type="text"
+                                    className="subtask-text-input"
+                                    placeholder="Add a subtask..."
+                                    value={tempSubtaskText}
+                                    onChange={e => setTempSubtaskText(e.target.value)}
+                                    onKeyDown={handleKeyDown}
                                 />
+                                <div className="subtask-weight-group">
+                                    <input 
+                                        type="number"
+                                        className="subtask-weight-input"
+                                        placeholder="%"
+                                        min="0" max="100"
+                                        title="Weight Percentage"
+                                        value={tempSubtaskWeight}
+                                        onChange={e => setTempSubtaskWeight(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                    />
+                                    <button className="subtask-add-btn" onClick={handleAddSubtask} title="Add Subtask">
+                                        Add
+                                    </button>
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
-                            <div className="form-group">
+                    {/* Right/Sidebar Column: Metadata fields */}
+                    <div className="modal-sidebar-column">
+                        <div className="sidebar-section">
+                            <h4 className="section-label">Details</h4>
+                            
+                            <div className="sidebar-field">
                                 <label>Priority</label>
                                 <CustomSelect
                                     options={priorityOptions}
@@ -140,69 +197,38 @@ export default function CreateTaskModal({
                                     width="100%"
                                 />
                             </div>
-                            
-                            <div className="form-group">
-                                <label>List Weight %</label>
+
+                            <div className="sidebar-field">
+                                <label>Weight %</label>
                                 <input 
                                     type="number" 
+                                    className="sidebar-input"
                                     placeholder="Auto"
-                                    min="0"
-                                    max="100"
+                                    min="0" max="100"
                                     value={weight}
                                     onChange={e => setWeight(e.target.value)}
                                 />
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Right Column: Subtasks */}
-                    <div className="form-column subtasks-container">
-                        <div className="subtasks-header">
-                            <h4>Subtasks ({subtasks.length})</h4>
-                        </div>
-                        
-                        <div className="subtask-list">
-                            {subtasks.length === 0 ? (
-                                <div className="empty-subtasks">No subtasks added.</div>
-                            ) : (
-                                subtasks.map((st, i) => (
-                                    <div key={st.id} className="mini-subtask-item">
-                                        <div className="mini-subtask-text">• {st.text}</div>
-                                        <div className="mini-subtask-meta">
-                                            ({st.weight > 0 ? st.weight : getProjectedWeight(subtasks, i)}%)
-                                        </div>
-                                        <button 
-                                            className="remove-btn" 
-                                            onClick={() => handleRemoveSubtask(i)}
-                                            title="Remove subtask"
-                                        >
-                                            &times;
-                                        </button>
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                            <div className="sidebar-field">
+                                <label>Start Date</label>
+                                <input 
+                                    type="date" 
+                                    className="sidebar-input date-input"
+                                    value={startDate}
+                                    onChange={e => setStartDate(e.target.value)}
+                                />
+                            </div>
 
-                        <div className="subtask-add-row">
-                            <input 
-                                type="text"
-                                placeholder="Add a subtask..."
-                                value={tempSubtaskText}
-                                onChange={e => setTempSubtaskText(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                            />
-                            <input 
-                                type="number"
-                                placeholder="%"
-                                min="0" max="100"
-                                title="Weight Percentage"
-                                value={tempSubtaskWeight}
-                                onChange={e => setTempSubtaskWeight(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                            />
-                            <button className="add-btn" onClick={handleAddSubtask} title="Add Subtask">
-                                +
-                            </button>
+                            <div className="sidebar-field">
+                                <label>Due Date</label>
+                                <input 
+                                    type="date" 
+                                    className="sidebar-input date-input"
+                                    value={dueDate}
+                                    onChange={e => setDueDate(e.target.value)}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,13 +1,4 @@
-/* notifications.scss */
-
-/* Helper vars - matching navbar.scss */
-:root {
-    --badge-bg: #ff4d4d;
-    --notif-bg-dark: linear-gradient(145deg, rgba(30,30,30,0.98), rgba(15,15,15,0.99));
-    --notif-bg-light: #fff;
-    --notif-border-dark: rgba(255, 255, 255, 0.1);
-    --notif-border-light: rgba(0, 0, 0, 0.1);
-}
+/* notifications.scss — Uses global theme variables */
 
 /* Parent container wrapper for overriding navbar defaults */
 .nav-link.notification-button {
@@ -27,24 +18,24 @@
             width: 40px;
             height: 40px;
             border-radius: 10px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ccc; 
+            background: var(--gold-faint, rgba(255, 255, 255, 0.06));
+            border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+            color: var(--text-mid, #ccc); 
             cursor: pointer;
             transition: all 0.2s;
             position: relative;
-            margin: 0 5px; /* Adjust margin slightly */
+            margin: 0 5px;
 
             &:hover, &.active {
-                background: rgba(255, 255, 255, 0.12);
-                color: #fff;
+                background: var(--card-hover-bg, rgba(255, 255, 255, 0.12));
+                color: var(--text-bright, #fff);
             }
 
             .badge {
                 position: absolute;
                 top: -4px;
                 right: -4px;
-                background: var(--badge-bg);
+                background: #ff4d4d;
                 color: #fff;
                 font-size: 10px;
                 font-weight: 700;
@@ -54,7 +45,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border: 2px solid #222; /* Fallback/dark border */
+                border: 2px solid var(--home-comp-bg, #222);
             }
             
             svg {
@@ -68,10 +59,10 @@
             top: calc(100% + 12px);
             right: -5px; 
             width: 320px;
-            background: var(--notif-bg-dark);
-            border: 1px solid var(--notif-border-dark);
+            background: var(--glass-bg, linear-gradient(145deg, rgba(30,30,30,0.98), rgba(15,15,15,0.99)));
+            border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            box-shadow: var(--glass-shadow, 0 10px 40px rgba(0,0,0,0.5));
             overflow: hidden;
             animation: fadeIn 0.15s ease-out;
             z-index: 200;
@@ -80,17 +71,17 @@
 
             .dropdown-header {
                 padding: 12px 16px;
-                border-bottom: 1px solid var(--notif-border-dark);
+                border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                background: rgba(255,255,255,0.03);
+                background: var(--gold-faint, rgba(255,255,255,0.03));
 
                 h4 {
                     margin: 0;
                     font-size: 14px;
                     font-weight: 600;
-                    color: #fff;
+                    color: var(--text-bright, #fff);
                     width: auto; padding: 0;
                     box-shadow: none;
                 }
@@ -98,22 +89,22 @@
                 button {
                     background: transparent;
                     border: none;
-                    color: #999;
+                    color: var(--text-dim, #999);
                     font-size: 11px;
                     cursor: pointer;
-                    &:hover { color: #fff; text-decoration: underline; }
+                    &:hover { color: var(--text-bright, #fff); text-decoration: underline; }
                 }
             }
 
             .dropdown-body {
-                max-height: 500px; /* Increased height */
+                max-height: 500px;
                 overflow-y: auto;
-                overflow-x: hidden; /* Prevent horizontal scroll */
+                overflow-x: hidden;
 
                 .empty-state {
                     padding: 24px;
                     text-align: center;
-                    color: #888;
+                    color: var(--text-dim, #888);
                     font-size: 13px;
                 }
 
@@ -131,7 +122,7 @@
                     margin: 0;
 
                     .notif-item {
-                        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                        border-bottom: 1px solid var(--gold-faint, rgba(255, 255, 255, 0.05));
                         &:last-child { border-bottom: none; }
                         
                         a {
@@ -141,7 +132,7 @@
                             transition: background 0.15s;
                             
                             &:hover {
-                                background: rgba(255, 255, 255, 0.04);
+                                background: var(--gold-faint, rgba(255, 255, 255, 0.04));
                             }
                             
                             .notif-top {
@@ -149,65 +140,16 @@
                                 justify-content: space-between;
                                 margin-bottom: 4px;
                                 
-                                strong { font-size: 13px; color: #fff; font-weight: 600; }
-                                span { font-size: 10px; color: #666; }
+                                strong { font-size: 13px; color: var(--text-bright, #fff); font-weight: 600; }
+                                span { font-size: 10px; color: var(--text-dim, #666); }
                             }
                             
                             p {
                                 margin: 0;
                                 font-size: 12px;
-                                color: #aaa;
+                                color: var(--text-mid, #aaa);
                                 line-height: 1.4;
                             }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-/* Light Mode Overrides */
-[data-theme="light"] {
-    .nav-link.notification-button {
-        .notification-dropdown-container {
-            .notification-btn {
-                background: rgba(0, 0, 0, 0.06);
-                border-color: var(--notif-border-light);
-                color: #475569;
-                
-                &:hover, &.active {
-                    background: rgba(0, 0, 0, 0.1);
-                    color: #1e293b;
-                }
-                
-                .badge {
-                    border-color: #fff;
-                }
-            }
-            
-            .dropdown-menu {
-                background: var(--notif-bg-light);
-                border-color: var(--notif-border-light);
-                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-                
-                .dropdown-header {
-                    background: #f8fafc;
-                    border-bottom-color: rgba(0,0,0,0.06);
-                    h4 { color: #1e293b; }
-                    button { color: #64748b; &:hover { color: #1e293b; } }
-                }
-                
-                .dropdown-body {
-                    .notif-list .notif-item {
-                        border-bottom-color: rgba(0,0,0,0.06);
-                        a {
-                            &:hover { background: #f1f5f9; }
-                            .notif-top {
-                                strong { color: #1e293b; }
-                                span { color: #94a3b8; }
-                            }
-                            p { color: #64748b; }
                         }
                     }
                 }
@@ -220,3 +162,4 @@
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
 }
+

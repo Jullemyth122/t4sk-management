@@ -12,15 +12,18 @@ import BusinessInfo from "./info/BusinessInfo";
 import BusinessDashboardSimple from "./dashboard/BusinessDashboard";
 import PersonalDashboard from "./dashboard/PersonalDashboard";
 import Pricing from "./components/Pricing";
+import Changelog from "./components/Changelog";
 import PaymentSuccess from "./components/PaymentSuccess";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 import TermsPage from "./components/authentication/TermsPage";
 import PrivacyPolicy from "./components/authentication/PrivacyPolicy";
+import SignUpTrial from "./components/authentication/SignUpTrial";
 
 // import SecureRoute from "./routes/SecureRoute";
 // import RequireAccountType from "./routes/RequireAccountType";
 // import ChooseAccountGuard from "./routes/ChooseAccountGuard";
+import VerifyEmail from "./components/authentication/VerifyEmail";
 
 const router = createBrowserRouter([
   {
@@ -28,15 +31,17 @@ const router = createBrowserRouter([
     element: (
       // Wrap Task so logged-in users without accountType are forced to /choose-account
       <ErrorBoundary>
-      <AuthGuard requireAuth={false} requireType="present">
-        <Task />
-      </AuthGuard>
+        <AuthGuard requireAuth={false} requireType="present">
+          <Task />
+        </AuthGuard>
       </ErrorBoundary>
     ),
-    errorElement: <div>Oops</div>,
+    errorElement: <ErrorBoundary />,
     children: [   
-      { path: "home", element: <PublicRoute><Home simulateLoading={true}/></PublicRoute> },  
-      { path: "signup", element: <PublicRoute><Signup simulateLoading={true}/></PublicRoute> },
+      { path: "home", element: <PublicRoute><Home simulateLoading={true}/></PublicRoute> },
+      { path: "changelog", element: <PublicRoute><Changelog /></PublicRoute> },
+      // { path: "signup", element: <PublicRoute><Signup simulateLoading={true}/></PublicRoute> },
+      { path: "signup", element: <PublicRoute><SignUpTrial /></PublicRoute> },
       { path: "terms", element: <PublicRoute><TermsPage /></PublicRoute> },
       { path: "privacy", element: <PublicRoute><PrivacyPolicy /></PublicRoute> },
       // These are children of Task so they show navbar (AuthGuard above will block access if no accountType)
@@ -101,6 +106,16 @@ const router = createBrowserRouter([
       </ErrorBoundary>
     )
   },
+  {
+    path: "verify-email",
+    element: (
+      <ErrorBoundary>
+        <AuthGuard requireAuth={true} requireType="absent">
+          <VerifyEmail />
+        </AuthGuard>
+      </ErrorBoundary>
+    )
+  }
 ]);
 
 function App() {

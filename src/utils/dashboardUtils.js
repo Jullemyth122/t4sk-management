@@ -134,3 +134,47 @@ export function inferDueDateFromItem(item) {
     }
     return null;
 }
+
+export const normalizeTokenForEmail = (tok = '') => {
+    if (!tok) return '';
+    return String(tok).trim().toLowerCase().replace(/[()\[\]<>,"'`]/g, '').replace(/\s+/g, '');
+};
+
+export const autoBalanceSubtaskList = (arr) => {
+    if (!Array.isArray(arr) || arr.length === 0) return [];
+    const copy = arr.map(x => ({ ...x, weight: Number(x.weight) || 0 }));
+    const total = copy.reduce((sum, x) => sum + x.weight, 0);
+    if (total === 100) return copy;
+    if (total === 0) {
+        const eq = Math.floor(100 / copy.length);
+        copy.forEach(x => x.weight = eq);
+        const rem = 100 - (eq * copy.length);
+        if (rem > 0) copy[0].weight += rem;
+        return copy;
+    }
+    let adj = 0;
+    copy.forEach(x => {
+        const w = Math.round((x.weight / total) * 100);
+        x.weight = w;
+        adj += w;
+    });
+    if (adj !== 100) copy[0].weight += (100 - adj);
+    return copy;
+};
+
+export const levenshtein = (a = '', b = '') => {
+    const A = String(a || ''), B = String(b || '');
+    const al = A.length, bl = B.length;
+    if (al === 0) return bl;
+    if (bl === 0) return al;
+    const dp = Array.from({ length: al + 1 }, () => new Array(bl + 1).fill(0));
+    for (let i = 0; i <= al; i++) dp[i][0] = i;
+    for (let j = 0; j <= bl; j++) dp[0][j] = j;
+    for (let i = 1; i <= al; i++) {
+        for (let j = 1; j <= bl; j++) {
+            const cost = A[i - 1] === B[j - 1] ? 0 : 1;
+            dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+        }
+    }
+    return dp[al][bl];
+};

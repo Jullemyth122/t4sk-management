@@ -1,0 +1,33 @@
+[
+  {
+    "version": "0.0.1",
+    "title": "Genesis — Task Management Platform Release",
+    "date": "March 18, 2026",
+    "isLatest": true,
+    "changes": [
+      "Kanban Board System with full CRUD for boards, lists, and task cards with real-time Firestore synchronization",
+      "Drag-and-drop card movement between lists with optimistic UI updates and rollback on failure",
+      "Smart Priority Engine with automatic prioritization based on due dates, effort, complexity, and dependency analysis",
+      "AI Co-Pilot powered by Google Gemini for task summarization, standup generation, workload analysis, and natural language task creation",
+      "Task Submission & Review Workflow with pending, approved, and rejected states, reviewer assignment, and QA checklists",
+      "Role-Based Access Control (RBAC) with 35+ granular permissions across business, boards, lists, cards, OCR, and AI features",
+      "Business Management with organization creation, member invitations (email-based), role assignment with level hierarchy and capacity limits",
+      "In-App Notification System with deduplication, 100-notification cap, and real-time delivery for task assignments, reviews, and submissions",
+      "Business Analytics Dashboard with project health scoring, risk distribution analysis, review bottleneck detection, and workload balancing insights",
+      "36+ Theme System with full CSS variable architecture supporting light, dark, and gradient themes (Olive, Barbie, Cyberpunk, Dracula, Aurora, and more)",
+      "User Presence Detection via Firebase Realtime Database for online/offline member status tracking",
+      "OCR Integration for importing task data from scanned documents and images",
+      "Board Calendar View for timeline-based task visualization with due date tracking",
+      "Personal & Business Dashboards with separate workspace modes and dedicated info pages",
+      "Firebase Authentication with email/password signup, email verification, and consent tracking (Terms & Privacy)",
+      "Today's Tasks aggregation across all boards with overdue and start-date awareness",
+      "Card Details Modal with subtasks, progress tracking, weight scoring, labels, and assignee management",
+      "Task Card Features including priority labels, effort estimation, start/end dates, dependencies, and workflow stages",
+      "Optimistic Snapshots with automatic rollback for a seamless, lag-free user experience",
+      "Responsive Landing Page with animated hero sections, dual Business/Personal mode toggle, and interactive Kanban preview",
+      "Stripe Integration for premium pricing with payment success handling",
+      "Docker & Vercel deployment configuration with Nginx reverse proxy support",
+      "Firestore Security Rules with comprehensive read/write access control for all collections"
+    ]
+  }
+]

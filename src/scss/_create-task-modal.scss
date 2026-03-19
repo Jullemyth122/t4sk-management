@@ -1,12 +1,12 @@
-// Import businessMixins if needed, or rely on business-dashboard importing this
-// @import './businessMixins';
+/* src/scss/_create-task-modal.scss */
+/* Revamped Professional Issue/Task Creator */
 
 .create-task-modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -14,285 +14,420 @@
     animation: fadeIn 0.2s ease-out;
 
     .create-task-modal {
-        background: var(--bd-header-bg); /* Use the rich gradient background */
-        border: 1px solid var(--bd-border-subtle);
-        border-radius: 16px;
+        background: var(--glass-bg, var(--bg-color, #1a1a14));
+        border: 1px solid var(--glass-border, rgba(177, 182, 137, 0.15));
+        border-radius: 12px;
         width: 100%;
-        max-width: 700px; /* Slightly wider to match dashboard spacing */
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        max-width: 860px; /* Wide professional modal */
+        box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.6);
         display: flex;
         flex-direction: column;
         animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         overflow: hidden;
+        max-height: 90vh;
+        color: var(--bd-text-main, #ebece5);
+        font-family: 'Inter', system-ui, sans-serif;
 
-        // Header matches sidebar styling
+        /* MODAL HEADER */
         .modal-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--bd-border-light);
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--card-border, rgba(177, 182, 137, 0.10));
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0, 0, 0, 0.15); /* Slight darkening for the header */
+            background: var(--mode-b-faint, rgba(0, 0, 0, 0.25));
 
-            h3 {
-                margin: 0;
-                color: var(--bd-text-main);
-                font-size: 1.15rem;
-                font-weight: 700;
-                letter-spacing: -0.2px;
+            .modal-header-info {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+
+                .modal-context {
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    color: var(--bd-text-sub, #a0a294);
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+
+                .modal-list-badge {
+                    background: var(--gold-faint, rgba(177, 182, 137, 0.12));
+                    border: 1px solid var(--gold-dim, rgba(177, 182, 137, 0.25));
+                    padding: 4px 10px;
+                    border-radius: 6px;
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                    color: var(--task-modalbtnBG, #b1b689);
+                }
             }
 
             .close-btn {
                 background: transparent;
-                border: 1px solid transparent;
-                color: var(--bd-text-sub);
+                border: none;
+                color: var(--bd-text-sub, #a0a294);
                 width: 32px;
                 height: 32px;
                 border-radius: 8px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 1.25rem;
+                font-size: 1.5rem;
                 cursor: pointer;
                 transition: all 0.2s;
 
                 &:hover {
-                    color: var(--bd-text-main);
-                    background: rgba(255, 255, 255, 0.08); /* Match bd-action-btn hover */
-                    border-color: var(--bd-border-light);
+                    color: var(--bd-text-main, #fff);
+                    background: rgba(255, 255, 255, 0.08);
                 }
             }
         }
 
-        // Body matches sd-modal-grid style roughly, but just two columns
-        .modal-body {
-            padding: 24px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px; /* Wider gap like standard bd-forms */
-            max-height: 70vh;
+        /* MODAL BODY (Split Layout) */
+        .modal-body-layout {
+            display: flex;
+            flex-direction: row;
             overflow-y: auto;
-
+            min-height: 450px;
+            
             &::-webkit-scrollbar { width: 6px; }
-            &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
-            &::-webkit-scrollbar-track { background: transparent; }
+            &::-webkit-scrollbar-thumb { background: rgba(177, 182, 137, 0.15); border-radius: 3px; }
 
-            // Form Fields
-            .form-column {
+            /* MAIN COLUMN */
+            .modal-main-column {
+                flex: 1 1 65%;
+                padding: 32px;
                 display: flex;
                 flex-direction: column;
-                gap: 16px; /* consistent vertical spacing */
-            }
+                gap: 24px;
+                border-right: 1px solid var(--card-border, rgba(177, 182, 137, 0.10));
+                min-width: 0; // prevent flex blowout
 
-            .form-group {
-                display: flex;
-                flex-direction: column;
-
-                label {
-                    display: block;
-                    margin-bottom: 6px;
-                    color: var(--bd-text-main);
-                    font-size: 0.85rem;
-                    font-weight: 600;
-                }
-
-                input[type="text"],
-                input[type="date"],
-                input[type="number"] {
+                .task-title-input {
                     width: 100%;
-                    padding: 10px 12px;
-                    background: var(--bd-input-bg);
-                    border: 1px solid transparent;
-                    border-radius: 8px;
-                    color: var(--bd-text-main);
-                    font-size: 0.9rem;
-                    font-family: inherit;
-                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
-                    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+                    background: transparent;
+                    border: none;
+                    font-size: 1.75rem;
+                    font-weight: 700;
+                    color: var(--bd-text-main, #fff);
+                    padding: 0;
+                    margin: 0;
+                    line-height: 1.2;
+                    letter-spacing: -0.5px;
+
+                    &::placeholder {
+                        color: var(--text-muted, rgba(235, 236, 229, 0.3));
+                        opacity: 0.6;
+                    }
 
                     &:focus {
                         outline: none;
-                        background: rgba(0, 0, 0, 0.04);
-                        border-color: var(--task-modalbtnBG); /* Use theme accent */
-                        box-shadow: 0 0 0 2px rgba(83, 143, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.02);
-                    }
-                    
-                    &::placeholder {
-                        color: var(--bd-input-pg, rgba(255,255,255,0.4));
-                    }
-                }
-            }
-
-            // Subtask Area
-            .subtasks-container {
-                display: flex;
-                flex-direction: column;
-                
-                .subtasks-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 12px;
-
-                    h4 {
-                        margin: 0;
-                        color: var(--bd-text-main);
-                        font-size: 0.95rem;
-                        font-weight: 600;
+                        box-shadow: none;
                     }
                 }
 
-                .subtask-list {
-                    background: var(--bd-panel-bg);
-                    border: 1px solid var(--bd-border-subtle);
-                    border-radius: 10px;
-                    padding: 12px;
-                    margin-bottom: 16px;
-                    min-height: 120px;
-                    max-height: 250px;
-                    overflow-y: auto;
+                .desc-wrapper {
                     display: flex;
                     flex-direction: column;
                     gap: 8px;
 
-                    &::-webkit-scrollbar { width: 4px; }
-                    &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+                    .section-label {
+                        font-size: 0.8rem;
+                        font-weight: 700;
+                        color: var(--bd-text-sub, #a0a294);
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
 
-                    .mini-subtask-item {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 8px 12px;
-                        background: var(--bd-card-bg); /* Match generic card */
-                        border: 1px solid var(--bd-card-border);
+                    .task-desc-input {
+                        width: 100%;
+                        background: var(--gold-faint, rgba(177, 182, 137, 0.03));
+                        border: 1px solid transparent;
                         border-radius: 8px;
-                        font-size: 0.85rem;
-                        color: var(--bd-text-main);
-                        transition: transform 0.15s, box-shadow 0.15s;
+                        color: var(--bd-text-main, #ebece5);
+                        font-family: inherit;
+                        font-size: 0.95rem;
+                        line-height: 1.6;
+                        padding: 14px;
+                        resize: vertical;
+                        min-height: 120px;
+                        transition: all 0.2s;
 
                         &:hover {
-                            background: var(--bd-card-hover);
-                            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                            background: var(--mode-b-faint, rgba(177, 182, 137, 0.06));
                         }
 
-                        .mini-subtask-text {
-                            flex: 1;
-                            margin-right: 12px;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                            white-space: nowrap;
-                            font-weight: 500;
+                        &:focus {
+                            outline: none;
+                            background: var(--mode-b-faint, rgba(0, 0, 0, 0.2));
+                            border-color: var(--gold-dim, rgba(177, 182, 137, 0.3));
+                            box-shadow: 0 0 0 3px var(--mode-b-faint, rgba(177, 182, 137, 0.08));
                         }
 
-                        .mini-subtask-meta {
-                            color: var(--task-modalbtnBG); /* Highlight weight in theme color */
-                            font-size: 0.75rem;
-                            font-weight: 700;
-                            margin-right: 12px;
-                            background: rgba(83, 143, 255, 0.1);
+                        &::placeholder {
+                            color: var(--text-muted, rgba(235, 236, 229, 0.35));
+                            opacity: 0.6;
+                        }
+                    }
+                }
+
+                .subtasks-section {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+
+                    .section-label {
+                        font-size: 0.8rem;
+                        font-weight: 700;
+                        color: var(--bd-text-sub, #a0a294);
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+
+                        .subtask-badge {
+                            background: var(--gold-faint, rgba(177, 182, 137, 0.15));
                             padding: 2px 6px;
-                            border-radius: 4px;
+                            border-radius: 999px;
+                            color: var(--task-modalbtnBG, #b1b689);
+                            font-size: 0.65rem;
+                        }
+                    }
+
+                    .subtask-list {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 6px;
+
+                        .empty-subtasks {
+                            padding: 16px;
+                            text-align: center;
+                            background: var(--mode-b-faint, rgba(177, 182, 137, 0.02));
+                            border: 1px dashed var(--card-border, rgba(177, 182, 137, 0.15));
+                            border-radius: 8px;
+                            color: var(--bd-text-sub, #a0a294);
+                            font-size: 0.85rem;
                         }
 
-                        .remove-btn {
-                            background: transparent;
-                            border: 1px solid transparent;
-                            color: var(--bd-text-sub);
-                            cursor: pointer;
-                            font-size: 1.1rem;
+                        .subtask-row {
                             display: flex;
                             align-items: center;
-                            justify-content: center;
-                            width: 24px;
-                            height: 24px;
-                            border-radius: 6px;
-                            transition: all 0.2s;
+                            background: var(--mode-b-faint, rgba(177, 182, 137, 0.04));
+                            border: 1px solid var(--card-border, rgba(177, 182, 137, 0.08));
+                            padding: 10px 14px;
+                            border-radius: 8px;
+                            gap: 12px;
+                            transition: transform 0.15s, background 0.15s;
 
                             &:hover {
-                                background: rgba(255, 107, 107, 0.1);
-                                color: #FF6B6B;
+                                background: var(--gold-faint, rgba(177, 182, 137, 0.08));
+                                transform: translateX(2px);
+                            }
+
+                            .subtask-bullet {
+                                width: 14px;
+                                height: 14px;
+                                border: 2px solid var(--gold-dim, rgba(177, 182, 137, 0.4));
+                                border-radius: 4px;
+                                flex-shrink: 0;
+                            }
+
+                            .subtask-text {
+                                flex: 1;
+                                font-size: 0.9rem;
+                                color: var(--bd-text-main, #fff);
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                white-space: nowrap;
+                            }
+
+                            .subtask-weight-badge {
+                                background: var(--gold-faint, rgba(177, 182, 137, 0.12));
+                                border: 1px solid var(--gold-dim, rgba(177, 182, 137, 0.2));
+                                padding: 2px 8px;
+                                border-radius: 6px;
+                                font-size: 0.75rem;
+                                font-weight: 700;
+                                color: var(--task-modalbtnBG, #b1b689);
+                            }
+
+                            .subtask-remove-btn {
+                                background: transparent;
+                                border: none;
+                                color: var(--bd-text-sub, #a0a294);
+                                cursor: pointer;
+                                padding: 4px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                border-radius: 4px;
+                                font-size: 1.1rem;
+                                transition: all 0.2s;
+
+                                &:hover {
+                                    background: rgba(255, 60, 60, 0.1);
+                                    color: #ff6b6b;
+                                }
                             }
                         }
                     }
 
-                    .empty-subtasks {
-                        text-align: center;
-                        color: var(--bd-text-sub);
-                        font-size: 0.85rem;
-                        padding: 20px 0;
-                        opacity: 0.7;
+                    .subtask-add-row {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        background: var(--mode-b-faint, rgba(0, 0, 0, 0.2));
+                        padding: 6px;
+                        border-radius: 8px;
+                        border: 1px dashed var(--card-border, rgba(177, 182, 137, 0.2));
+
+                        .subtask-text-input {
+                            flex: 1;
+                            background: transparent;
+                            border: none;
+                            padding: 8px 10px;
+                            color: var(--bd-text-main, #fff);
+                            font-size: 0.85rem;
+
+                            &:focus { outline: none; }
+                            &::placeholder { color: var(--text-muted, rgba(235, 236, 229, 0.3)); opacity: 0.6; }
+                        }
+
+                        .subtask-weight-group {
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                            background: var(--mode-b-faint, rgba(177, 182, 137, 0.05));
+                            padding: 4px;
+                            border-radius: 6px;
+
+                            .subtask-weight-input {
+                                width: 50px;
+                                background: transparent;
+                                border: none;
+                                color: var(--bd-text-main, #fff);
+                                font-size: 0.85rem;
+                                text-align: center;
+                                padding: 4px;
+
+                                &:focus { outline: none; }
+                                &::-webkit-outer-spin-button, &::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+                            }
+
+                            .subtask-add-btn {
+                                background: var(--gold-faint, rgba(177, 182, 137, 0.12));
+                                border: 1px solid var(--gold-dim, rgba(177, 182, 137, 0.2));
+                                color: var(--task-modalbtnBG, #b1b689);
+                                font-weight: 700;
+                                padding: 6px 14px;
+                                border-radius: 6px;
+                                font-size: 0.8rem;
+                                cursor: pointer;
+                                transition: all 0.2s;
+
+                                &:hover {
+                                    background: var(--gold-faint, rgba(177, 182, 137, 0.2));
+                                    color: #fff;
+                                }
+                            }
+                        }
                     }
                 }
+            }
 
-                .subtask-add-row {
+            /* SIDEBAR COLUMN */
+            .modal-sidebar-column {
+                flex: 0 0 35%;
+                background: var(--mode-b-faint, rgba(0, 0, 0, 0.15));
+                display: flex;
+                flex-direction: column;
+                
+                .sidebar-section {
+                    padding: 32px 24px;
                     display: flex;
-                    gap: 8px;
+                    flex-direction: column;
+                    gap: 16px;
 
-                    input[type="text"] {
-                        flex: 1;
-                        padding: 10px 12px;
-                        background: var(--bd-input-bg);
-                        border: 1px solid transparent;
-                        border-radius: 8px;
-                        color: var(--bd-text-main);
-                        font-size: 0.85rem;
-
-                        &:focus {
-                            border-color: var(--task-modalbtnBG);
-                        }
-                    }
-
-                    input[type="number"] {
-                        width: 70px;
-                        text-align: center;
-                        padding: 10px;
-                        background: var(--bd-input-bg);
-                        border: 1px solid transparent;
-                        border-radius: 8px;
-                        color: var(--bd-text-main);
-
-                        &:focus {
-                            border-color: var(--task-modalbtnBG);
-                        }
-                    }
-
-                    .add-subtask-btn {
-                        background: var(--bd-btn-bg);
-                        color: var(--bd-text-main);
-                        border: 1px solid var(--bd-btn-border);
-                        border-radius: 8px;
-                        padding: 0 16px;
+                    .section-label {
+                        font-size: 0.8rem;
                         font-weight: 700;
-                        cursor: pointer;
-                        transition: all 0.18s;
+                        color: var(--bd-text-sub, #a0a294);
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        margin: 0 0 8px 0;
+                    }
 
-                        &:hover {
-                            background: var(--bd-btn-hover);
-                            border-color: var(--bd-border-light);
-                            transform: translateY(-1px);
-                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+                    .sidebar-field {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 6px;
+
+                        label {
+                            font-size: 0.8rem;
+                            font-weight: 600;
+                            color: var(--bd-text-main, #ebece5);
                         }
 
-                        &:active {
-                            transform: translateY(0);
+                        .sidebar-input {
+                            width: 100%;
+                            background: var(--mode-b-faint, rgba(177, 182, 137, 0.05));
+                            border: 1px solid var(--card-border, rgba(177, 182, 137, 0.15));
+                            padding: 10px 12px;
+                            border-radius: 8px;
+                            color: var(--bd-text-main, #fff);
+                            font-size: 0.85rem;
+                            transition: all 0.2s;
+
+                            &:hover {
+                                border-color: var(--gold-dim, rgba(177, 182, 137, 0.3));
+                                background: var(--gold-faint, rgba(177, 182, 137, 0.08));
+                            }
+
+                            &:focus {
+                                outline: none;
+                                border-color: var(--task-modalbtnBG, #b1b689);
+                                box-shadow: 0 0 0 3px var(--mode-b-faint, rgba(177, 182, 137, 0.1));
+                            }
+
+                            &::placeholder {
+                                color: var(--text-muted, rgba(235, 236, 229, 0.3));
+                                opacity: 0.6;
+                            }
+                        }
+
+                        /* Override CustomSelect internals slightly to match if necessary */
+                        .custom-select-container {
+                            font-size: 0.85rem;
+
+                            .custom-select-control {
+                                background: var(--mode-b-faint, rgba(177, 182, 137, 0.05));
+                                border: 1px solid var(--card-border, rgba(177, 182, 137, 0.15));
+                                border-radius: 8px;
+                                min-height: 38px;
+
+                                &:hover {
+                                    border-color: var(--gold-dim, rgba(177, 182, 137, 0.3));
+                                }
+                            }
                         }
                     }
                 }
             }
         }
 
-        // Footer matches bd-header-like action area
+        /* MODAL FOOTER */
         .modal-footer {
-            padding: 20px 24px;
-            border-top: 1px solid var(--bd-border-subtle);
-            background: rgba(0, 0, 0, 0.2); // Matching the sd-left pane depth
+            padding: 18px 24px;
+            border-top: 1px solid var(--card-border, rgba(177, 182, 137, 0.10));
+            background: var(--mode-b-faint, rgba(0, 0, 0, 0.35));
             display: flex;
             justify-content: flex-end;
+            align-items: center;
             gap: 12px;
 
             button {
                 padding: 10px 20px;
-                border-radius: 10px;
+                border-radius: 8px;
                 font-size: 0.9rem;
                 font-weight: 600;
                 cursor: pointer;
@@ -301,20 +436,19 @@
 
                 &.btn-cancel {
                     background: transparent;
-                    border: 1px solid var(--bd-border-subtle);
-                    color: var(--bd-text-main);
+                    border: 1px solid transparent;
+                    color: var(--bd-text-main, #ebece5);
 
                     &:hover {
-                        background: rgba(255, 255, 255, 0.05);
-                        border-color: var(--bd-border-light);
+                        background: rgba(255, 255, 255, 0.08);
                     }
                 }
 
                 &.btn-create {
-                    background: linear-gradient(135deg, var(--task-modalbtnBG), var(--task-modalbtnBG1));
+                    background: linear-gradient(135deg, var(--task-modalbtnBG, #b1b689), var(--task-modalbtnBG1, #6e6b3a));
                     border: none;
-                    color: #fff;
-                    box-shadow: 0 4px 15px rgba(83, 143, 255, 0.2);
+                    color: #1a1a14;
+                    box-shadow: 0 4px 15px rgba(177, 182, 137, 0.25);
 
                     &:hover {
                         filter: brightness(1.1);
@@ -335,36 +469,23 @@
             }
         }
 
-        // Responsive adjustments
+        /* RESPONSIVE */
         @media (max-width: 768px) {
-            .modal-body {
-                grid-template-columns: 1fr;
-                gap: 24px;
-                padding: 20px;
-            }
-            .modal-header {
-                padding: 20px;
-            }
-            .modal-footer {
-                padding: 20px;
-            }
-        }
-    }
-}
+            .modal-body-layout {
+                flex-direction: column;
+                
+                .modal-main-column {
+                    padding: 24px;
+                    border-right: none;
+                    border-bottom: 1px solid var(--card-border, rgba(177, 182, 137, 0.10));
+                }
 
-// Light theme overrides mapping where necessary, mostly relies on BD tokens
-[data-theme="light"] .create-task-modal-overlay {
-    background: rgba(0, 0, 0, 0.4);
-
-    .create-task-modal {
-        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
-        
-        .modal-header { background: rgba(0, 0, 0, 0.02); }
-        .modal-footer { background: rgba(0, 0, 0, 0.02); }
-        
-        .subtasks-container .subtask-list .mini-subtask-item {
-            .mini-subtask-meta {
-                background: rgba(33, 118, 203, 0.08);
+                .modal-sidebar-column {
+                    
+                    .sidebar-section {
+                        padding: 24px;
+                    }
+                }
             }
         }
     }
@@ -376,6 +497,6 @@
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px) scale(0.98); }
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
     to { opacity: 1; transform: translateY(0) scale(1); }
 }

@@ -44,9 +44,13 @@ export default function PersonalSidebar({
     onDeleteBoard,
     lists = [],
     highlightItemId,
+    aiGenerating,
+    genProgressText,
+    handleGenerateBoard,
 }) {
     const [isCreatingBoard, setIsCreatingBoard] = useState(false);
     const [newBoardName, setNewBoardName] = useState('');
+    const [genPrompt, setGenPrompt] = useState('');
 
     useEffect(() => {
         if (highlightItemId) {
@@ -246,6 +250,53 @@ export default function PersonalSidebar({
                     )}
                 </div>
             </div>
+
+            {/* AI Generative Board */}
+            {!sidebarCollapsed && handleGenerateBoard && (
+                <div className="pd-boards-section" style={{ marginTop: '0', borderTop: '1px solid var(--pd-border-subtle, rgba(255,255,255,0.1))', paddingTop: '1rem' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--pd-text-muted, #9ca3af)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '0 1rem', marginBottom: '0.5rem' }}>Generative Task</div>
+                    <div style={{ padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <textarea
+                            className="pd-create-board-input"
+                            placeholder="e.g. Setup marketing campaign for new shoes"
+                            value={genPrompt}
+                            onChange={e => setGenPrompt(e.target.value)}
+                            disabled={aiGenerating}
+                            rows={3}
+                            style={{ width: '100%', resize: 'none', fontFamily: 'inherit', padding: '0.5rem', borderRadius: '4px', background: 'var(--pd-surface, rgba(255,255,255,0.05))', color: 'inherit', border: '1px solid var(--pd-border, rgba(255,255,255,0.1))' }}
+                        />
+                        <button
+                            className="pd-create-board-submit"
+                            onClick={() => { handleGenerateBoard(genPrompt); setGenPrompt(''); }}
+                            disabled={aiGenerating || !genPrompt.trim()}
+                            style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', padding: '0.5rem', borderRadius: '4px', background: 'var(--pd-primary, #6366f1)', color: '#fff', border: 'none', cursor: 'pointer', opacity: (aiGenerating || !genPrompt.trim()) ? 0.6 : 1 }}
+                        >
+                            {aiGenerating ? (
+                                <>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="3" strokeLinecap="round" style={{ animation: 'spin 1s linear infinite' }}>
+                                        <circle cx="12" cy="12" r="10" strokeDasharray="32"></circle>
+                                    </svg>
+                                    Generating...
+                                </>
+                            ) : (
+                                <>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                        <path d="M2 17l10 5 10-5" />
+                                        <path d="M2 12l10 5 10-5" />
+                                    </svg>
+                                    Generate Board
+                                </>
+                            )}
+                        </button>
+                        {aiGenerating && genProgressText && (
+                            <div style={{ fontSize: '0.7rem', color: 'var(--pd-primary, #6366f1)', textAlign: 'center', animation: 'pulse-op 1.5s infinite', marginTop: '2px' }}>
+                                {genProgressText}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Spacer */}
             <div className="pd-sidebar-spacer" />

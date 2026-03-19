@@ -7,6 +7,7 @@ import {
   updateProfile as fbUpdateProfile,
   signOut as firebaseSignOut,
   signInWithPopup,
+  sendEmailVerification
 } from "firebase/auth";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../config/firebase";
@@ -180,11 +181,19 @@ export const AuthProvider = ({ children }) => {
         termsAcceptedAt: new Date().toISOString(),
       });
 
+      // Send the verification email right after they sign up
+      try {
+        await sendEmailVerification(user);
+      } catch (verifyErr) {
+        console.warn("Could not send verification email immediately:", verifyErr);
+        // We do not fail the whole signup if the email fails to send.
+      }
+
       setSuccessMessage("Account created successfully! Redirecting...");
 
       // Auto redirect (best UX)
       setTimeout(() => {
-        window.location.href = "/choose-account";
+        window.location.href = "/verify-email";
       }, 1200);
 
       return user;

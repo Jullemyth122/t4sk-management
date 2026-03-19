@@ -4,11 +4,18 @@ import { clampInt } from "../../utils/dashboardUtils";
 import { computePriority } from "../../utils/prioritization";
 import { serverTimestamp } from "firebase/firestore";
 
-export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs, actorName, boardName }) {
+export function useCardHandlers(props) {
+    const depsRef = useRef(props);
+    depsRef.current = props;
     const snapshotRef = useRef({});
 
-    const handleCreateCardForList = useCallback(async (listId) => {
-        const inputs = newCardInputs[listId] || {};
+    const handleCreateCardForList = useCallback(async (listIdOrObj) => {
+        const { businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs, actorName, boardName } = depsRef.current;
+        const isObj = listIdOrObj && typeof listIdOrObj === 'object';
+        const listId = isObj ? listIdOrObj.listId : listIdOrObj;
+        const cardOverride = isObj ? listIdOrObj.cardOverride : null;
+
+        const inputs = cardOverride || newCardInputs[listId] || {};
         const title = (inputs.title || '').trim();
         if (!title || !selectedBoardId) {
             dispatchSet('uiError', 'Title or board required');
@@ -71,9 +78,10 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
             dispatchSet('cardsMap', snapshotRef.current.cardsMap || {});
             dispatchSet('uiError', err?.message || 'Failed to create card');
         }
-    }, [newCardInputs, selectedBoardId, businessId, uid, cardsMap, canAssignTasks, dispatchSet, actorName, boardName]);
+    }, []);
 
     const handleUpdateCard = useCallback(async ({ listId, cardId, updates, listAssignees }) => {
+        const { businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs, actorName, boardName } = depsRef.current;
         if (!cardId || !listId) return dispatchSet('uiError', 'Invalid card/list');
         
         const updateKeys = Object.keys(updates || {});
@@ -141,9 +149,10 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
             dispatchSet('cardsMap', snapshotRef.current.cardsMap || {});
             dispatchSet('uiError', err?.message || 'Failed to update card');
         }
-    }, [businessId, uid, userEmail, selectedBoardId, cardsMap, canEditBoardValue, dispatchSet, actorName, boardName]);
+    }, []);
 
     const handleDeleteCard = useCallback(async ({ listId, cardId }) => {
+        const { businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs, actorName, boardName } = depsRef.current;
         if (!listId || !cardId || !canEditBoardValue || !window.confirm('Delete this card?')) return;
         dispatchSet('uiError', '');
         snapshotRef.current.cardsMap = { ...cardsMap };
@@ -155,9 +164,10 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
             dispatchSet('cardsMap', snapshotRef.current.cardsMap || {});
             dispatchSet('uiError', err?.message || 'Failed to delete card');
         }
-    }, [businessId, uid, selectedBoardId, cardsMap, canEditBoardValue, dispatchSet]);
+    }, []);
 
     const handleMoveCard = useCallback(async ({ fromListId, toListId, card }) => {
+        const { businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs, actorName, boardName } = depsRef.current;
         if (!fromListId || !toListId || !card || fromListId === toListId || !canEditBoardValue) return dispatchSet('uiError', 'Permission denied or invalid move');
         snapshotRef.current.cardsMap = { ...cardsMap };
         dispatchSet('cardsMap', (prev) => {
@@ -172,7 +182,7 @@ export function useCardHandlers({ businessId, uid, userEmail, dispatchSet, selec
             dispatchSet('cardsMap', snapshotRef.current.cardsMap || {});
             dispatchSet('uiError', err?.message || 'Failed to move card');
         }
-    }, [businessId, uid, selectedBoardId, cardsMap, canEditBoardValue, dispatchSet]);
+    }, []);
 
     return { handleCreateCardForList, handleUpdateCard, handleDeleteCard, handleMoveCard };
 }

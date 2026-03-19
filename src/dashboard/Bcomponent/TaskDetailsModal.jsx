@@ -95,9 +95,43 @@ export default function TaskDetailsModal({
         return total > 0 ? Math.round((completed / total) * 100) : 0;
     };
 
+    const balanceSubtasksLocally = (subsArray, modifiedIdx = -1) => {
+        if (!subsArray || subsArray.length === 0) return subsArray;
+        const total = subsArray.reduce((sum, st) => sum + (Number(st.weight) || 0), 0);
+        if (total === 100) return subsArray;
+
+        if (total === 0) {
+            const eq = Math.floor(100 / subsArray.length);
+            subsArray.forEach(s => s.weight = eq);
+            const rem = 100 - (eq * subsArray.length);
+            if (rem > 0) subsArray[0].weight += rem;
+            return subsArray;
+        }
+
+        let adjustedTotal = 0;
+        subsArray.forEach((st, i) => {
+            const newW = Math.round(((Number(st.weight) || 0) / total) * 100);
+            subsArray[i] = { ...st, weight: newW };
+            adjustedTotal += newW;
+        });
+
+        if (adjustedTotal !== 100 && subsArray.length > 1) {
+            const diff = 100 - adjustedTotal;
+            // Add remainder to a subtask other than the one just modified
+            const targetIdx = modifiedIdx === 0 ? 1 : 0;
+            subsArray[targetIdx].weight += diff;
+        }
+        return subsArray;
+    };
+
     const handleSubtaskChange = (idx, field, value) => {
-        const newSubs = [...subtasks];
+        let newSubs = [...subtasks];
         newSubs[idx] = { ...newSubs[idx], [field]: value };
+
+        if (field === 'weight') {
+            newSubs = balanceSubtasksLocally(newSubs, idx);
+        }
+
         const newProgress = calculateWeightedProgress(newSubs);
         setDraft(p => ({
             ...p,
@@ -110,7 +144,8 @@ export default function TaskDetailsModal({
     };
 
     const handleAddSubtask = () => {
-         const newSubs = [...subtasks, { text: '', completed: false, weight: 1 }];
+        let newSubs = [...subtasks, { text: '', completed: false, weight: 1 }];
+        newSubs = balanceSubtasksLocally(newSubs);
          const newProgress = calculateWeightedProgress(newSubs);
          setDraft(p => ({
             ...p,
@@ -119,7 +154,10 @@ export default function TaskDetailsModal({
     };
 
     const handleRemoveSubtask = (idx) => {
-        const newSubs = subtasks.filter((_, i) => i !== idx);
+        let newSubs = subtasks.filter((_, i) => i !== idx);
+        if (newSubs.length > 0) {
+            newSubs = balanceSubtasksLocally(newSubs);
+        }
         const newProgress = calculateWeightedProgress(newSubs);
         setDraft(p => ({
             ...p,
@@ -285,7 +323,7 @@ export default function TaskDetailsModal({
                                             <input 
                                                 type="number" 
                                                 className="td-subtask-weight"
-                                                value={st.weight || 1} 
+                                                value={st.weight != null ? st.weight : 0} 
                                                 onChange={e => handleSubtaskChange(i, 'weight', e.target.value)} 
                                             />
                                         </div>
