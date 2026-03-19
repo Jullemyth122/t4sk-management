@@ -84,6 +84,11 @@ export function useCardHandlers(props) {
         const { businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs, actorName, boardName } = depsRef.current;
         if (!cardId || !listId) return dispatchSet('uiError', 'Invalid card/list');
         
+        if (String(cardId).startsWith('tmp-')) {
+            console.warn('Ignored attempt to update temporary card:', cardId);
+            return;
+        }
+        
         const updateKeys = Object.keys(updates || {});
         const isSubtaskOnlyUpdate = updateKeys.length > 0 && updateKeys.every(k => k === 'subtasks' || k === 'progress');
         

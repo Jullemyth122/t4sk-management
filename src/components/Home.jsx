@@ -354,12 +354,12 @@ const Home = ({ simulateLoading = false }) => {
 
                                 <g className="tesser-vertices">
                                     {/* Connecting Vertices between Outer Hex and Inner Core (4D Mapping paths) */}
-                                    <line className="tesser-vert v1" x1="100" y1="10" x2="100" y2="50" strokeWidth="1" strokeDasharray="3 3" />
-                                    <line className="tesser-vert v2" x1="180" y1="50" x2="150" y2="75" strokeWidth="1" strokeDasharray="3 3" />
-                                    <line className="tesser-vert v3" x1="180" y1="150" x2="150" y2="125" strokeWidth="1" strokeDasharray="3 3" />
-                                    <line className="tesser-vert v4" x1="100" y1="190" x2="100" y2="150" strokeWidth="1" strokeDasharray="3 3" />
-                                    <line className="tesser-vert v5" x1="20" y1="150" x2="50" y2="125" strokeWidth="1" strokeDasharray="3 3" />
-                                    <line className="tesser-vert v6" x1="20" y1="50" x2="50" y2="75" strokeWidth="1" strokeDasharray="3 3" />
+                                        <line className="tesser-vert v1" x1="100" y1="10" x2="100" y2="50" strokeWidth="1" strokeDasharray="3 3" />
+                                        <line className="tesser-vert v2" x1="180" y1="50" x2="150" y2="75" strokeWidth="1" strokeDasharray="3 3" />
+                                        <line className="tesser-vert v3" x1="180" y1="150" x2="150" y2="125" strokeWidth="1" strokeDasharray="3 3" />
+                                        <line className="tesser-vert v4" x1="100" y1="190" x2="100" y2="150" strokeWidth="1" strokeDasharray="3 3" />
+                                        <line className="tesser-vert v5" x1="20" y1="150" x2="50" y2="125" strokeWidth="1" strokeDasharray="3 3" />
+                                        <line className="tesser-vert v6" x1="20" y1="50" x2="50" y2="75" strokeWidth="1" strokeDasharray="3 3" />
                                 </g>
 
                                 {/* HyperData Nodes traveling along vertices */}

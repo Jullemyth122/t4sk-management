@@ -37,6 +37,7 @@ const router = createBrowserRouter([
       </ErrorBoundary>
     ),
     errorElement: <ErrorBoundary />,
+    errorElement: <ErrorBoundary />,
     children: [   
       { path: "home", element: <PublicRoute><Home simulateLoading={true}/></PublicRoute> },
       { path: "changelog", element: <PublicRoute><Changelog /></PublicRoute> },

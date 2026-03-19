@@ -77,8 +77,13 @@ export function useSubmissionHandlers({ businessId, uid, userEmail, dispatchSet,
         const card = (cardsMap[listId] || []).find(c => c.id === cardId);
         if (!card) return dispatchSet('uiError', 'Card not found');
         const submission = card.submission || {};
-        const isReviewer = (submission.reviewerUid === uid) || (submission.reviewerEmail.toLowerCase() === userEmail.toLowerCase());
-        if (!isReviewer) return dispatchSet('uiError', 'Permission denied');
+        const isReviewer = (submission.reviewerUid === uid) || (submission.reviewerEmail?.toLowerCase() === userEmail.toLowerCase());
+        
+        // Check if user has high-level permissions or is owner to override
+        let canOverride = false;
+        if (uid === actorName || userLevel >= 999) canOverride = true; // basic fallback
+        
+        if (!isReviewer && !canOverride) return dispatchSet('uiError', 'Permission denied');
         snapshotRef.current.cardsMap = { ...cardsMap };
         const reviewStatus = action === 'approve' ? 'approved' : 'rejected';
         const updates = {

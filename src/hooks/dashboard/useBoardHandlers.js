@@ -53,6 +53,12 @@ export function useBoardHandlers(props) {
     const handleCreateBoard = useCallback(async () => {
         const { businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName } = depsRef.current;
         if (!newBoardName || !businessId) return dispatchSet('uiError', 'Board name or business required');
+        
+        // Free tier board limit check
+        if (planType === 'free' && boards.length >= 10) {
+            return dispatchSet('uiError', 'Free plan is limited to 10 boards. Please upgrade to Pro or Enterprise to unlock unlimited boards.');
+        }
+
         dispatchSet('uiError', '');
         snapshotRef.current.boards = boards;
         const tempId = `tmp-board-${Date.now()}`;

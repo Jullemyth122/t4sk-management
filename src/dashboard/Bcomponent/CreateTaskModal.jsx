@@ -237,7 +237,7 @@ export default function CreateTaskModal({
                     <button className="btn-cancel" onClick={onClose}>Cancel</button>
                     <button 
                         className="btn-create" 
-                        onClick={handleSubmit} 
+       https://github.com/Jullemyth122/t4sk-management/pull/9/conflict?name=src%252Fdashboard%252FBcomponent%252FCreateTaskModal.jsx&base_oid=1a890f2c07e450c3e098fe1e8a136f8bb561fc4a&head_oid=46159a2bb643dd6a6f3e0e8fdf70cca3d17c8692                 onClick={handleSubmit} 
                         disabled={isLocked || !title.trim()}
                     >
                         Create Task
