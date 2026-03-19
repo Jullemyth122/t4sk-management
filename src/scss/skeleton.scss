@@ -1,20 +1,11 @@
-/* --- SKELETON LOCAL THEME VARIABLES (Default Dark) --- */
+/* --- SKELETON VARIABLES — Inherit from global theme --- */
 :root {
-    /* Dark Mode: Subtle white shimmer on dark background */
-    --skel-bg-shimmer: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%);
-    --skel-spinner-border: rgba(255, 255, 255, 0.1);
-    --skel-spinner-top: #ffffff;
-    --skel-text: #a1a1aa; /* Zinc-400 */
+    --skel-bg-shimmer: var(--skeleton-bg, linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%));
+    --skel-spinner-border: var(--spinner-border, rgba(255, 255, 255, 0.1));
+    --skel-spinner-top: var(--spinner-top, #ffffff);
+    --skel-text: var(--loader-text, var(--text-dim, #a1a1aa));
 }
 
-/* --- LIGHT MODE OVERRIDES --- */
-[data-theme="light"] {
-    /* Light Mode: Slate gray shimmer on white/light background */
-    --skel-bg-shimmer: linear-gradient(90deg, rgb(203, 213, 225) 0%, rgb(203, 213, 225) 50%, rgb(203, 213, 225) 100%); /* Slate-300 based */
-    --skel-spinner-border: rgba(30, 41, 59, 0.1); /* Slate-800 */
-    --skel-spinner-top: #0f172a; /* Slate-900 */
-    --skel-text: #475569; /* Slate-600 */
-}
 
 .skeleton-block {
     background: var(--skel-bg-shimmer);

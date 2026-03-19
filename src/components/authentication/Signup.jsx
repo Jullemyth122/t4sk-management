@@ -126,7 +126,6 @@ const Signup = ({ simulateLoading = false }) => {
   // ---------- render skeleton while loading, but AFTER hooks are declared ----------
   if (loading) return <SignupSkeleton/>;
 
-
   return (
     <div className='signup-comp flex items-center justify-center relative'>
       <div className="signup-in-comp flex items-center justify-center relative">

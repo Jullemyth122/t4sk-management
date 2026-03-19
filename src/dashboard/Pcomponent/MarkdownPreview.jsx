@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * Lightweight markdown renderer for task descriptions.
  * Supports: code blocks (```), checklists (- [ ] / - [x]), and tables (| ... |).

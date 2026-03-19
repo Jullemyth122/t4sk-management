@@ -1,10 +1,13 @@
 import { useCallback, useRef } from "react";
 import * as boardSvc from '../../services/boardService'
 
-export function useListHandlers({ businessId, uid, dispatchSet, selectedBoardId, cardsMap, lists, newListName, newListAssignees, canCreateList, canEditBoardValue, userLevel, userEmail }) {
+export function useListHandlers(props) {
+    const depsRef = useRef(props);
+    depsRef.current = props;
     const snapshotRef = useRef({});
 
     const handleCreateList = useCallback(async () => {
+        const { businessId, uid, dispatchSet, selectedBoardId, cardsMap, lists, newListName, newListAssignees, canCreateList, canEditBoardValue, userLevel, userEmail } = depsRef.current;
         if (!canCreateList || !newListName || !selectedBoardId) return dispatchSet('uiError', 'Permission denied, name, or board required');
         let uniq = Array.from(new Set(newListAssignees.map(String).map(s => s.trim()).filter(Boolean)));
         if (userLevel <= 2 && uniq.length === 0) uniq.push(uid || userEmail.toLowerCase());
@@ -24,9 +27,10 @@ export function useListHandlers({ businessId, uid, dispatchSet, selectedBoardId,
             dispatchSet('lists', snapshotRef.current.lists || []);
             dispatchSet('uiError', err?.message || 'Failed to create list');
         }
-    }, [canCreateList, newListName, selectedBoardId, newListAssignees, businessId, uid, lists, dispatchSet, userLevel, userEmail]);
+    }, []);
 
     const handleDeleteList = useCallback(async ({ boardId: bId, listId }) => {
+        const { businessId, uid, dispatchSet, selectedBoardId, cardsMap, lists, newListName, newListAssignees, canCreateList, canEditBoardValue, userLevel, userEmail } = depsRef.current;
         if (!bId || !listId || !canEditBoardValue || !window.confirm('Delete list and cards?')) return;
         dispatchSet('uiError', '');
         snapshotRef.current.lists = lists;
@@ -45,9 +49,10 @@ export function useListHandlers({ businessId, uid, dispatchSet, selectedBoardId,
             dispatchSet('cardsMap', snapshotRef.current.cardsMap || {});
             dispatchSet('uiError', err?.message || 'Failed to delete list');
         }
-    }, [businessId, uid, lists, cardsMap, canEditBoardValue, dispatchSet]);
+    }, []);
 
     const handleUpdateList = useCallback(async (bId, listId, updates) => {
+        const { businessId, uid, dispatchSet, selectedBoardId, cardsMap, lists, newListName, newListAssignees, canCreateList, canEditBoardValue, userLevel, userEmail } = depsRef.current;
         if (!listId || !canEditBoardValue) return dispatchSet('uiError', 'Permission denied or invalid list');
         snapshotRef.current.lists = lists;
         try {
@@ -59,7 +64,7 @@ export function useListHandlers({ businessId, uid, dispatchSet, selectedBoardId,
             dispatchSet('lists', snapshotRef.current.lists || []);
             dispatchSet('uiError', err?.message || 'Failed to update list');
         }
-    }, [businessId, uid, lists, canEditBoardValue, dispatchSet]);
+    }, []);
 
     return { handleCreateList, handleDeleteList, handleUpdateList };
 }

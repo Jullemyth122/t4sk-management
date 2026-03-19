@@ -1,0 +1,412 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jura:wght@300..700&display=swap");
+
+/* Navbar theme vars — Inherits from global theme */
+:root {
+    --nav_txt: 30px;
+    --nav-height: 70px;
+    --nav-grd-light: var(--bg-nav-grd-darkLight, var(--olive-dark));
+    --nav-grd-dark: var(--bg-nav-grd-darkDark, var(--home-comp-bg));
+    --notif-grd-light: var(--gold-faint, rgba(255, 255, 255, 0.02));
+    --notif-grd-dark: var(--gold-faint, rgba(255, 255, 255, 0.01));
+    --notif-textColor: var(--text-bright, rgba(255, 255, 255, 0.92));
+    --badge-bg: #ff4d4d;
+}
+
+/* Small helper: hide mobile hamburger by default */
+.mobile-menu-button {
+    display: none;
+}
+
+/*─────────────────────────────────────────────────────────────────────*/
+/* NAVBAR BASE STYLES                                                 */
+/*─────────────────────────────────────────────────────────────────────*/
+.navigator-comp {
+    background: linear-gradient(to right, var(--nav-grd-light), var(--nav-grd-dark));
+    height: var(--nav-height);
+    box-shadow: 0 1px 3px #00000062;
+    font-family: "Jura", sans-serif;
+    position: relative;
+    z-index: 50;
+
+    .text_nav {
+        color: var(--text-bright, #fff);
+    }
+
+    ul {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        margin: 0;
+        height: 100%;
+
+        .grp-1 {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 15px;
+        }
+
+        .nav-side {
+            margin: 0 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            h3.txt1 {
+                font-size: var(--nav_txt);
+                color: var(--text-bright, #fff);
+                clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%);
+            }
+
+            h3.txt2 {
+                font-size: var(--nav_txt);
+                position: absolute;
+                top: 0;
+                left: 0;
+                color: var(--gold, #8c8022);
+                clip-path: polygon(38.5% 0, 100% 0, 100% 100%, 38.5% 100%);
+            }
+        }
+
+        .acc_name {
+            padding: 10px;
+            color: var(--text-bright, #fff);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* LINKS CONTAINER */
+        .nav-side-links {
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            gap: 8px;
+            padding: 0 20px;
+            height: 100%;
+
+            .nav-link {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                position: relative;
+                padding: 10px;
+                cursor: pointer;
+                color: var(--text-bright, #fff);
+
+                svg {
+                    fill: var(--text-bright, #fff);
+                }
+
+                a {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    text-decoration: none;
+                }
+
+                h5 {
+                    position: absolute;
+                    top: 100%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: var(--glass-bg, linear-gradient(to right, var(--nav-grd-light), var(--nav-grd-dark)));
+                    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.05));
+                    border-radius: 6px;
+                    white-space: nowrap;
+                    opacity: 0;
+                    visibility: hidden;
+                    transition: all 0.2s ease-in-out;
+                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+                    display: block;
+                    width: auto !important;
+                    margin-top: 0px;
+                    color: var(--text-bright, #fff);
+                    font-size: 0.85rem;
+                    z-index: 100;
+                    padding: 5px 12px;
+
+                    &.normal {
+                        width: auto !important;
+                        padding: 5px 12px;
+                    }
+                }
+
+                &:hover h5 {
+                    opacity: 1;
+                    visibility: visible;
+                    margin-top: 8px;
+                    padding: 5px 12px;
+                }
+            }
+
+            .btn_logout {
+                cursor: pointer;
+                background: transparent;
+                color: var(--text-bright, #fff);
+                border: none;
+                padding: 8px 10px;
+                border-radius: 8px;
+                transition: background .12s;
+            }
+        }
+
+        .nav-link.invites-button {
+            position: relative;
+            
+            svg {
+                width: 25px;
+                height: 25px;
+            }
+
+            .badge {
+                position: absolute;
+                bottom: -2px;
+                left: -2px;
+                background: var(--badge-bg);
+                color: #fff;
+                font-size: 10px;
+                padding: 3px 5px;
+                border-radius: 12px;
+                font-weight: 700;
+                line-height: 1;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.24);
+            }
+
+            .invite-dropdown {
+                position: absolute;
+                top: calc(var(--nav-height) - 12px);
+                right: 0;
+                width: 380px;
+                max-height: 480px;
+                /* darker, mostly-opaque background for readability */
+                background: var(--glass-bg, linear-gradient(180deg, rgba(18, 20, 22, 0.98), rgba(12, 14, 16, 0.98)));
+                border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.06));
+                border-radius: 12px;
+                overflow-y: auto;
+                box-shadow: var(--glass-shadow, 0 10px 30px rgba(0, 0, 0, 0.36));
+                z-index: 140;
+                padding: 12px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+
+                .no-invites {
+                    padding: 14px;
+                    text-align: center;
+                    color: var(--notif-textColor);
+                    font-size: 0.95rem;
+                }
+
+                .invite-item {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 12px;
+                    align-items: flex-start;
+                    padding: 12px;
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.01);
+                    transition: background .12s;
+
+                    &:hover {
+                        background: rgba(255, 255, 255, 0.02);
+                    }
+
+                    &:not(:last-child) {
+                        margin-bottom: 8px;
+                    }
+
+                    .invite-meta {
+                        flex: 1 1 auto;
+                        min-width: 0;
+
+                        .invite-title {
+                            font-weight: 700;
+                            color: var(--notif-textColor);
+                            margin-bottom: 6px;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            font-size: 0.98rem;
+                        }
+
+                        .invite-sub {
+                            font-size: 0.86rem;
+                            color: rgba(255, 255, 255, 0.82);
+                            margin-bottom: 6px;
+                        }
+
+                        .invite-msg {
+                            font-size: 0.92rem;
+                            color: rgba(255, 255, 255, 0.88);
+                            margin-bottom: 8px;
+                        }
+
+                        .invite-time {
+                            font-size: 0.78rem;
+                            color: rgba(255, 255, 255, 0.62);
+                        }
+                    }
+
+                    .invite-actions {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        align-items: flex-end;
+                        min-width: 110px;
+
+                        .btn.small {
+                            padding: 8px 10px;
+                            font-size: 0.9rem;
+                            border-radius: 8px;
+                            background: #ffffff;
+                            color: #000;
+                            border: none;
+                            cursor: pointer;
+                            min-width: 78px;
+                        }
+
+                        .btn.small.ghost {
+                            background: transparent;
+                            border: 1px solid rgba(255, 255, 255, 0.08);
+                            color: var(--notif-textColor);
+                        }
+
+                        .btn.small[disabled] {
+                            opacity: 0.7;
+                            cursor: not-allowed;
+                        }
+                    }
+                }
+            }
+        }
+
+        /* HAMBURGER BUTTON (desktop-hidden) */
+        .mobile-menu-button {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0 20px;
+
+            div {
+                width: 24px;
+                height: 2px;
+                background: var(--text-bright, #fff);
+                margin-bottom: 4px;
+            }
+        }
+    }
+
+    /* end ul */
+}
+
+/* end navigator-comp */
+
+/*─────────────────────────────────────────────────────────────────────*/
+/* RESPONSIVE BREAKPOINT @ 768px                                        */
+/*─────────────────────────────────────────────────────────────────────*/
+@media (max-width: 768px) {
+    :root {
+        --nav_txt: 22px;
+    }
+
+    .navigator-comp {
+        ul {
+            .mobile-menu-button {
+                display: block;
+            }
+
+            .nav-side-links {
+                display: none;
+            }
+
+            /* compact the invite/notification dropdown width on small screens */
+            .nav-link.notification-button .notif-lists,
+            .nav-link.invites-button .invite-dropdown {
+                right: 8px;
+                left: 8px;
+                width: calc(100% - 16px);
+                top: calc(var(--nav-height) + 6px);
+            }
+        }
+
+        /* Keyframes for slide-in */
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        /* Slide-in panel when “open” */
+        .nav-side-links.open {
+            display: flex !important;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 60% !important;
+            background: rgba(79, 79, 79, 0.36);
+            backdrop-filter: blur(8px);
+            overflow-y: auto;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out forwards;
+
+            .nav-link,
+            .btn_logout {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 12px 16px;
+                gap: 8px;
+                text-align: left;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+
+                h5 {
+                    position: relative;
+                    top: auto;
+                    left: auto;
+                    transform: none;
+                    background: transparent;
+                    border: none;
+                    margin: 0;
+                    opacity: 1;
+                    visibility: visible;
+                    box-shadow: none;
+                    display: inline-block;
+                    color: inherit;
+                    
+                    transition: none !important;
+                    width: auto !important;
+                    padding: 0 !important;
+                    overflow: visible;
+                }
+            }
+        }
+    }
+
+    /* end navigator-comp */
+}
+
+/* small tweaks for even smaller screens */
+@media (max-width: 420px) {
+    .navigator-comp {
+        padding: 0 6px;
+    }
+
+    .navigator-comp .nav-side {
+        margin: 0 8px;
+    }
+
+    .navigator-comp .acc_name {
+        display: none;
+    }
+}
+
+/* Light mode handled by global theme variable cascade */

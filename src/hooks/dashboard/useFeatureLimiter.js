@@ -5,7 +5,7 @@ const LIMIT_HOURS = 5;
 const HOUR_IN_MS = 60 * 60 * 1000;
 
 export function useFeatureLimiter(businessId, uid, planType, isOwner) {
-  const isPremium = planType === 'pro' || planType === 'enterprise';
+  const isPremium = ['pro', 'enterprise'].includes(String(planType || '').toLowerCase());
 
   const getStorageKey = () => `t4sk_feature_usage_${businessId}_${uid}`;
 

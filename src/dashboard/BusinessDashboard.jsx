@@ -30,6 +30,7 @@ import { useApplyOCR } from '../hooks/dashboard/useApplyOCR';
 import { useMemberWorkload } from '../hooks/dashboard/useMemberWorkload';
 import { useAICopilot } from '../hooks/dashboard/useAICopilot';
 import { useFeatureLimiter } from '../hooks/dashboard/useFeatureLimiter';
+import { useGenerativeBoard } from '../hooks/dashboard/useGenerativeBoard';
 import UpgradeModal from '../components/UpgradeModal';
 
 // Extracted initial state for clarity
@@ -79,6 +80,9 @@ const initialState = {
   ocrRaw: null,
   ocrResult: null,
   ocrError: null,
+  ocrVerificationOpen: false,
+  aiResult: null,
+  aiVerificationOpen: false,
   showHeaderActions: false,
 
   // Sidebar collapse state
@@ -131,7 +135,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
     return () => clearTimeout(timer);
   }, [highlightCardIds.size]);
 
-  const { businessId, businessName, businessOwnerUid, planType, boards, selectedBoardId, lists, cardsMap, allBoardsListsMap, roles, members, membersLoading, membersError, uiError, boardQuery, boardView, memberQuery, editingBoard, boardDraft, newBoardName, newListName, newListAssignees, assigneeSearch, assigneeDropdownOpen, listNameEditing, listNameDrafts, cardEditing, cardDrafts, newCardInputs, copiedEmailId, loading, ocrRaw, ocrResult, ocrError, showHeaderActions, sidebarCollapsed, sidebarTab, previewFile, previewUrl, listViewMode, copilotOpen } = state;
+  const { businessId, businessName, businessOwnerUid, planType, boards, selectedBoardId, lists, cardsMap, allBoardsListsMap, roles, members, membersLoading, membersError, uiError, boardQuery, boardView, memberQuery, editingBoard, boardDraft, newBoardName, newListName, newListAssignees, assigneeSearch, assigneeDropdownOpen, listNameEditing, listNameDrafts, cardEditing, cardDrafts, newCardInputs, copiedEmailId, loading, ocrRaw, ocrResult, ocrError, ocrVerificationOpen, aiResult, aiVerificationOpen, showHeaderActions, sidebarCollapsed, sidebarTab, previewFile, previewUrl, listViewMode, copilotOpen } = state;
 
   const getMemberLevel = useCallback((m, rolesList = roles) => {
     if (typeof m.level === 'number') return m.level;
@@ -145,6 +149,8 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
 
   useBusinessLoading({ businessId, dispatchSet, profile, uid });
   useRolesAndMembers({ businessId, dispatchSet, businessOwnerUid, members });
+
+  const { aiGenerating, genProgressText, aiUsageCount, isGenUnlimited, genLimitMax, handleGenerateBoard, handleApplyAIToBoard, aiApplying } = useGenerativeBoard({ businessId, uid, isOwner, planType, members, dispatchSet, businessOwnerUid });
 
 
   useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards, highlightBoardId, uid, userEmail });
@@ -393,6 +399,131 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
 
   const removeAssignee = useCallback((value) => dispatchSet('newListAssignees', (p) => p.filter(x => x !== (value || '').toLowerCase())), [dispatchSet]);
 
+  // OCR Edit Helpers
+  const updateOcrList = useCallback((lIdx, field, value) => {
+    dispatchSet('ocrResult', (prev) => {
+      if (!prev || !prev.lists) return prev;
+      const newLists = [...prev.lists];
+      newLists[lIdx] = { ...newLists[lIdx], [field]: value };
+      return { ...prev, lists: newLists };
+    });
+  }, [dispatchSet]);
+
+  const updateOcrTask = useCallback((lIdx, tIdx, field, value) => {
+    dispatchSet('ocrResult', (prev) => {
+      if (!prev || !prev.lists) return prev;
+      const newLists = [...prev.lists];
+      const newItems = [...newLists[lIdx].items];
+      newItems[tIdx] = { ...newItems[tIdx], [field]: value };
+      newLists[lIdx] = { ...newLists[lIdx], items: newItems };
+      return { ...prev, lists: newLists };
+    });
+  }, [dispatchSet]);
+
+  const updateOcrSubtask = useCallback((lIdx, tIdx, sIdx, field, value) => {
+    dispatchSet('ocrResult', (prev) => {
+      if (!prev || !prev.lists) return prev;
+      const newLists = [...prev.lists];
+      const newItems = [...newLists[lIdx].items];
+      const newSubtasks = [...newItems[tIdx].subtasks];
+      newSubtasks[sIdx] = { ...newSubtasks[sIdx], [field]: value };
+      
+      if (field === 'weight') {
+        const total = newSubtasks.reduce((sum, st) => sum + (Number(st.weight) || 0), 0);
+        if (total > 0 && total !== 100) {
+          let adjustedTotal = 0;
+          newSubtasks.forEach((st, idx) => {
+             const newW = Math.round(((Number(st.weight) || 0) / total) * 100);
+             newSubtasks[idx] = { ...st, weight: newW };
+             adjustedTotal += newW;
+          });
+          if (adjustedTotal !== 100 && newSubtasks.length > 1) {
+             const diff = 100 - adjustedTotal;
+             const targetIdx = sIdx === 0 ? 1 : 0;
+             newSubtasks[targetIdx].weight += diff;
+          }
+        }
+      }
+
+      newItems[tIdx] = { ...newItems[tIdx], subtasks: newSubtasks };
+      newLists[lIdx] = { ...newLists[lIdx], items: newItems };
+      return { ...prev, lists: newLists };
+    });
+  }, [dispatchSet]);
+
+  const addOcrAssignee = useCallback((lIdx, tIdx, item, email) => {
+    if (!email) return;
+    const current = Array.isArray(item.assignees) ? item.assignees : [];
+    if (!current.includes(email)) {
+      updateOcrTask(lIdx, tIdx, 'assignees', [...current, email]);
+    }
+  }, [updateOcrTask]);
+
+  const removeOcrAssignee = useCallback((lIdx, tIdx, item, email) => {
+    const current = Array.isArray(item.assignees) ? item.assignees : [];
+    updateOcrTask(lIdx, tIdx, 'assignees', current.filter(e => e !== email));
+  }, [updateOcrTask]);
+
+  // --- AI Edit Helpers ---
+  const [aiExpandedLists, setAiExpandedLists] = useState({});
+
+  const toggleAIListExpand = useCallback((lIdx) => {
+    setAiExpandedLists(prev => ({ ...prev, [lIdx]: !prev[lIdx] }));
+  }, []);
+
+  const updateAIBoardName = useCallback((value) => {
+    dispatchSet('aiResult', (prev) => {
+      if (!prev) return prev;
+      return { ...prev, boardName: value };
+    });
+  }, [dispatchSet]);
+
+  const updateAIList = useCallback((lIdx, field, value) => {
+    dispatchSet('aiResult', (prev) => {
+      if (!prev || !prev.lists) return prev;
+      const newLists = [...prev.lists];
+      newLists[lIdx] = { ...newLists[lIdx], [field]: value };
+      return { ...prev, lists: newLists };
+    });
+  }, [dispatchSet]);
+
+  const updateAICard = useCallback((lIdx, cIdx, field, value) => {
+    dispatchSet('aiResult', (prev) => {
+      if (!prev || !prev.lists) return prev;
+      const newLists = [...prev.lists];
+      const newCards = [...(newLists[lIdx].cards || [])];
+      newCards[cIdx] = { ...newCards[cIdx], [field]: value };
+      newLists[lIdx] = { ...newLists[lIdx], cards: newCards };
+      return { ...prev, lists: newLists };
+    });
+  }, [dispatchSet]);
+
+  const updateAISubtask = useCallback((lIdx, cIdx, sIdx, field, value) => {
+    dispatchSet('aiResult', (prev) => {
+      if (!prev || !prev.lists) return prev;
+      const newLists = [...prev.lists];
+      const newCards = [...(newLists[lIdx].cards || [])];
+      const newSubtasks = [...(newCards[cIdx].subtasks || [])];
+      newSubtasks[sIdx] = { ...newSubtasks[sIdx], [field]: value };
+      newCards[cIdx] = { ...newCards[cIdx], subtasks: newSubtasks };
+      newLists[lIdx] = { ...newLists[lIdx], cards: newCards };
+      return { ...prev, lists: newLists };
+    });
+  }, [dispatchSet]);
+
+  const addAIAssignee = useCallback((lIdx, cIdx, card, email) => {
+    if (!email) return;
+    const current = Array.isArray(card.assignees) ? card.assignees : [];
+    if (!current.includes(email)) {
+      updateAICard(lIdx, cIdx, 'assignees', [...current, email]);
+    }
+  }, [updateAICard]);
+
+  const removeAIAssignee = useCallback((lIdx, cIdx, card, email) => {
+    const current = Array.isArray(card.assignees) ? card.assignees : [];
+    updateAICard(lIdx, cIdx, 'assignees', current.filter(e => e !== email));
+  }, [updateAICard]);
+
   const showAside = canViewBoards || canViewMembers;
 
   return (
@@ -493,6 +624,13 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                 handleCreateBoard={handleCreateBoard}
                 canEditBoardValue={canEditBoardValue}
                 canCreateBoard={canCreateBoard}
+                aiGenerating={aiGenerating}
+                genProgressText={genProgressText}
+                aiUsageCount={aiUsageCount}
+                isGenUnlimited={isGenUnlimited}
+                genLimitMax={genLimitMax}
+                handleGenerateBoard={handleGenerateBoard}
+                isOwner={isOwner}
               />
             )}
 
@@ -650,8 +788,8 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                     <>
                       <button
                         className="bd-action-btn bd-action-btn--accent"
-                        title="Import OCR result to board"
-                        onClick={() => { handleApplyOCRToBoard(); dispatchSet('showHeaderActions', false); }}
+                        title="Review and import OCR result"
+                        onClick={() => { dispatchSet('ocrVerificationOpen', true); dispatchSet('showHeaderActions', false); }}
                         disabled={!canCreateList || !selectedBoardId || loading}
                       >
                         <span className="bd-action-btn-icon" aria-hidden>
@@ -659,20 +797,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
                             <path d="M12 5v14M5 12l7 7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         </span>
-                        <span className="bd-action-btn-text">Import OCR</span>
-                      </button>
-                      <button
-                        className="bd-action-btn"
-                        title="Preview OCR JSON output"
-                        onClick={() => { console.log('OCR preview', ocrResult); dispatchSet('showHeaderActions', false); }}
-                      >
-                        <span className="bd-action-btn-icon" aria-hidden>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <polyline points="16 18 22 12 16 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            <polyline points="8 6 2 12 8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </span>
-                        <span className="bd-action-btn-text">Preview OCR</span>
+                        <span className="bd-action-btn-text">Verify & Import OCR</span>
                       </button>
                     </>
                   )}
@@ -787,6 +912,395 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
               <div className="modal-actions">
                 <button className="bd-btn plain" onClick={cancelUpload}>Cancel</button>
                 <button className="bd-btn primary" onClick={confirmUpload}>Confirm Upload</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* OCR Verification Modal */}
+        {ocrVerificationOpen && ocrResult && (
+          <div className="ocr-verify-overlay">
+            <div className="ocr-verify-modal">
+              <div className="ocr-verify-header">
+                <div>
+                  <h3 className="ocr-verify-title">Verify OCR Data</h3>
+                  <p className="ocr-verify-subtitle">Review the extracted structure before importing to your board.</p>
+                </div>
+                <button
+                  className="ocr-verify-close"
+                  onClick={() => dispatchSet('ocrVerificationOpen', false)}
+                  title="Close"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="ocr-verify-body">
+                {(ocrResult.lists || []).length === 0 ? (
+                  <div className="ocr-verify-empty">No lists or tasks were found in the document.</div>
+                ) : (
+                  (ocrResult.lists || []).map((list, lIdx) => (
+                    <div className="ocr-verify-list" key={lIdx}>
+                      <h4 className="ocr-verify-list-name">
+                        <span className="list-icon">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <rect x="3" y="3" width="7" height="18" rx="1.5" />
+                            <rect x="13" y="3" width="8" height="11" rx="1.5" opacity="0.7" />
+                          </svg>
+                        </span>
+                        <input 
+                          className="ocr-edit-input list-title-input" 
+                          value={list.name || ''} 
+                          onChange={(e) => updateOcrList(lIdx, 'name', e.target.value)} 
+                          placeholder="Untitled List"
+                        />
+                        <span className="task-count">{list.items?.length || 0} tasks</span>
+                      </h4>
+
+                      <div className="ocr-verify-tasks">
+                        {(list.items || []).map((item, tIdx) => (
+                          <div className="ocr-verify-task" key={tIdx}>
+                            <div className="task-header">
+                              <input 
+                                className="ocr-edit-input task-title-input" 
+                                value={item.title || ''} 
+                                onChange={(e) => updateOcrTask(lIdx, tIdx, 'title', e.target.value)} 
+                                placeholder="Task Title"
+                              />
+                              <div className="task-badges">
+                                <select 
+                                  className={`ocr-edit-input task-badge priority-${(item.priorityScale || 'Medium').toLowerCase()}`} 
+                                  value={item.priorityScale || 'Medium'} 
+                                  onChange={(e) => updateOcrTask(lIdx, tIdx, 'priorityScale', e.target.value)}
+                                >
+                                  <option value="High">High</option>
+                                  <option value="Medium">Medium</option>
+                                  <option value="Low">Low</option>
+                                </select>
+                                <span className="task-badge weight">
+                                  P <input 
+                                    type="number" 
+                                    className="ocr-edit-input weight-input" 
+                                    value={item.weight || 0} 
+                                    onChange={(e) => updateOcrTask(lIdx, tIdx, 'weight', parseInt(e.target.value, 10))} 
+                                  />
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <textarea 
+                              className="ocr-edit-input task-desc-input" 
+                              value={item.description || ''} 
+                              onChange={(e) => updateOcrTask(lIdx, tIdx, 'description', e.target.value)} 
+                              placeholder="Task Description"
+                            />
+                            
+                            <div className="task-meta">
+                              <span className="meta-item">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                                Start: <input type="date" className="ocr-edit-input date-input" value={item.startDate || ''} onChange={(e) => updateOcrTask(lIdx, tIdx, 'startDate', e.target.value)} />
+                              </span>
+                              <span className="meta-item highlight-due">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                Due: <input type="date" className="ocr-edit-input date-input" min={new Date().toISOString().split('T')[0]} value={item.dueDate || ''} onChange={(e) => updateOcrTask(lIdx, tIdx, 'dueDate', e.target.value)} />
+                              </span>
+                              <span className="meta-item assignees-edit">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                                {(item.assignees || []).map(a => (
+                                  <span className="assignee-pill" key={a}>
+                                    {a} 
+                                    <button type="button" onClick={() => removeOcrAssignee(lIdx, tIdx, item, a)}>&times;</button>
+                                  </span>
+                                ))}
+                                <select 
+                                  className="ocr-edit-input assignee-select" 
+                                  value="" 
+                                  onChange={(e) => addOcrAssignee(lIdx, tIdx, item, e.target.value)}
+                                >
+                                  <option value="" disabled>+ Assignee</option>
+                                  {candidateEmails.filter(ce => !(item.assignees || []).includes(ce)).map(ce => (
+                                    <option key={ce} value={ce}>{ce}</option>
+                                  ))}
+                                </select>
+                              </span>
+                            </div>
+
+                            {Array.isArray(item.subtasks) && item.subtasks.length > 0 && (
+                              <div className="task-subtasks">
+                                {item.subtasks.map((st, sIdx) => (
+                                  <div className="subtask-row" key={sIdx}>
+                                    <input 
+                                      type="checkbox" 
+                                      checked={!!st.completed} 
+                                      onChange={(e) => updateOcrSubtask(lIdx, tIdx, sIdx, 'completed', e.target.checked)} 
+                                    />
+                                    <input 
+                                      type="text" 
+                                      className={`ocr-edit-input subtask-text ${st.completed ? 'completed' : ''}`} 
+                                      value={st.text || ''} 
+                                      onChange={(e) => updateOcrSubtask(lIdx, tIdx, sIdx, 'text', e.target.value)} 
+                                    />
+                                    <span className="subtask-weight">
+                                      <input 
+                                        type="number" 
+                                        className="ocr-edit-input weight-input" 
+                                        value={st.weight || 0} 
+                                        onChange={(e) => updateOcrSubtask(lIdx, tIdx, sIdx, 'weight', parseInt(e.target.value, 10))} 
+                                      />%
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="ocr-verify-footer">
+                <button
+                  className="action-btn danger"
+                  onClick={() => {
+                    dispatchSet('ocrRaw', null);
+                    dispatchSet('ocrResult', null);
+                    dispatchSet('ocrError', null);
+                    dispatchSet('ocrVerificationOpen', false);
+                  }}
+                >
+                  Clear & Reset
+                </button>
+                <div className="footer-right">
+                  <button
+                    className="action-btn"
+                    onClick={() => dispatchSet('ocrVerificationOpen', false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="action-btn primary pulse"
+                    onClick={() => {
+                      dispatchSet('ocrVerificationOpen', false);
+                      handleApplyOCRToBoard();
+                    }}
+                    disabled={loading || !canCreateList || !selectedBoardId}
+                  >
+                    {loading ? 'Importing...' : 'Confirm & Import to Board'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* AI Verification Modal */}
+        {aiVerificationOpen && aiResult && (
+          <div className="ocr-verify-overlay" style={{ zIndex: 9999 }}>
+            <div className="ocr-verify-modal">
+              <div className="ocr-verify-header">
+                <div>
+                  <h3 className="ocr-verify-title">Verify Generated Board</h3>
+                  <p className="ocr-verify-subtitle">Review the AI generated lists and tasks before creating your new board.</p>
+                </div>
+                <button
+                  className="ocr-verify-close"
+                  onClick={() => dispatchSet('aiVerificationOpen', false)}
+                  title="Close"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="ocr-verify-body">
+                <div style={{ marginBottom: '1.5rem', background: 'var(--bd-bg-tertiary)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--bd-border-subtle)' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--bd-text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Board Name</label>
+                  <input 
+                    className="ocr-edit-input" 
+                    value={aiResult.boardName || ''} 
+                    onChange={(e) => updateAIBoardName(e.target.value)} 
+                    placeholder="Board Name"
+                    style={{ width: '100%', fontSize: '1rem', padding: '0.5rem', fontWeight: 600 }}
+                  />
+                </div>
+
+                {(aiResult.lists || []).length === 0 ? (
+                  <div className="ocr-verify-empty">No lists or tasks were generated.</div>
+                ) : (
+                  (aiResult.lists || []).map((list, lIdx) => {
+                    const isExpanded = !aiExpandedLists[lIdx]; // Default expanded
+                    return (
+                    <div className="ocr-verify-list" key={lIdx}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: isExpanded ? '1rem' : 0 }}>
+                        <button 
+                          onClick={() => toggleAIListExpand(lIdx)}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--bd-text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0.2rem' }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+                            <polyline points="9 18 15 12 9 6" />
+                          </svg>
+                        </button>
+                        <h4 className="ocr-verify-list-name" style={{ margin: 0, flex: 1, paddingBottom: 0, borderBottom: 'none' }}>
+                          <span className="list-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                              <rect x="3" y="3" width="7" height="18" rx="1.5" />
+                              <rect x="13" y="3" width="8" height="11" rx="1.5" opacity="0.7" />
+                            </svg>
+                          </span>
+                          <input 
+                            className="ocr-edit-input list-title-input" 
+                            value={list.name || ''} 
+                            onChange={(e) => updateAIList(lIdx, 'name', e.target.value)} 
+                            placeholder="List Name"
+                          />
+                          <span className="task-count">{list.cards?.length || 0} tasks</span>
+                        </h4>
+                      </div>
+
+                      {isExpanded && (
+                      <div className="ocr-verify-tasks">
+                        {(list.cards || []).map((card, cIdx) => (
+                          <div className="ocr-verify-task" key={cIdx}>
+                            <div className="task-header">
+                              <input 
+                                className="ocr-edit-input task-title-input" 
+                                value={card.title || ''} 
+                                onChange={(e) => updateAICard(lIdx, cIdx, 'title', e.target.value)} 
+                                placeholder="Task Title"
+                              />
+                              <div className="task-badges">
+                                <select 
+                                  className={`ocr-edit-input task-badge priority-${(card.priorityScale || 'Medium').toLowerCase()}`} 
+                                  value={card.priorityScale || 'Medium'} 
+                                  onChange={(e) => updateAICard(lIdx, cIdx, 'priorityScale', e.target.value)}
+                                >
+                                  <option value="High">High</option>
+                                  <option value="Medium">Medium</option>
+                                  <option value="Low">Low</option>
+                                </select>
+                                <span className="task-badge weight">
+                                  Effort <input 
+                                    type="number" 
+                                    className="ocr-edit-input weight-input" 
+                                    value={card.effort || 0} 
+                                    onChange={(e) => updateAICard(lIdx, cIdx, 'effort', parseInt(e.target.value, 10))} 
+                                  />
+                                </span>
+                                <span className="task-badge date">
+                                  Start <input 
+                                    type="date" 
+                                    className="ocr-edit-input date-input" 
+                                    value={card.startDate || ''} 
+                                    onChange={(e) => updateAICard(lIdx, cIdx, 'startDate', e.target.value)} 
+                                  />
+                                </span>
+                                <span className="task-badge date">
+                                  Due <input 
+                                    type="date" 
+                                    className="ocr-edit-input date-input" 
+                                    value={card.dueDate || ''} 
+                                    onChange={(e) => updateAICard(lIdx, cIdx, 'dueDate', e.target.value)} 
+                                  />
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <textarea 
+                              className="ocr-edit-input task-desc-input" 
+                              value={card.description || ''} 
+                              onChange={(e) => updateAICard(lIdx, cIdx, 'description', e.target.value)} 
+                              placeholder="Task Description"
+                            />
+                            
+                            <div className="task-meta">
+                              <span className="meta-item assignees-edit">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                                {(card.assignees || []).map(a => (
+                                  <span className="assignee-pill" key={a}>
+                                    {a} 
+                                    <button type="button" onClick={() => removeAIAssignee(lIdx, cIdx, card, a)}>&times;</button>
+                                  </span>
+                                ))}
+                                <select 
+                                  className="ocr-edit-input assignee-select" 
+                                  value="" 
+                                  onChange={(e) => addAIAssignee(lIdx, cIdx, card, e.target.value)}
+                                >
+                                  <option value="" disabled>+ Assignee</option>
+                                  {(members || [])
+                                    .filter(m => String(m.uid) !== String(businessOwnerUid))
+                                    .map(m => m.email)
+                                    .filter(Boolean)
+                                    .filter(ce => !(card.assignees || []).includes(ce))
+                                    .map(ce => (
+                                    <option key={ce} value={ce}>{ce}</option>
+                                  ))}
+                                </select>
+                              </span>
+                            </div>
+
+                            {Array.isArray(card.subtasks) && card.subtasks.length > 0 && (
+                              <div className="task-subtasks">
+                                {card.subtasks.map((st, sIdx) => (
+                                  <div className="subtask-row" key={sIdx}>
+                                    <input 
+                                      type="checkbox" 
+                                      checked={!!st.completed} 
+                                      onChange={(e) => updateAISubtask(lIdx, cIdx, sIdx, 'completed', e.target.checked)} 
+                                    />
+                                    <input 
+                                      type="text" 
+                                      className={`ocr-edit-input subtask-text ${st.completed ? 'completed' : ''}`} 
+                                      value={st.text || ''} 
+                                      onChange={(e) => updateAISubtask(lIdx, cIdx, sIdx, 'text', e.target.value)} 
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      )}
+                    </div>
+                  );
+                  })
+                )}
+              </div>
+
+              <div className="ocr-verify-footer">
+                <button
+                  className="action-btn danger"
+                  onClick={() => Object.keys(aiExpandedLists).length < (aiResult.lists?.length || 0) 
+                    ? setAiExpandedLists(aiResult.lists.reduce((acc, _, i) => ({...acc, [i]: true}), {})) 
+                    : setAiExpandedLists({})}
+                >
+                  {Object.keys(aiExpandedLists).length < (aiResult.lists?.length || 0) ? "Collapse All Lists" : "Expand All Lists"}
+                </button>
+                <div className="footer-right">
+                  <button
+                    className="action-btn"
+                    onClick={() => dispatchSet('aiVerificationOpen', false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="action-btn primary pulse"
+                    onClick={() => {
+                      handleApplyAIToBoard(aiResult);
+                    }}
+                    disabled={aiApplying}
+                  >
+                    {aiApplying ? 'Importing...' : 'Confirm & Create Board'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

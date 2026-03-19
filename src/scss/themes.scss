@@ -1,0 +1,3012 @@
+/* ============================================================
+   T4SK GLOCAL THEME REGISTRY
+   10 Distinct Color Palettes for the Task Intelligence Platform
+   ============================================================ */
+
+/*
+  HOW TO ADD MORE THEMES:
+  Duplicate a block below, change the [data-theme="xyz"] selector,
+  and redefine the core color variables. 
+  Try to maintain contrast ratios for text visibility.
+*/
+
+/* 1. BARBIE DREAM (Light/Pink) */
+[data-theme="barbie"] {
+    --bg-color: #fce4ec; /* light pink base bg */
+    --text-color: #880e4f;
+    --text-muted: #c2185b;
+    
+    --skeleton-bg: linear-gradient(90deg, rgba(255,105,180, 0.06) 0%, rgba(255,105,180, 0.10) 50%, rgba(255,105,180, 0.06) 100%);
+    --loader-text: #c2185b;
+    --spinner-border: rgba(255,105,180, 0.14);
+    --spinner-top: #ff1493;
+
+    --home-comp-bg: #fdf5f8;
+    --olive-dark: #f8bbd0;
+    --olive-mid: #f48fb1;
+    --olive-accent: #f06292;
+    --gold: #ff69b4; /* hot pink primary accent */
+    --gold-dim: rgba(255,105,180, 0.55);
+    --gold-faint: rgba(255,105,180, 0.12);
+    --text-bright: #880e4f;
+    --text-mid: #c2185b;
+    --text-dim: #e91e63;
+    
+    --mode-b-primary: #ff1493;
+    --mode-b-glow: rgba(255,20,147, 0.25);
+    --mode-b-faint: rgba(255,20,147, 0.08);
+    --mode-b-border: rgba(255,20,147, 0.22);
+    --mode-b-badge-bg: rgba(255,20,147, 0.06);
+    --mode-b-highlight: linear-gradient(to right, #ff69b4, #ff1493);
+    --mode-b-text: #fff;
+    
+    --mode-p-primary: #ab47bc; /* soft purple for personal mode */
+    --mode-p-glow: rgba(171,71,188, 0.25);
+    --mode-p-faint: rgba(171,71,188, 0.08);
+    --mode-p-border: rgba(171,71,188, 0.22);
+    --mode-p-badge-bg: rgba(171,71,188, 0.06);
+    --mode-p-highlight: linear-gradient(to right, #ba68c8, #ab47bc);
+    --mode-p-text: #fff;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, rgba(255,105,180, 0.2) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, rgba(233,30,99, 0.15) 0%, transparent 55%), linear-gradient(to bottom, #fce4ec 0%, #f8cce0 40%, #fce4ec 100%);
+    --home-noise-opacity: 0.15;
+    --home-grid-line: rgba(255,105,180, 0.15);
+    
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(255,105,180, 0.4);
+    --glass-shadow: 0 8px 40px rgba(255,105,180, 0.15);
+    
+    --card-bg: rgba(255,255,255, 0.65);
+    --card-border: rgba(255,105,180, 0.3);
+    --card-hover-bg: rgba(255,255,255, 0.9);
+    --card-hover-border: #ff69b4;
+    
+    --status-bg: rgba(248,187,208, 0.5);
+    --status-border: rgba(255,105,180, 0.6);
+    --status-color: #e91e63;
+    --status-done-color: #c2185b;
+    --status-done-border: rgba(233,30,99, 0.3);
+    --status-done-bg: rgba(233,30,99, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, rgba(255,105,180, 0.2), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, rgba(255,105,180, 0.2), transparent);
+    --deco-corner: rgba(255,105,180, 0.4);
+    --stream-dot: #ff1493;
+    
+    --tab-bg: rgba(255,255,255, 0.65);
+    --tab-active-bg: #ff69b4;
+    --tab-active-color: #fff;
+    --tab-active-b-bg: #ff69b4;
+    --tab-active-b-color: #fff;
+    --tab-active-p-bg: #ab47bc;
+    --tab-active-p-color: #fff;
+
+    --signup-comp: #fce4ec;
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: rgba(250,220,230, 0.6);
+    --sign-bx-otc-light: rgba(255,105,180, 0.3);
+    --sign-txt-6xl: #ff1493;
+    --sign-highlight: #880e4f;
+    --sign-dashline: rgba(255,105,180, 0.3);
+    --sign-sct: #880e4f;
+    --sign-si: #ff69b4;
+    --sign-header-inactive: #e91e63;
+    --sign-labels: #d81b60;
+    --sign-input: #880e4f;
+    --input-bg: #fff;
+    --input-border: #f48fb1;
+    --social-bg: #fff;
+    --social-border: #f48fb1;
+}
+
+/* 2. BEN 10 (Dark/Neon Green) */
+[data-theme="ben10"] {
+    --bg-color: #0d110d;
+    --text-color: #d1f2d1;
+    --text-muted: #8ad98a;
+    
+    --skeleton-bg: linear-gradient(90deg, rgba(57,255,20, 0.05) 0%, rgba(57,255,20, 0.08) 50%, rgba(57,255,20, 0.05) 100%);
+    --loader-text: #8ad98a;
+    --spinner-border: rgba(57,255,20, 0.14);
+    --spinner-top: #39ff14;
+
+    --home-comp-bg: #0d110d;
+    --olive-dark: #111511;
+    --olive-mid: #162016;
+    --olive-accent: #1f301f;
+    --gold: #39ff14; /* neon green */
+    --gold-dim: rgba(57,255,20, 0.55);
+    --gold-faint: rgba(57,255,20, 0.12);
+    --text-bright: #e5ffe5;
+    --text-mid: #b3ffb3;
+    --text-dim: #8ad98a;
+    
+    --mode-b-primary: #39ff14;
+    --mode-b-glow: rgba(57,255,20, 0.25);
+    --mode-b-faint: rgba(57,255,20, 0.08);
+    --mode-b-border: rgba(57,255,20, 0.22);
+    --mode-b-badge-bg: rgba(57,255,20, 0.06);
+    --mode-b-highlight: linear-gradient(to right, #7fff00, #32cd32);
+    --mode-b-text: #000;
+    
+    --mode-p-primary: #00ffcc; /* neon cyan/teal */
+    --mode-p-glow: rgba(0,255,204, 0.25);
+    --mode-p-faint: rgba(0,255,204, 0.08);
+    --mode-p-border: rgba(0,255,204, 0.22);
+    --mode-p-badge-bg: rgba(0,255,204, 0.06);
+    --mode-p-highlight: linear-gradient(to right, #00ffcc, #00cccc);
+    --mode-p-text: #000;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, rgba(57,255,20, 0.15) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, rgba(0,0,0, 0.5) 0%, transparent 55%), linear-gradient(to bottom, #090b09 0%, #0d110d 40%, #111511 100%);
+    --home-noise-opacity: 0.35;
+    --home-grid-line: rgba(57,255,20, 0.08);
+    
+    --glass-bg: rgba(13,17,13, 0.85);
+    --glass-border: rgba(57,255,20, 0.5);
+    --glass-shadow: 0 8px 40px rgba(0,0,0, 0.6);
+    
+    --card-bg: rgba(18,24,18, 0.55);
+    --card-border: rgba(57,255,20, 0.3);
+    --card-hover-bg: rgba(22,30,22, 0.85);
+    --card-hover-border: #39ff14;
+    
+    --status-bg: rgba(13,17,13, 0.5);
+    --status-border: rgba(57,255,20, 0.4);
+    --status-color: #8ad98a;
+    --status-done-color: #39ff14;
+    --status-done-border: rgba(57,255,20, 0.3);
+    --status-done-bg: rgba(57,255,20, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, rgba(57,255,20, 0.2), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, rgba(57,255,20, 0.2), transparent);
+    --deco-corner: rgba(57,255,20, 0.4);
+    --stream-dot: #39ff14;
+    
+    --tab-bg: rgba(18,24,18, 0.65);
+    --tab-active-bg: #39ff14;
+    --tab-active-color: #000;
+    --tab-active-b-bg: #39ff14;
+    --tab-active-b-color: #000;
+    --tab-active-p-bg: #00ffcc;
+    --tab-active-p-color: #000;
+
+    --signup-comp: #090b09;
+    --sign-otc-light: rgba(13,17,13, 0.8);
+    --sign-otc-dark: rgba(9,11,9, 0.6);
+    --sign-bx-otc-light: rgba(57,255,20, 0.3);
+    --sign-txt-6xl: #7fff00;
+    --sign-highlight: #e5ffe5;
+    --sign-dashline: rgba(57,255,20, 0.3);
+    --sign-sct: #e5ffe5;
+    --sign-si: #39ff14;
+    --sign-header-inactive: #8ad98a;
+    --sign-labels: #b3ffb3;
+    --sign-input: #e5ffe5;
+    --input-bg: #090b09;
+    --input-border: #1f301f;
+    --social-bg: #0d110d;
+    --social-border: #1f301f;
+}
+
+/* 3. OCEAN (Dark/Deep Blue/Cyan) */
+[data-theme="ocean"] {
+    --bg-color: #001f3f;
+    --text-color: #e0f7fa;
+    --text-muted: #80deea;
+    
+    --skeleton-bg: linear-gradient(90deg, rgba(0,206,209, 0.05) 0%, rgba(0,206,209, 0.08) 50%, rgba(0,206,209, 0.05) 100%);
+    --loader-text: #80deea;
+    --spinner-border: rgba(0,206,209, 0.14);
+    --spinner-top: #00ced1;
+
+    --home-comp-bg: #001f3f;
+    --olive-dark: #00284d;
+    --olive-mid: #003366;
+    --olive-accent: #00509e;
+    --gold: #00ced1; /* dark cyan / aqua */
+    --gold-dim: rgba(0,206,209, 0.55);
+    --gold-faint: rgba(0,206,209, 0.12);
+    --text-bright: #ffffff;
+    --text-mid: #b2ebf2;
+    --text-dim: #4dd0e1;
+    
+    --mode-b-primary: #00ced1;
+    --mode-b-glow: rgba(0,206,209, 0.25);
+    --mode-b-faint: rgba(0,206,209, 0.08);
+    --mode-b-border: rgba(0,206,209, 0.22);
+    --mode-b-badge-bg: rgba(0,206,209, 0.06);
+    --mode-b-highlight: linear-gradient(to right, #40e0d0, #00ced1);
+    --mode-b-text: #001f3f;
+    
+    --mode-p-primary: #00bcd4;
+    --mode-p-glow: rgba(0,188,212, 0.25);
+    --mode-p-faint: rgba(0,188,212, 0.08);
+    --mode-p-border: rgba(0,188,212, 0.22);
+    --mode-p-badge-bg: rgba(0,188,212, 0.06);
+    --mode-p-highlight: linear-gradient(to right, #26c6da, #00bcd4);
+    --mode-p-text: #001f3f;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, rgba(0,206,209, 0.2) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, rgba(0,0,0, 0.5) 0%, transparent 55%), linear-gradient(to bottom, #00122e 0%, #001f3f 40%, #00284d 100%);
+    --home-noise-opacity: 0.3;
+    --home-grid-line: rgba(0,206,209, 0.1);
+    
+    --glass-bg: rgba(0, 31, 63, 0.85);
+    --glass-border: rgba(0,206,209, 0.4);
+    --glass-shadow: 0 8px 40px rgba(0,0,0, 0.5);
+    
+    --card-bg: rgba(0, 51, 102, 0.45);
+    --card-border: rgba(0,206,209, 0.3);
+    --card-hover-bg: rgba(0, 51, 102, 0.85);
+    --card-hover-border: #00ced1;
+    
+    --status-bg: rgba(0, 31, 63, 0.5);
+    --status-border: rgba(0,206,209, 0.4);
+    --status-color: #4dd0e1;
+    --status-done-color: #00ced1;
+    --status-done-border: rgba(0,206,209, 0.3);
+    --status-done-bg: rgba(0,206,209, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, rgba(0,206,209, 0.2), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, rgba(0,206,209, 0.2), transparent);
+    --deco-corner: rgba(0,206,209, 0.4);
+    --stream-dot: #00ced1;
+    
+    --tab-bg: rgba(0, 51, 102, 0.5);
+    --tab-active-bg: #00ced1;
+    --tab-active-color: #001f3f;
+    --tab-active-b-bg: #00ced1;
+    --tab-active-b-color: #001f3f;
+    --tab-active-p-bg: #00bcd4;
+    --tab-active-p-color: #001f3f;
+
+    --signup-comp: #00122e;
+    --sign-otc-light: rgba(0, 31, 63, 0.8);
+    --sign-otc-dark: rgba(0, 18, 46, 0.6);
+    --sign-bx-otc-light: rgba(0,206,209, 0.3);
+    --sign-txt-6xl: #40e0d0;
+    --sign-highlight: #ffffff;
+    --sign-dashline: rgba(0,206,209, 0.3);
+    --sign-sct: #ffffff;
+    --sign-si: #00ced1;
+    --sign-header-inactive: #4dd0e1;
+    --sign-labels: #b2ebf2;
+    --sign-input: #ffffff;
+    --input-bg: #00122e;
+    --input-border: #003366;
+    --social-bg: #001933;
+    --social-border: #003366;
+}
+
+/* 4. SUNSET (Dark/Orange/Red) */
+[data-theme="sunset"] {
+    --bg-color: #2e0900;
+    --text-color: #ffe0b2;
+    --text-muted: #ffb74d;
+    
+    --skeleton-bg: linear-gradient(90deg, rgba(255,140,0, 0.05) 0%, rgba(255,140,0, 0.08) 50%, rgba(255,140,0, 0.05) 100%);
+    --loader-text: #ffb74d;
+    --spinner-border: rgba(255,140,0, 0.14);
+    --spinner-top: #ff8c00;
+
+    --home-comp-bg: #2e0900;
+    --olive-dark: #3e1200;
+    --olive-mid: #5c1f00;
+    --olive-accent: #873000;
+    --gold: #ff8c00; /* dark orange */
+    --gold-dim: rgba(255,140,0, 0.55);
+    --gold-faint: rgba(255,140,0, 0.12);
+    --text-bright: #fff3e0;
+    --text-mid: #ffcc80;
+    --text-dim: #ffa726;
+    
+    --mode-b-primary: #ff8c00;
+    --mode-b-glow: rgba(255,140,0, 0.25);
+    --mode-b-faint: rgba(255,140,0, 0.08);
+    --mode-b-border: rgba(255,140,0, 0.22);
+    --mode-b-badge-bg: rgba(255,140,0, 0.06);
+    --mode-b-highlight: linear-gradient(to right, #ffb347, #ff8c00);
+    --mode-b-text: #2e0900;
+    
+    --mode-p-primary: #f44336; /* red */
+    --mode-p-glow: rgba(244,67,54, 0.25);
+    --mode-p-faint: rgba(244,67,54, 0.08);
+    --mode-p-border: rgba(244,67,54, 0.22);
+    --mode-p-badge-bg: rgba(244,67,54, 0.06);
+    --mode-p-highlight: linear-gradient(to right, #ef5350, #f44336);
+    --mode-p-text: #fff;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, rgba(255,140,0, 0.2) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, rgba(0,0,0, 0.5) 0%, transparent 55%), linear-gradient(to bottom, #1f0400 0%, #2e0900 40%, #3e1200 100%);
+    --home-noise-opacity: 0.3;
+    --home-grid-line: rgba(255,140,0, 0.1);
+    
+    --glass-bg: rgba(46, 9, 0, 0.85);
+    --glass-border: rgba(255,140,0, 0.4);
+    --glass-shadow: 0 8px 40px rgba(0,0,0, 0.5);
+    
+    --card-bg: rgba(92, 31, 0, 0.45);
+    --card-border: rgba(255,140,0, 0.3);
+    --card-hover-bg: rgba(92, 31, 0, 0.85);
+    --card-hover-border: #ff8c00;
+    
+    --status-bg: rgba(46, 9, 0, 0.5);
+    --status-border: rgba(255,140,0, 0.4);
+    --status-color: #ffa726;
+    --status-done-color: #ff8c00;
+    --status-done-border: rgba(255,140,0, 0.3);
+    --status-done-bg: rgba(255,140,0, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, rgba(255,140,0, 0.2), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, rgba(255,140,0, 0.2), transparent);
+    --deco-corner: rgba(255,140,0, 0.4);
+    --stream-dot: #ff8c00;
+    
+    --tab-bg: rgba(92, 31, 0, 0.5);
+    --tab-active-bg: #ff8c00;
+    --tab-active-color: #2e0900;
+    --tab-active-b-bg: #ff8c00;
+    --tab-active-b-color: #2e0900;
+    --tab-active-p-bg: #f44336;
+    --tab-active-p-color: #fff;
+
+    --signup-comp: #1f0400;
+    --sign-otc-light: rgba(46, 9, 0, 0.8);
+    --sign-otc-dark: rgba(31, 4, 0, 0.6);
+    --sign-bx-otc-light: rgba(255,140,0, 0.3);
+    --sign-txt-6xl: #ffb347;
+    --sign-highlight: #fff3e0;
+    --sign-dashline: rgba(255,140,0, 0.3);
+    --sign-sct: #fff3e0;
+    --sign-si: #ff8c00;
+    --sign-header-inactive: #ffa726;
+    --sign-labels: #ffcc80;
+    --sign-input: #fff3e0;
+    --input-bg: #1f0400;
+    --input-border: #5c1f00;
+    --social-bg: #2e0900;
+    --social-border: #5c1f00;
+}
+
+/* 5. CYBERPUNK (Dark/Neon Purple/Cyan) */
+[data-theme="cyberpunk"] {
+    --bg-color: #0d0221;
+    --text-color: #fce4ec;
+    --text-muted: #e1bee7;
+    
+    --skeleton-bg: linear-gradient(90deg, rgba(255,0,255, 0.05) 0%, rgba(255,0,255, 0.08) 50%, rgba(255,0,255, 0.05) 100%);
+    --loader-text: #e1bee7;
+    --spinner-border: rgba(255,0,255, 0.14);
+    --spinner-top: #ff00ff;
+
+    --home-comp-bg: #0d0221;
+    --olive-dark: #1f0642;
+    --olive-mid: #2f0b5c;
+    --olive-accent: #481387;
+    --gold: #ff00ff; /* pure magenta / hot pink */
+    --gold-dim: rgba(255,0,255, 0.55);
+    --gold-faint: rgba(255,0,255, 0.12);
+    --text-bright: #ffffff;
+    --text-mid: #f3e5f5;
+    --text-dim: #ea80fc;
+    
+    --mode-b-primary: #ff00ff;
+    --mode-b-glow: rgba(255,0,255, 0.35);
+    --mode-b-faint: rgba(255,0,255, 0.12);
+    --mode-b-border: rgba(255,0,255, 0.3);
+    --mode-b-badge-bg: rgba(255,0,255, 0.1);
+    --mode-b-highlight: linear-gradient(to right, #ff4081, #ff00ff);
+    --mode-b-text: #0d0221;
+    
+    --mode-p-primary: #00e5ff; /* cyan */
+    --mode-p-glow: rgba(0,229,255, 0.35);
+    --mode-p-faint: rgba(0,229,255, 0.12);
+    --mode-p-border: rgba(0,229,255, 0.3);
+    --mode-p-badge-bg: rgba(0,229,255, 0.1);
+    --mode-p-highlight: linear-gradient(to right, #18ffff, #00e5ff);
+    --mode-p-text: #0d0221;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, rgba(255,0,255, 0.15) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, rgba(0,229,255, 0.15) 0%, transparent 55%), linear-gradient(to bottom, #070114 0%, #0d0221 40%, #1f0642 100%);
+    --home-noise-opacity: 0.4;
+    --home-grid-line: rgba(255,0,255, 0.12);
+    
+    --glass-bg: rgba(13, 2, 33, 0.85);
+    --glass-border: rgba(255,0,255, 0.45);
+    --glass-shadow: 0 8px 40px rgba(255,0,255, 0.15);
+    
+    --card-bg: rgba(47, 11, 92, 0.45);
+    --card-border: rgba(0,229,255, 0.3); /* cyber cyan border */
+    --card-hover-bg: rgba(47, 11, 92, 0.85);
+    --card-hover-border: #ff00ff; /* cyberpunk pink on hover */
+    
+    --status-bg: rgba(13, 2, 33, 0.5);
+    --status-border: rgba(255,0,255, 0.4);
+    --status-color: #ea80fc;
+    --status-done-color: #ff00ff;
+    --status-done-border: rgba(255,0,255, 0.3);
+    --status-done-bg: rgba(255,0,255, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, rgba(0,229,255, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, rgba(0,229,255, 0.3), transparent);
+    --deco-corner: rgba(255,0,255, 0.5);
+    --stream-dot: #00e5ff;
+    
+    --tab-bg: rgba(47, 11, 92, 0.5);
+    --tab-active-bg: #ff00ff;
+    --tab-active-color: #fff;
+    --tab-active-b-bg: #ff00ff;
+    --tab-active-b-color: #fff;
+    --tab-active-p-bg: #00e5ff;
+    --tab-active-p-color: #000;
+
+    --signup-comp: #070114;
+    --sign-otc-light: rgba(13, 2, 33, 0.8);
+    --sign-otc-dark: rgba(7, 1, 20, 0.6);
+    --sign-bx-otc-light: rgba(255,0,255, 0.3);
+    --sign-txt-6xl: #ff4081;
+    --sign-highlight: #ffffff;
+    --sign-dashline: rgba(0,229,255, 0.4);
+    --sign-sct: #ffffff;
+    --sign-si: #ff00ff;
+    --sign-header-inactive: #ea80fc;
+    --sign-labels: #f3e5f5;
+    --sign-input: #ffffff;
+    --input-bg: #070114;
+    --input-border: #481387;
+    --social-bg: #1f0642;
+    --social-border: #481387;
+}
+
+/* 6. DRACULA (Dark/Purples) */
+[data-theme="dracula"] {
+    --bg-color: #282a36;
+    --text-color: #f8f8f2;
+    --text-muted: #6272a4;
+    
+    --skeleton-bg: linear-gradient(90deg, rgba(189,147,249, 0.05) 0%, rgba(189,147,249, 0.08) 50%, rgba(189,147,249, 0.05) 100%);
+    --loader-text: #6272a4;
+    --spinner-border: rgba(189,147,249, 0.14);
+    --spinner-top: #bd93f9;
+
+    --home-comp-bg: #282a36;
+    --olive-dark: #383a59;
+    --olive-mid: #44475a;
+    --olive-accent: #6272a4;
+    --gold: #bd93f9; /* Dracula purple */
+    --gold-dim: rgba(189,147,249, 0.55);
+    --gold-faint: rgba(189,147,249, 0.12);
+    --text-bright: #f8f8f2;
+    --text-mid: #e9e9f4;
+    --text-dim: #8be9fd;
+    
+    --mode-b-primary: #bd93f9;
+    --mode-b-glow: rgba(189,147,249, 0.25);
+    --mode-b-faint: rgba(189,147,249, 0.08);
+    --mode-b-border: rgba(189,147,249, 0.22);
+    --mode-b-badge-bg: rgba(189,147,249, 0.06);
+    --mode-b-highlight: linear-gradient(to right, #ff79c6, #bd93f9); /* pink to purple */
+    --mode-b-text: #282a36;
+    
+    --mode-p-primary: #50fa7b; /* Dracula green */
+    --mode-p-glow: rgba(80,250,123, 0.25);
+    --mode-p-faint: rgba(80,250,123, 0.08);
+    --mode-p-border: rgba(80,250,123, 0.22);
+    --mode-p-badge-bg: rgba(80,250,123, 0.06);
+    --mode-p-highlight: linear-gradient(to right, #8be9fd, #50fa7b); /* cyan to green */
+    --mode-p-text: #282a36;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, rgba(189,147,249, 0.15) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, rgba(0,0,0, 0.3) 0%, transparent 55%), linear-gradient(to bottom, #21222c 0%, #282a36 40%, #383a59 100%);
+    --home-noise-opacity: 0.25;
+    --home-grid-line: rgba(189,147,249, 0.1);
+    
+    --glass-bg: rgba(40, 42, 54, 0.85);
+    --glass-border: rgba(189,147,249, 0.4);
+    --glass-shadow: 0 8px 40px rgba(0,0,0, 0.3);
+    
+    --card-bg: rgba(68, 71, 90, 0.55);
+    --card-border: rgba(189,147,249, 0.3);
+    --card-hover-bg: rgba(68, 71, 90, 0.85);
+    --card-hover-border: #ff79c6;
+    
+    --status-bg: rgba(40, 42, 54, 0.5);
+    --status-border: rgba(189,147,249, 0.4);
+    --status-color: #8be9fd;
+    --status-done-color: #bd93f9;
+    --status-done-border: rgba(189,147,249, 0.3);
+    --status-done-bg: rgba(189,147,249, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, rgba(189,147,249, 0.2), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, rgba(189,147,249, 0.2), transparent);
+    --deco-corner: rgba(189,147,249, 0.4);
+    --stream-dot: #ff79c6;
+    
+    --tab-bg: rgba(68, 71, 90, 0.65);
+    --tab-active-bg: #bd93f9;
+    --tab-active-color: #282a36;
+    --tab-active-b-bg: #bd93f9;
+    --tab-active-b-color: #282a36;
+    --tab-active-p-bg: #50fa7b;
+    --tab-active-p-color: #282a36;
+
+    --signup-comp: #21222c;
+    --sign-otc-light: rgba(40, 42, 54, 0.8);
+    --sign-otc-dark: rgba(33, 34, 44, 0.6);
+    --sign-bx-otc-light: rgba(189,147,249, 0.3);
+    --sign-txt-6xl: #ff79c6;
+    --sign-highlight: #f8f8f2;
+    --sign-dashline: rgba(189,147,249, 0.3);
+    --sign-sct: #f8f8f2;
+    --sign-si: #bd93f9;
+    --sign-header-inactive: #8be9fd;
+    --sign-labels: #e9e9f4;
+    --sign-input: #f8f8f2;
+    --input-bg: #21222c;
+    --input-border: #6272a4;
+    --social-bg: #282a36;
+    --social-border: #6272a4;
+}
+
+/* 7. FOREST (Dark/Earthy Greens) */
+[data-theme="forest"] {
+    --bg-color: #0f1c13;
+    --text-color: #e8f5e9;
+    --text-muted: #a5d6a7;
+    
+    --skeleton-bg: linear-gradient(90deg, rgba(34,139,34, 0.05) 0%, rgba(34,139,34, 0.08) 50%, rgba(34,139,34, 0.05) 100%);
+    --loader-text: #a5d6a7;
+    --spinner-border: rgba(34,139,34, 0.14);
+    --spinner-top: #228b22;
+
+    --home-comp-bg: #0f1c13;
+    --olive-dark: #1b3323;
+    --olive-mid: #2b4f3b;
+    --olive-accent: #3e6d54;
+    --gold: #4caf50; /* forest green */
+    --gold-dim: rgba(76,175,80, 0.55);
+    --gold-faint: rgba(76,175,80, 0.12);
+    --text-bright: #ffffff;
+    --text-mid: #c8e6c9;
+    --text-dim: #81c784;
+    
+    --mode-b-primary: #4caf50;
+    --mode-b-glow: rgba(76,175,80, 0.25);
+    --mode-b-faint: rgba(76,175,80, 0.08);
+    --mode-b-border: rgba(76,175,80, 0.22);
+    --mode-b-badge-bg: rgba(76,175,80, 0.06);
+    --mode-b-highlight: linear-gradient(to right, #81c784, #4caf50); 
+    --mode-b-text: #0f1c13;
+    
+    --mode-p-primary: #cddc39; /* lime green vibe */
+    --mode-p-glow: rgba(205,220,57, 0.25);
+    --mode-p-faint: rgba(205,220,57, 0.08);
+    --mode-p-border: rgba(205,220,57, 0.22);
+    --mode-p-badge-bg: rgba(205,220,57, 0.06);
+    --mode-p-highlight: linear-gradient(to right, #d4e157, #cddc39); 
+    --mode-p-text: #0f1c13;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, rgba(76,175,80, 0.15) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, rgba(0,0,0, 0.5) 0%, transparent 55%), linear-gradient(to bottom, #0a120c 0%, #0f1c13 40%, #1b3323 100%);
+    --home-noise-opacity: 0.3;
+    --home-grid-line: rgba(76,175,80, 0.1);
+    
+    --glass-bg: rgba(15, 28, 19, 0.85);
+    --glass-border: rgba(76,175,80, 0.4);
+    --glass-shadow: 0 8px 40px rgba(0,0,0, 0.5);
+    
+    --card-bg: rgba(43, 79, 59, 0.45);
+    --card-border: rgba(76,175,80, 0.3);
+    --card-hover-bg: rgba(43, 79, 59, 0.85);
+    --card-hover-border: #4caf50;
+    
+    --status-bg: rgba(15, 28, 19, 0.5);
+    --status-border: rgba(76,175,80, 0.4);
+    --status-color: #81c784;
+    --status-done-color: #4caf50;
+    --status-done-border: rgba(76,175,80, 0.3);
+    --status-done-bg: rgba(76,175,80, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, rgba(76,175,80, 0.2), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, rgba(76,175,80, 0.2), transparent);
+    --deco-corner: rgba(76,175,80, 0.4);
+    --stream-dot: #81c784;
+    
+    --tab-bg: rgba(43, 79, 59, 0.5);
+    --tab-active-bg: #4caf50;
+    --tab-active-color: #0f1c13;
+    --tab-active-b-bg: #4caf50;
+    --tab-active-b-color: #0f1c13;
+    --tab-active-p-bg: #cddc39;
+    --tab-active-p-color: #0f1c13;
+
+    --signup-comp: #0a120c;
+    --sign-otc-light: rgba(15, 28, 19, 0.8);
+    --sign-otc-dark: rgba(10, 18, 12, 0.6);
+    --sign-bx-otc-light: rgba(76,175,80, 0.3);
+    --sign-txt-6xl: #81c784;
+    --sign-highlight: #ffffff;
+    --sign-dashline: rgba(76,175,80, 0.3);
+    --sign-sct: #ffffff;
+    --sign-si: #4caf50;
+    --sign-header-inactive: #a5d6a7;
+    --sign-labels: #c8e6c9;
+    --sign-input: #ffffff;
+    --input-bg: #0a120c;
+    --input-border: #3e6d54;
+    --social-bg: #1b3323;
+    --social-border: #3e6d54;
+}
+
+/* 8. MONOCHROME (Dark/Greys) */
+[data-theme="monochrome"] {
+    --bg-color: #111111;
+    --text-color: #f5f5f5;
+    --text-muted: #9e9e9e;
+    
+    --skeleton-bg: linear-gradient(90deg, rgba(255,255,255, 0.05) 0%, rgba(255,255,255, 0.08) 50%, rgba(255,255,255, 0.05) 100%);
+    --loader-text: #9e9e9e;
+    --spinner-border: rgba(255,255,255, 0.14);
+    --spinner-top: #ffffff;
+
+    --home-comp-bg: #111111;
+    --olive-dark: #1e1e1e;
+    --olive-mid: #2c2c2c;
+    --olive-accent: #3d3d3d;
+    --gold: #ffffff; /* white */
+    --gold-dim: rgba(255,255,255, 0.55);
+    --gold-faint: rgba(255,255,255, 0.12);
+    --text-bright: #ffffff;
+    --text-mid: #e0e0e0;
+    --text-dim: #bdbdbd;
+    
+    --mode-b-primary: #ffffff;
+    --mode-b-glow: rgba(255,255,255, 0.25);
+    --mode-b-faint: rgba(255,255,255, 0.08);
+    --mode-b-border: rgba(255,255,255, 0.22);
+    --mode-b-badge-bg: rgba(255,255,255, 0.06);
+    --mode-b-highlight: linear-gradient(to right, #9e9e9e, #ffffff); 
+    --mode-b-text: #111111;
+    
+    --mode-p-primary: #b0bec5; /* slate grey */
+    --mode-p-glow: rgba(176,190,197, 0.25);
+    --mode-p-faint: rgba(176,190,197, 0.08);
+    --mode-p-border: rgba(176,190,197, 0.22);
+    --mode-p-badge-bg: rgba(176,190,197, 0.06);
+    --mode-p-highlight: linear-gradient(to right, #78909c, #b0bec5); 
+    --mode-p-text: #111111;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, rgba(255,255,255, 0.08) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, rgba(0,0,0, 0.6) 0%, transparent 55%), linear-gradient(to bottom, #0a0a0a 0%, #111111 40%, #1e1e1e 100%);
+    --home-noise-opacity: 0.35;
+    --home-grid-line: rgba(255,255,255, 0.05);
+    
+    --glass-bg: rgba(17, 17, 17, 0.85);
+    --glass-border: rgba(255,255,255, 0.3);
+    --glass-shadow: 0 8px 40px rgba(0,0,0, 0.5);
+    
+    --card-bg: rgba(44, 44, 44, 0.45);
+    --card-border: rgba(255,255,255, 0.25);
+    --card-hover-bg: rgba(44, 44, 44, 0.85);
+    --card-hover-border: #ffffff;
+    
+    --status-bg: rgba(17, 17, 17, 0.5);
+    --status-border: rgba(255,255,255, 0.3);
+    --status-color: #bdbdbd;
+    --status-done-color: #ffffff;
+    --status-done-border: rgba(255,255,255, 0.3);
+    --status-done-bg: rgba(255,255,255, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, rgba(255,255,255, 0.15), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, rgba(255,255,255, 0.15), transparent);
+    --deco-corner: rgba(255,255,255, 0.3);
+    --stream-dot: #ffffff;
+    
+    --tab-bg: rgba(44, 44, 44, 0.5);
+    --tab-active-bg: #ffffff;
+    --tab-active-color: #111111;
+    --tab-active-b-bg: #ffffff;
+    --tab-active-b-color: #111111;
+    --tab-active-p-bg: #b0bec5;
+    --tab-active-p-color: #111111;
+
+    --signup-comp: #0a0a0a;
+    --sign-otc-light: rgba(17, 17, 17, 0.8);
+    --sign-otc-dark: rgba(10, 10, 10, 0.6);
+    --sign-bx-otc-light: rgba(255,255,255, 0.2);
+    --sign-txt-6xl: #9e9e9e;
+    --sign-highlight: #ffffff;
+    --sign-dashline: rgba(255,255,255, 0.2);
+    --sign-sct: #ffffff;
+    --sign-si: #ffffff;
+    --sign-header-inactive: #bdbdbd;
+    --sign-labels: #e0e0e0;
+    --sign-input: #ffffff;
+    --input-bg: #0a0a0a;
+    --input-border: #3d3d3d;
+    --social-bg: #1e1e1e;
+    --social-border: #3d3d3d;
+}
+
+/* 11. LAVENDER LIGHT (Light/Purple) */
+[data-theme="lavender"] {
+    --bg-color: #f3e5f5; /* light purple base bg */
+    --text-color: #4a148c;
+    --text-muted: #6a1b9a;
+    
+    --skeleton-bg: linear-gradient(90deg, rgba(171,71,188, 0.06) 0%, rgba(171,71,188, 0.10) 50%, rgba(171,71,188, 0.06) 100%);
+    --loader-text: #6a1b9a;
+    --spinner-border: rgba(171,71,188, 0.14);
+    --spinner-top: #ab47bc;
+
+    --home-comp-bg: #fdfafb;
+    --olive-dark: #e1bee7;
+    --olive-mid: #ce93d8;
+    --olive-accent: #ba68c8;
+    --gold: #9c27b0; /* primary accent */
+    --gold-dim: rgba(156,39,176, 0.55);
+    --gold-faint: rgba(156,39,176, 0.12);
+    --text-bright: #4a148c;
+    --text-mid: #6a1b9a;
+    --text-dim: #7b1fa2;
+    
+    --mode-b-primary: #9c27b0;
+    --mode-b-glow: rgba(156,39,176, 0.25);
+    --mode-b-faint: rgba(156,39,176, 0.08);
+    --mode-b-border: rgba(156,39,176, 0.22);
+    --mode-b-badge-bg: rgba(156,39,176, 0.06);
+    --mode-b-highlight: linear-gradient(to right, #ba68c8, #9c27b0);
+    --mode-b-text: #fff;
+    
+    --mode-p-primary: #ec407a;
+    --mode-p-glow: rgba(236,64,122, 0.25);
+    --mode-p-faint: rgba(236,64,122, 0.08);
+    --mode-p-border: rgba(236,64,122, 0.22);
+    --mode-p-badge-bg: rgba(236,64,122, 0.06);
+    --mode-p-highlight: linear-gradient(to right, #f06292, #ec407a);
+    --mode-p-text: #fff;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, rgba(156,39,176, 0.2) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, rgba(142,36,170, 0.15) 0%, transparent 55%), linear-gradient(to bottom, #f3e5f5 0%, #e1bee7 40%, #f3e5f5 100%);
+    --home-noise-opacity: 0.12;
+    --home-grid-line: rgba(156,39,176, 0.15);
+    
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(156,39,176, 0.4);
+    --glass-shadow: 0 8px 40px rgba(156,39,176, 0.15);
+    
+    --card-bg: rgba(255,255,255, 0.65);
+    --card-border: rgba(156,39,176, 0.3);
+    --card-hover-bg: rgba(255,255,255, 0.9);
+    --card-hover-border: #9c27b0;
+    
+    --status-bg: rgba(225,190,231, 0.5);
+    --status-border: rgba(156,39,176, 0.6);
+    --status-color: #8e24aa;
+    --status-done-color: #6a1b9a;
+    --status-done-border: rgba(123,31,162, 0.3);
+    --status-done-bg: rgba(123,31,162, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, rgba(156,39,176, 0.2), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, rgba(156,39,176, 0.2), transparent);
+    --deco-corner: rgba(156,39,176, 0.4);
+    --stream-dot: #9c27b0;
+    
+    --tab-bg: rgba(255,255,255, 0.65);
+    --tab-active-bg: #9c27b0;
+    --tab-active-color: #fff;
+    --tab-active-b-bg: #9c27b0;
+    --tab-active-b-color: #fff;
+    --tab-active-p-bg: #ec407a;
+    --tab-active-p-color: #fff;
+
+    --signup-comp: #f3e5f5;
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: rgba(225,190,231, 0.6);
+    --sign-bx-otc-light: rgba(156,39,176, 0.3);
+    --sign-txt-6xl: #9c27b0;
+    --sign-highlight: #4a148c;
+    --sign-dashline: rgba(156,39,176, 0.3);
+    --sign-sct: #4a148c;
+    --sign-si: #8e24aa;
+    --sign-header-inactive: #6a1b9a;
+    --sign-labels: #6a1b9a;
+    --sign-input: #4a148c;
+    --input-bg: #fff;
+    --input-border: #ba68c8;
+    --social-bg: #fff;
+    --social-border: #ba68c8;
+}
+
+/* 12. MINT LIGHT (Light/Green) */
+[data-theme="mint"] {
+    --bg-color: #e8f5e9; /* light green base bg */
+    --text-color: #1b5e20;
+    --text-muted: #2e7d32;
+    
+    --skeleton-bg: linear-gradient(90deg, rgba(76,175,80, 0.06) 0%, rgba(76,175,80, 0.10) 50%, rgba(76,175,80, 0.06) 100%);
+    --loader-text: #2e7d32;
+    --spinner-border: rgba(76,175,80, 0.14);
+    --spinner-top: #4caf50;
+
+    --home-comp-bg: #f5fdf5;
+    --olive-dark: #c8e6c9;
+    --olive-mid: #a5d6a7;
+    --olive-accent: #81c784;
+    --gold: #4caf50; /* primary accent */
+    --gold-dim: rgba(76,175,80, 0.55);
+    --gold-faint: rgba(76,175,80, 0.12);
+    --text-bright: #1b5e20;
+    --text-mid: #2e7d32;
+    --text-dim: #388e3c;
+    
+    --mode-b-primary: #4caf50;
+    --mode-b-glow: rgba(76,175,80, 0.25);
+    --mode-b-faint: rgba(76,175,80, 0.08);
+    --mode-b-border: rgba(76,175,80, 0.22);
+    --mode-b-badge-bg: rgba(76,175,80, 0.06);
+    --mode-b-highlight: linear-gradient(to right, #81c784, #4caf50);
+    --mode-b-text: #fff;
+    
+    --mode-p-primary: #00acc1;
+    --mode-p-glow: rgba(0,172,193, 0.25);
+    --mode-p-faint: rgba(0,172,193, 0.08);
+    --mode-p-border: rgba(0,172,193, 0.22);
+    --mode-p-badge-bg: rgba(0,172,193, 0.06);
+    --mode-p-highlight: linear-gradient(to right, #26c6da, #00acc1);
+    --mode-p-text: #fff;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, rgba(76,175,80, 0.2) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, rgba(67,160,71, 0.15) 0%, transparent 55%), linear-gradient(to bottom, #e8f5e9 0%, #c8e6c9 40%, #e8f5e9 100%);
+    --home-noise-opacity: 0.12;
+    --home-grid-line: rgba(76,175,80, 0.15);
+    
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(76,175,80, 0.4);
+    --glass-shadow: 0 8px 40px rgba(76,175,80, 0.15);
+    
+    --card-bg: rgba(255,255,255, 0.65);
+    --card-border: rgba(76,175,80, 0.3);
+    --card-hover-bg: rgba(255,255,255, 0.9);
+    --card-hover-border: #4caf50;
+    
+    --status-bg: rgba(200,230,201, 0.5);
+    --status-border: rgba(76,175,80, 0.6);
+    --status-color: #388e3c;
+    --status-done-color: #2e7d32;
+    --status-done-border: rgba(56,142,60, 0.3);
+    --status-done-bg: rgba(56,142,60, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, rgba(76,175,80, 0.2), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, rgba(76,175,80, 0.2), transparent);
+    --deco-corner: rgba(76,175,80, 0.4);
+    --stream-dot: #4caf50;
+    
+    --tab-bg: rgba(255,255,255, 0.65);
+    --tab-active-bg: #4caf50;
+    --tab-active-color: #fff;
+    --tab-active-b-bg: #4caf50;
+    --tab-active-b-color: #fff;
+    --tab-active-p-bg: #00acc1;
+    --tab-active-p-color: #fff;
+
+    --signup-comp: #e8f5e9;
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: rgba(200,230,201, 0.6);
+    --sign-bx-otc-light: rgba(76,175,80, 0.3);
+    --sign-txt-6xl: #4caf50;
+    --sign-highlight: #1b5e20;
+    --sign-dashline: rgba(76,175,80, 0.3);
+    --sign-sct: #1b5e20;
+    --sign-si: #388e3c;
+    --sign-header-inactive: #2e7d32;
+    --sign-labels: #2e7d32;
+    --sign-input: #1b5e20;
+    --input-bg: #fff;
+    --input-border: #81c784;
+    --social-bg: #fff;
+    --social-border: #81c784;
+}
+
+
+/* 13. SKY LIGHT (Light/Blue) */
+[data-theme="skylight"] {
+    --bg-color: #e0f7fa; /* light cyan base bg */
+    --text-color: #006064;
+    --text-muted: #0097a7;
+    
+    --skeleton-bg: linear-gradient(90deg, rgba(0,188,212, 0.06) 0%, rgba(0,188,212, 0.10) 50%, rgba(0,188,212, 0.06) 100%);
+    --loader-text: #0097a7;
+    --spinner-border: rgba(0,188,212, 0.14);
+    --spinner-top: #00bcd4;
+
+    --home-comp-bg: #e0f7fa;
+    --olive-dark: #b2ebf2;
+    --olive-mid: #80deea;
+    --olive-accent: #4dd0e1;
+    --gold: #00acc1; /* primary accent */
+    --gold-dim: rgba(0,172,193, 0.55);
+    --gold-faint: rgba(0,172,193, 0.12);
+    --text-bright: #004d40;
+    --text-mid: #00695c;
+    --text-dim: #00796b;
+    
+    --mode-b-primary: #00acc1;
+    --mode-b-glow: rgba(0,172,193, 0.25);
+    --mode-b-faint: rgba(0,172,193, 0.08);
+    --mode-b-border: rgba(0,172,193, 0.22);
+    --mode-b-badge-bg: rgba(0,172,193, 0.06);
+    --mode-b-highlight: linear-gradient(to right, #4dd0e1, #00acc1);
+    --mode-b-text: #fff;
+    
+    --mode-p-primary: #1e88e5;
+    --mode-p-glow: rgba(30,136,229, 0.25);
+    --mode-p-faint: rgba(30,136,229, 0.08);
+    --mode-p-border: rgba(30,136,229, 0.22);
+    --mode-p-badge-bg: rgba(30,136,229, 0.06);
+    --mode-p-highlight: linear-gradient(to right, #42a5f5, #1e88e5);
+    --mode-p-text: #fff;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, rgba(0,188,212, 0.2) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, rgba(3,169,244, 0.15) 0%, transparent 55%), linear-gradient(to bottom, #e0f7fa 0%, #b2ebf2 40%, #e0f7fa 100%);
+    --home-noise-opacity: 0.12;
+    --home-grid-line: rgba(0,188,212, 0.15);
+    
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(0,188,212, 0.4);
+    --glass-shadow: 0 8px 40px rgba(0,188,212, 0.15);
+    
+    --card-bg: rgba(255,255,255, 0.65);
+    --card-border: rgba(0,188,212, 0.3);
+    --card-hover-bg: rgba(255,255,255, 0.9);
+    --card-hover-border: #00acc1;
+    
+    --status-bg: rgba(178,235,242, 0.5);
+    --status-border: rgba(0,188,212, 0.6);
+    --status-color: #00838f;
+    --status-done-color: #006064;
+    --status-done-border: rgba(0,96,100, 0.3);
+    --status-done-bg: rgba(0,96,100, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, rgba(0,188,212, 0.2), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, rgba(0,188,212, 0.2), transparent);
+    --deco-corner: rgba(0,188,212, 0.4);
+    --stream-dot: #00acc1;
+    
+    --tab-bg: rgba(255,255,255, 0.65);
+    --tab-active-bg: #00acc1;
+    --tab-active-color: #fff;
+    --tab-active-b-bg: #00acc1;
+    --tab-active-b-color: #fff;
+    --tab-active-p-bg: #1e88e5;
+    --tab-active-p-color: #fff;
+
+    --signup-comp: #e0f7fa;
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: rgba(178,235,242, 0.6);
+    --sign-bx-otc-light: rgba(0,188,212, 0.3);
+    --sign-txt-6xl: #00acc1;
+    --sign-highlight: #004d40;
+    --sign-dashline: rgba(0,188,212, 0.3);
+    --sign-sct: #004d40;
+    --sign-si: #00838f;
+    --sign-header-inactive: #006064;
+    --sign-labels: #006064;
+    --sign-input: #004d40;
+    --input-bg: #fff;
+    --input-border: #4dd0e1;
+    --social-bg: #fff;
+    --social-border: #4dd0e1;
+}
+
+/* 14. SUNLIGHT (Light/Warm Yellow) */
+[data-theme="sunlight"] {
+    --bg-color: #fff8e1; /* very light yellow base bg */
+    --text-color: #5d4037; /* warm brown text */
+    --text-muted: #8d6e63;
+    
+    --skeleton-bg: linear-gradient(90deg, rgba(255,179,0, 0.06) 0%, rgba(255,179,0, 0.10) 50%, rgba(255,179,0, 0.06) 100%);
+    --loader-text: #8d6e63;
+    --spinner-border: rgba(255,179,0, 0.14);
+    --spinner-top: #ffb300;
+
+    --home-comp-bg: #fffdf7;
+    --olive-dark: #ffecb3;
+    --olive-mid: #ffe082;
+    --olive-accent: #ffd54f;
+    --gold: #ffb300; /* primary accent orange/gold */
+    --gold-dim: rgba(255,179,0, 0.55);
+    --gold-faint: rgba(255,179,0, 0.12);
+    --text-bright: #3e2723;
+    --text-mid: #4e342e;
+    --text-dim: #5d4037;
+    
+    --mode-b-primary: #ffb300;
+    --mode-b-glow: rgba(255,179,0, 0.25);
+    --mode-b-faint: rgba(255,179,0, 0.08);
+    --mode-b-border: rgba(255,179,0, 0.22);
+    --mode-b-badge-bg: rgba(255,179,0, 0.06);
+    --mode-b-highlight: linear-gradient(to right, #ffd54f, #ffb300);
+    --mode-b-text: #fff;
+    
+    --mode-p-primary: #ff5722;
+    --mode-p-glow: rgba(255,87,34, 0.25);
+    --mode-p-faint: rgba(255,87,34, 0.08);
+    --mode-p-border: rgba(255,87,34, 0.22);
+    --mode-p-badge-bg: rgba(255,87,34, 0.06);
+    --mode-p-highlight: linear-gradient(to right, #ff8a65, #ff5722);
+    --mode-p-text: #fff;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, rgba(255,179,0, 0.2) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, rgba(255,152,0, 0.15) 0%, transparent 55%), linear-gradient(to bottom, #fff8e1 0%, #ffecb3 40%, #fff8e1 100%);
+    --home-noise-opacity: 0.12;
+    --home-grid-line: rgba(255,179,0, 0.15);
+    
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(255,179,0, 0.4);
+    --glass-shadow: 0 8px 40px rgba(255,179,0, 0.15);
+    
+    --card-bg: rgba(255,255,255, 0.65);
+    --card-border: rgba(255,179,0, 0.3);
+    --card-hover-bg: rgba(255,255,255, 0.9);
+    --card-hover-border: #ffb300;
+    
+    --status-bg: rgba(255,236,179, 0.5);
+    --status-border: rgba(255,179,0, 0.6);
+    --status-color: #f57c00;
+    --status-done-color: #e65100;
+    --status-done-border: rgba(230,81,0, 0.3);
+    --status-done-bg: rgba(230,81,0, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, rgba(255,179,0, 0.2), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, rgba(255,179,0, 0.2), transparent);
+    --deco-corner: rgba(255,179,0, 0.4);
+    --stream-dot: #ffb300;
+    
+    --tab-bg: rgba(255,255,255, 0.65);
+    --tab-active-bg: #ffb300;
+    --tab-active-color: #fff;
+    --tab-active-b-bg: #ffb300;
+    --tab-active-b-color: #fff;
+    --tab-active-p-bg: #ff5722;
+    --tab-active-p-color: #fff;
+
+    --signup-comp: #fff8e1;
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: rgba(255,236,179, 0.6);
+    --sign-bx-otc-light: rgba(255,179,0, 0.3);
+    --sign-txt-6xl: #ffb300;
+    --sign-highlight: #3e2723;
+    --sign-dashline: rgba(255,179,0, 0.3);
+    --sign-sct: #3e2723;
+    --sign-si: #f57c00;
+    --sign-header-inactive: #e65100;
+    --sign-labels: #e65100;
+    --sign-input: #3e2723;
+    --input-bg: #fff;
+    --input-border: #ffd54f;
+    --social-bg: #fff;
+    --social-border: #ffd54f;
+}
+
+/* 15. AURORA GRADIENT (Dark/Multicolor) */
+[data-theme="aurora"] {
+    --bg-color: #0b0c10;
+    --text-color: #c5c6c7;
+    --text-muted: #8b8e94;
+    
+    --skeleton-bg: linear-gradient(90deg, rgba(0,255,204, 0.05) 0%, rgba(204,0,255, 0.08) 50%, rgba(0,255,204, 0.05) 100%);
+    --loader-text: #8b8e94;
+    --spinner-border: rgba(0,255,204, 0.14);
+    --spinner-top: #00ffcc;
+
+    --home-comp-bg: #0b0c10;
+    --olive-dark: #1f2833;
+    --olive-mid: #2b3a4a;
+    --olive-accent: #3b5266;
+    --gold: #00ffcc; /* primary accent neon cyan */
+    --gold-dim: rgba(0,255,204, 0.55);
+    --gold-faint: rgba(0,255,204, 0.12);
+    --text-bright: #ffffff;
+    --text-mid: #e0e2e4;
+    --text-dim: #c5c6c7;
+    
+    --mode-b-primary: #00ffcc;
+    --mode-b-glow: rgba(0,255,204, 0.25);
+    --mode-b-faint: rgba(0,255,204, 0.08);
+    --mode-b-border: rgba(0,255,204, 0.22);
+    --mode-b-badge-bg: rgba(0,255,204, 0.06);
+    --mode-b-highlight: linear-gradient(to right, #00ffcc, #00b3ff);
+    --mode-b-text: #000;
+    
+    --mode-p-primary: #cc00ff;
+    --mode-p-glow: rgba(204,0,255, 0.25);
+    --mode-p-faint: rgba(204,0,255, 0.08);
+    --mode-p-border: rgba(204,0,255, 0.22);
+    --mode-p-badge-bg: rgba(204,0,255, 0.06);
+    --mode-p-highlight: linear-gradient(to right, #ff00cc, #cc00ff);
+    --mode-p-text: #fff;
+    
+    /* Multicolored gradient background */
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, rgba(0,255,204, 0.2) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, rgba(204,0,255, 0.2) 0%, transparent 55%), radial-gradient(ellipse at 50% 100%, rgba(0,179,255, 0.15) 0%, transparent 50%), linear-gradient(to bottom, #090a0d 0%, #0b0c10 40%, #151820 100%);
+    --home-noise-opacity: 0.15;
+    --home-grid-line: rgba(0,255,204, 0.1);
+    
+    --glass-bg: rgba(11,12,16, 0.75);
+    --glass-border: rgba(0,255,204, 0.3);
+    --glass-shadow: 0 8px 40px rgba(0,0,0, 0.6);
+    
+    --card-bg: rgba(31,40,51, 0.65);
+    --card-border: rgba(204,0,255, 0.3);
+    --card-hover-bg: rgba(43,58,74, 0.85);
+    --card-hover-border: #00ffcc;
+    
+    --status-bg: rgba(31,40,51, 0.5);
+    --status-border: rgba(0,255,204, 0.4);
+    --status-color: #66fcf1;
+    --status-done-color: #45a29e;
+    --status-done-border: rgba(69,162,158, 0.3);
+    --status-done-bg: rgba(69,162,158, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, rgba(0,255,204, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, rgba(204,0,255, 0.3), transparent);
+    --deco-corner: rgba(0,255,204, 0.4);
+    --stream-dot: #00ffcc;
+    
+    --tab-bg: rgba(31,40,51, 0.65);
+    --tab-active-bg: linear-gradient(45deg, #00ffcc, #00b3ff);
+    --tab-active-color: #000;
+    --tab-active-b-bg: linear-gradient(45deg, #00ffcc, #00b3ff);
+    --tab-active-b-color: #000;
+    --tab-active-p-bg: linear-gradient(45deg, #ff00cc, #cc00ff);
+    --tab-active-p-color: #fff;
+
+    --signup-comp: #0b0c10;
+    --sign-otc-light: rgba(255,255,255, 0.05);
+    --sign-otc-dark: rgba(0,0,0, 0.4);
+    --sign-bx-otc-light: rgba(0,255,204, 0.15);
+    --sign-txt-6xl: #00ffcc;
+    --sign-highlight: #ffffff;
+    --sign-dashline: rgba(204,0,255, 0.2);
+    --sign-sct: #e0e2e4;
+    --sign-si: #66fcf1;
+    --sign-header-inactive: #8b8e94;
+    --sign-labels: #c5c6c7;
+    --sign-input: #ffffff;
+    --input-bg: #1f2833;
+    --input-border: #3b5266;
+    --social-bg: #0b0c10;
+    --social-border: #3b5266;
+}
+
+
+/* PEACH */
+[data-theme="peach"] {
+    --bg-color: hsl(25, 70%, 96%);
+    --text-color: hsl(25, 90%, 20%);
+    --text-muted: hsl(25, 90%, 35%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(25, 90%, 60%, 0.06) 0%, hsla(25, 90%, 60%, 0.1) 50%, hsla(25, 90%, 60%, 0.06) 100%);
+    --loader-text: hsl(25, 90%, 35%);
+    --spinner-border: hsla(25, 90%, 60%, 0.14);
+    --spinner-top: hsl(25, 90%, 60%);
+
+    --home-comp-bg: hsl(25, 10%, 98%);
+    --olive-dark: hsl(25, 90%, 90%);
+    --olive-mid: hsl(25, 90%, 80%);
+    --olive-accent: hsl(25, 90%, 65%);
+    --gold: hsl(25, 90%, 60%);
+    --gold-dim: hsla(25, 90%, 60%, 0.55);
+    --gold-faint: hsla(25, 90%, 60%, 0.12);
+    --text-bright: hsl(25, 90%, 10%);
+    --text-mid: hsl(25, 90%, 25%);
+    --text-dim: hsl(25, 90%, 35%);
+    
+    --mode-b-primary: hsl(25, 90%, 60%);
+    --mode-b-glow: hsla(25, 90%, 60%, 0.25);
+    --mode-b-faint: hsla(25, 90%, 60%, 0.08);
+    --mode-b-border: hsla(25, 90%, 60%, 0.22);
+    --mode-b-badge-bg: hsla(25, 90%, 60%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(25, 90%, 70%), hsl(25, 90%, 60%));
+    --mode-b-text: #ffffff;
+    
+    --mode-p-primary: hsl(65, 90%, 60%);
+    --mode-p-glow: hsla(65, 90%, 60%, 0.25);
+    --mode-p-faint: hsla(65, 90%, 60%, 0.08);
+    --mode-p-border: hsla(65, 90%, 60%, 0.22);
+    --mode-p-badge-bg: hsla(65, 90%, 60%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(65, 90%, 70%), hsl(65, 90%, 60%));
+    --mode-p-text: #ffffff;
+    
+    --home-page-bg: linear-gradient(to bottom, hsl(25, 70%, 96%) 0%, hsl(25, 20%, 93%) 100%);
+    --home-noise-opacity: 0.08;
+    --home-grid-line: hsla(25, 90%, 60%, 0.15);
+    
+    --glass-bg: hsla(25, 10%, 100%, 0.85);
+    --glass-border: hsla(25, 90%, 60%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(25, 90%, 50%, 0.08);
+    
+    --card-bg: hsla(25, 10%, 100%, 0.65);
+    --card-border: hsla(25, 90%, 60%, 0.25);
+    --card-hover-bg: hsla(25, 10%, 100%, 0.9);
+    --card-hover-border: hsl(25, 90%, 60%);
+    
+    --status-bg: hsla(25, 90%, 90%, 0.5);
+    --status-border: hsla(25, 90%, 60%, 0.4);
+    --status-color: hsl(25, 90%, 60%);
+    --status-done-color: hsl(120, 60%, 40%);
+    --status-done-border: hsla(120, 60%, 40%, 0.3);
+    --status-done-bg: hsla(120, 60%, 40%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(25, 90%, 60%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(25, 90%, 60%, 0.3), transparent);
+    --deco-corner: hsla(25, 90%, 60%, 0.4);
+    --stream-dot: hsl(25, 90%, 60%);
+    
+    --tab-bg: hsla(25, 10%, 100%, 0.65);
+    --tab-active-bg: hsl(25, 90%, 60%);
+    --tab-active-color: #ffffff;
+    --tab-active-b-bg: hsl(25, 90%, 60%);
+    --tab-active-b-color: #ffffff;
+    --tab-active-p-bg: hsl(65, 90%, 60%);
+    --tab-active-p-color: #ffffff;
+
+    --signup-comp: hsl(25, 70%, 96%);
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: hsla(25, 90%, 90%, 0.6);
+    --sign-bx-otc-light: hsla(25, 90%, 60%, 0.2);
+    --sign-txt-6xl: hsl(25, 90%, 60%);
+    --sign-highlight: hsl(25, 90%, 20%);
+    --sign-dashline: hsla(25, 90%, 60%, 0.3);
+    --sign-sct: hsl(25, 90%, 35%);
+    --sign-si: hsl(25, 90%, 60%);
+    --sign-header-inactive: hsl(25, 90%, 35%);
+    --sign-labels: hsl(25, 90%, 35%);
+    --sign-input: hsl(25, 90%, 20%);
+    --input-bg: #ffffff;
+    --input-border: hsla(25, 90%, 60%, 0.5);
+    --social-bg: hsl(25, 70%, 96%);
+    --social-border: hsla(25, 90%, 60%, 0.4);
+    
+    --nav-logo-1: hsl(25, 90%, 20%);
+    --nav-logo-2: hsl(25, 90%, 60%);
+}
+
+/* CORAL */
+[data-theme="coral"] {
+    --bg-color: hsl(10, 60%, 96%);
+    --text-color: hsl(10, 80%, 20%);
+    --text-muted: hsl(10, 80%, 35%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(10, 80%, 65%, 0.06) 0%, hsla(10, 80%, 65%, 0.1) 50%, hsla(10, 80%, 65%, 0.06) 100%);
+    --loader-text: hsl(10, 80%, 35%);
+    --spinner-border: hsla(10, 80%, 65%, 0.14);
+    --spinner-top: hsl(10, 80%, 65%);
+
+    --home-comp-bg: hsl(10, 10%, 98%);
+    --olive-dark: hsl(10, 80%, 90%);
+    --olive-mid: hsl(10, 80%, 80%);
+    --olive-accent: hsl(10, 80%, 65%);
+    --gold: hsl(10, 80%, 65%);
+    --gold-dim: hsla(10, 80%, 65%, 0.55);
+    --gold-faint: hsla(10, 80%, 65%, 0.12);
+    --text-bright: hsl(10, 80%, 10%);
+    --text-mid: hsl(10, 80%, 25%);
+    --text-dim: hsl(10, 80%, 35%);
+    
+    --mode-b-primary: hsl(10, 80%, 65%);
+    --mode-b-glow: hsla(10, 80%, 65%, 0.25);
+    --mode-b-faint: hsla(10, 80%, 65%, 0.08);
+    --mode-b-border: hsla(10, 80%, 65%, 0.22);
+    --mode-b-badge-bg: hsla(10, 80%, 65%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(10, 80%, 75%), hsl(10, 80%, 65%));
+    --mode-b-text: #ffffff;
+    
+    --mode-p-primary: hsl(50, 80%, 65%);
+    --mode-p-glow: hsla(50, 80%, 65%, 0.25);
+    --mode-p-faint: hsla(50, 80%, 65%, 0.08);
+    --mode-p-border: hsla(50, 80%, 65%, 0.22);
+    --mode-p-badge-bg: hsla(50, 80%, 65%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(50, 80%, 75%), hsl(50, 80%, 65%));
+    --mode-p-text: #ffffff;
+    
+    --home-page-bg: linear-gradient(to bottom, hsl(10, 60%, 96%) 0%, hsl(10, 20%, 93%) 100%);
+    --home-noise-opacity: 0.08;
+    --home-grid-line: hsla(10, 80%, 65%, 0.15);
+    
+    --glass-bg: hsla(10, 10%, 100%, 0.85);
+    --glass-border: hsla(10, 80%, 65%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(10, 80%, 50%, 0.08);
+    
+    --card-bg: hsla(10, 10%, 100%, 0.65);
+    --card-border: hsla(10, 80%, 65%, 0.25);
+    --card-hover-bg: hsla(10, 10%, 100%, 0.9);
+    --card-hover-border: hsl(10, 80%, 65%);
+    
+    --status-bg: hsla(10, 80%, 90%, 0.5);
+    --status-border: hsla(10, 80%, 65%, 0.4);
+    --status-color: hsl(10, 80%, 65%);
+    --status-done-color: hsl(120, 60%, 40%);
+    --status-done-border: hsla(120, 60%, 40%, 0.3);
+    --status-done-bg: hsla(120, 60%, 40%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(10, 80%, 65%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(10, 80%, 65%, 0.3), transparent);
+    --deco-corner: hsla(10, 80%, 65%, 0.4);
+    --stream-dot: hsl(10, 80%, 65%);
+    
+    --tab-bg: hsla(10, 10%, 100%, 0.65);
+    --tab-active-bg: hsl(10, 80%, 65%);
+    --tab-active-color: #ffffff;
+    --tab-active-b-bg: hsl(10, 80%, 65%);
+    --tab-active-b-color: #ffffff;
+    --tab-active-p-bg: hsl(50, 80%, 65%);
+    --tab-active-p-color: #ffffff;
+
+    --signup-comp: hsl(10, 60%, 96%);
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: hsla(10, 80%, 90%, 0.6);
+    --sign-bx-otc-light: hsla(10, 80%, 65%, 0.2);
+    --sign-txt-6xl: hsl(10, 80%, 65%);
+    --sign-highlight: hsl(10, 80%, 20%);
+    --sign-dashline: hsla(10, 80%, 65%, 0.3);
+    --sign-sct: hsl(10, 80%, 35%);
+    --sign-si: hsl(10, 80%, 65%);
+    --sign-header-inactive: hsl(10, 80%, 35%);
+    --sign-labels: hsl(10, 80%, 35%);
+    --sign-input: hsl(10, 80%, 20%);
+    --input-bg: #ffffff;
+    --input-border: hsla(10, 80%, 65%, 0.5);
+    --social-bg: hsl(10, 60%, 96%);
+    --social-border: hsla(10, 80%, 65%, 0.4);
+    
+    --nav-logo-1: hsl(10, 80%, 20%);
+    --nav-logo-2: hsl(10, 80%, 65%);
+}
+
+/* ICE */
+[data-theme="ice"] {
+    --bg-color: hsl(195, 70%, 96%);
+    --text-color: hsl(195, 90%, 20%);
+    --text-muted: hsl(195, 90%, 35%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(195, 90%, 60%, 0.06) 0%, hsla(195, 90%, 60%, 0.1) 50%, hsla(195, 90%, 60%, 0.06) 100%);
+    --loader-text: hsl(195, 90%, 35%);
+    --spinner-border: hsla(195, 90%, 60%, 0.14);
+    --spinner-top: hsl(195, 90%, 60%);
+
+    --home-comp-bg: hsl(195, 10%, 98%);
+    --olive-dark: hsl(195, 90%, 90%);
+    --olive-mid: hsl(195, 90%, 80%);
+    --olive-accent: hsl(195, 90%, 65%);
+    --gold: hsl(195, 90%, 60%);
+    --gold-dim: hsla(195, 90%, 60%, 0.55);
+    --gold-faint: hsla(195, 90%, 60%, 0.12);
+    --text-bright: hsl(195, 90%, 10%);
+    --text-mid: hsl(195, 90%, 25%);
+    --text-dim: hsl(195, 90%, 35%);
+    
+    --mode-b-primary: hsl(195, 90%, 60%);
+    --mode-b-glow: hsla(195, 90%, 60%, 0.25);
+    --mode-b-faint: hsla(195, 90%, 60%, 0.08);
+    --mode-b-border: hsla(195, 90%, 60%, 0.22);
+    --mode-b-badge-bg: hsla(195, 90%, 60%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(195, 90%, 70%), hsl(195, 90%, 60%));
+    --mode-b-text: #ffffff;
+    
+    --mode-p-primary: hsl(235, 90%, 60%);
+    --mode-p-glow: hsla(235, 90%, 60%, 0.25);
+    --mode-p-faint: hsla(235, 90%, 60%, 0.08);
+    --mode-p-border: hsla(235, 90%, 60%, 0.22);
+    --mode-p-badge-bg: hsla(235, 90%, 60%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(235, 90%, 70%), hsl(235, 90%, 60%));
+    --mode-p-text: #ffffff;
+    
+    --home-page-bg: linear-gradient(to bottom, hsl(195, 70%, 96%) 0%, hsl(195, 20%, 93%) 100%);
+    --home-noise-opacity: 0.08;
+    --home-grid-line: hsla(195, 90%, 60%, 0.15);
+    
+    --glass-bg: hsla(195, 10%, 100%, 0.85);
+    --glass-border: hsla(195, 90%, 60%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(195, 90%, 50%, 0.08);
+    
+    --card-bg: hsla(195, 10%, 100%, 0.65);
+    --card-border: hsla(195, 90%, 60%, 0.25);
+    --card-hover-bg: hsla(195, 10%, 100%, 0.9);
+    --card-hover-border: hsl(195, 90%, 60%);
+    
+    --status-bg: hsla(195, 90%, 90%, 0.5);
+    --status-border: hsla(195, 90%, 60%, 0.4);
+    --status-color: hsl(195, 90%, 60%);
+    --status-done-color: hsl(120, 60%, 40%);
+    --status-done-border: hsla(120, 60%, 40%, 0.3);
+    --status-done-bg: hsla(120, 60%, 40%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(195, 90%, 60%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(195, 90%, 60%, 0.3), transparent);
+    --deco-corner: hsla(195, 90%, 60%, 0.4);
+    --stream-dot: hsl(195, 90%, 60%);
+    
+    --tab-bg: hsla(195, 10%, 100%, 0.65);
+    --tab-active-bg: hsl(195, 90%, 60%);
+    --tab-active-color: #ffffff;
+    --tab-active-b-bg: hsl(195, 90%, 60%);
+    --tab-active-b-color: #ffffff;
+    --tab-active-p-bg: hsl(235, 90%, 60%);
+    --tab-active-p-color: #ffffff;
+
+    --signup-comp: hsl(195, 70%, 96%);
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: hsla(195, 90%, 90%, 0.6);
+    --sign-bx-otc-light: hsla(195, 90%, 60%, 0.2);
+    --sign-txt-6xl: hsl(195, 90%, 60%);
+    --sign-highlight: hsl(195, 90%, 20%);
+    --sign-dashline: hsla(195, 90%, 60%, 0.3);
+    --sign-sct: hsl(195, 90%, 35%);
+    --sign-si: hsl(195, 90%, 60%);
+    --sign-header-inactive: hsl(195, 90%, 35%);
+    --sign-labels: hsl(195, 90%, 35%);
+    --sign-input: hsl(195, 90%, 20%);
+    --input-bg: #ffffff;
+    --input-border: hsla(195, 90%, 60%, 0.5);
+    --social-bg: hsl(195, 70%, 96%);
+    --social-border: hsla(195, 90%, 60%, 0.4);
+    
+    --nav-logo-1: hsl(195, 90%, 20%);
+    --nav-logo-2: hsl(195, 90%, 60%);
+}
+
+/* MATCHA */
+[data-theme="matcha"] {
+    --bg-color: hsl(100, 30%, 96%);
+    --text-color: hsl(100, 50%, 20%);
+    --text-muted: hsl(100, 50%, 35%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(100, 50%, 50%, 0.06) 0%, hsla(100, 50%, 50%, 0.1) 50%, hsla(100, 50%, 50%, 0.06) 100%);
+    --loader-text: hsl(100, 50%, 35%);
+    --spinner-border: hsla(100, 50%, 50%, 0.14);
+    --spinner-top: hsl(100, 50%, 50%);
+
+    --home-comp-bg: hsl(100, 10%, 98%);
+    --olive-dark: hsl(100, 50%, 90%);
+    --olive-mid: hsl(100, 50%, 80%);
+    --olive-accent: hsl(100, 50%, 65%);
+    --gold: hsl(100, 50%, 50%);
+    --gold-dim: hsla(100, 50%, 50%, 0.55);
+    --gold-faint: hsla(100, 50%, 50%, 0.12);
+    --text-bright: hsl(100, 50%, 10%);
+    --text-mid: hsl(100, 50%, 25%);
+    --text-dim: hsl(100, 50%, 35%);
+    
+    --mode-b-primary: hsl(100, 50%, 50%);
+    --mode-b-glow: hsla(100, 50%, 50%, 0.25);
+    --mode-b-faint: hsla(100, 50%, 50%, 0.08);
+    --mode-b-border: hsla(100, 50%, 50%, 0.22);
+    --mode-b-badge-bg: hsla(100, 50%, 50%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(100, 50%, 60%), hsl(100, 50%, 50%));
+    --mode-b-text: #ffffff;
+    
+    --mode-p-primary: hsl(140, 50%, 50%);
+    --mode-p-glow: hsla(140, 50%, 50%, 0.25);
+    --mode-p-faint: hsla(140, 50%, 50%, 0.08);
+    --mode-p-border: hsla(140, 50%, 50%, 0.22);
+    --mode-p-badge-bg: hsla(140, 50%, 50%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(140, 50%, 60%), hsl(140, 50%, 50%));
+    --mode-p-text: #ffffff;
+    
+    --home-page-bg: linear-gradient(to bottom, hsl(100, 30%, 96%) 0%, hsl(100, 20%, 93%) 100%);
+    --home-noise-opacity: 0.08;
+    --home-grid-line: hsla(100, 50%, 50%, 0.15);
+    
+    --glass-bg: hsla(100, 10%, 100%, 0.85);
+    --glass-border: hsla(100, 50%, 50%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(100, 50%, 50%, 0.08);
+    
+    --card-bg: hsla(100, 10%, 100%, 0.65);
+    --card-border: hsla(100, 50%, 50%, 0.25);
+    --card-hover-bg: hsla(100, 10%, 100%, 0.9);
+    --card-hover-border: hsl(100, 50%, 50%);
+    
+    --status-bg: hsla(100, 50%, 90%, 0.5);
+    --status-border: hsla(100, 50%, 50%, 0.4);
+    --status-color: hsl(100, 50%, 50%);
+    --status-done-color: hsl(120, 60%, 40%);
+    --status-done-border: hsla(120, 60%, 40%, 0.3);
+    --status-done-bg: hsla(120, 60%, 40%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(100, 50%, 50%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(100, 50%, 50%, 0.3), transparent);
+    --deco-corner: hsla(100, 50%, 50%, 0.4);
+    --stream-dot: hsl(100, 50%, 50%);
+    
+    --tab-bg: hsla(100, 10%, 100%, 0.65);
+    --tab-active-bg: hsl(100, 50%, 50%);
+    --tab-active-color: #ffffff;
+    --tab-active-b-bg: hsl(100, 50%, 50%);
+    --tab-active-b-color: #ffffff;
+    --tab-active-p-bg: hsl(140, 50%, 50%);
+    --tab-active-p-color: #ffffff;
+
+    --signup-comp: hsl(100, 30%, 96%);
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: hsla(100, 50%, 90%, 0.6);
+    --sign-bx-otc-light: hsla(100, 50%, 50%, 0.2);
+    --sign-txt-6xl: hsl(100, 50%, 50%);
+    --sign-highlight: hsl(100, 50%, 20%);
+    --sign-dashline: hsla(100, 50%, 50%, 0.3);
+    --sign-sct: hsl(100, 50%, 35%);
+    --sign-si: hsl(100, 50%, 50%);
+    --sign-header-inactive: hsl(100, 50%, 35%);
+    --sign-labels: hsl(100, 50%, 35%);
+    --sign-input: hsl(100, 50%, 20%);
+    --input-bg: #ffffff;
+    --input-border: hsla(100, 50%, 50%, 0.5);
+    --social-bg: hsl(100, 30%, 96%);
+    --social-border: hsla(100, 50%, 50%, 0.4);
+    
+    --nav-logo-1: hsl(100, 50%, 20%);
+    --nav-logo-2: hsl(100, 50%, 50%);
+}
+
+/* SAND */
+[data-theme="sand"] {
+    --bg-color: hsl(35, 20%, 96%);
+    --text-color: hsl(35, 40%, 20%);
+    --text-muted: hsl(35, 40%, 35%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(35, 40%, 65%, 0.06) 0%, hsla(35, 40%, 65%, 0.1) 50%, hsla(35, 40%, 65%, 0.06) 100%);
+    --loader-text: hsl(35, 40%, 35%);
+    --spinner-border: hsla(35, 40%, 65%, 0.14);
+    --spinner-top: hsl(35, 40%, 65%);
+
+    --home-comp-bg: hsl(35, 10%, 98%);
+    --olive-dark: hsl(35, 40%, 90%);
+    --olive-mid: hsl(35, 40%, 80%);
+    --olive-accent: hsl(35, 40%, 65%);
+    --gold: hsl(35, 40%, 65%);
+    --gold-dim: hsla(35, 40%, 65%, 0.55);
+    --gold-faint: hsla(35, 40%, 65%, 0.12);
+    --text-bright: hsl(35, 40%, 10%);
+    --text-mid: hsl(35, 40%, 25%);
+    --text-dim: hsl(35, 40%, 35%);
+    
+    --mode-b-primary: hsl(35, 40%, 65%);
+    --mode-b-glow: hsla(35, 40%, 65%, 0.25);
+    --mode-b-faint: hsla(35, 40%, 65%, 0.08);
+    --mode-b-border: hsla(35, 40%, 65%, 0.22);
+    --mode-b-badge-bg: hsla(35, 40%, 65%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(35, 40%, 75%), hsl(35, 40%, 65%));
+    --mode-b-text: #ffffff;
+    
+    --mode-p-primary: hsl(75, 40%, 65%);
+    --mode-p-glow: hsla(75, 40%, 65%, 0.25);
+    --mode-p-faint: hsla(75, 40%, 65%, 0.08);
+    --mode-p-border: hsla(75, 40%, 65%, 0.22);
+    --mode-p-badge-bg: hsla(75, 40%, 65%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(75, 40%, 75%), hsl(75, 40%, 65%));
+    --mode-p-text: #ffffff;
+    
+    --home-page-bg: linear-gradient(to bottom, hsl(35, 20%, 96%) 0%, hsl(35, 20%, 93%) 100%);
+    --home-noise-opacity: 0.08;
+    --home-grid-line: hsla(35, 40%, 65%, 0.15);
+    
+    --glass-bg: hsla(35, 10%, 100%, 0.85);
+    --glass-border: hsla(35, 40%, 65%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(35, 40%, 50%, 0.08);
+    
+    --card-bg: hsla(35, 10%, 100%, 0.65);
+    --card-border: hsla(35, 40%, 65%, 0.25);
+    --card-hover-bg: hsla(35, 10%, 100%, 0.9);
+    --card-hover-border: hsl(35, 40%, 65%);
+    
+    --status-bg: hsla(35, 40%, 90%, 0.5);
+    --status-border: hsla(35, 40%, 65%, 0.4);
+    --status-color: hsl(35, 40%, 65%);
+    --status-done-color: hsl(120, 60%, 40%);
+    --status-done-border: hsla(120, 60%, 40%, 0.3);
+    --status-done-bg: hsla(120, 60%, 40%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(35, 40%, 65%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(35, 40%, 65%, 0.3), transparent);
+    --deco-corner: hsla(35, 40%, 65%, 0.4);
+    --stream-dot: hsl(35, 40%, 65%);
+    
+    --tab-bg: hsla(35, 10%, 100%, 0.65);
+    --tab-active-bg: hsl(35, 40%, 65%);
+    --tab-active-color: #ffffff;
+    --tab-active-b-bg: hsl(35, 40%, 65%);
+    --tab-active-b-color: #ffffff;
+    --tab-active-p-bg: hsl(75, 40%, 65%);
+    --tab-active-p-color: #ffffff;
+
+    --signup-comp: hsl(35, 20%, 96%);
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: hsla(35, 40%, 90%, 0.6);
+    --sign-bx-otc-light: hsla(35, 40%, 65%, 0.2);
+    --sign-txt-6xl: hsl(35, 40%, 65%);
+    --sign-highlight: hsl(35, 40%, 20%);
+    --sign-dashline: hsla(35, 40%, 65%, 0.3);
+    --sign-sct: hsl(35, 40%, 35%);
+    --sign-si: hsl(35, 40%, 65%);
+    --sign-header-inactive: hsl(35, 40%, 35%);
+    --sign-labels: hsl(35, 40%, 35%);
+    --sign-input: hsl(35, 40%, 20%);
+    --input-bg: #ffffff;
+    --input-border: hsla(35, 40%, 65%, 0.5);
+    --social-bg: hsl(35, 20%, 96%);
+    --social-border: hsla(35, 40%, 65%, 0.4);
+    
+    --nav-logo-1: hsl(35, 40%, 20%);
+    --nav-logo-2: hsl(35, 40%, 65%);
+}
+
+/* MORNING */
+[data-theme="morning"] {
+    --bg-color: hsl(45, 70%, 96%);
+    --text-color: hsl(45, 90%, 20%);
+    --text-muted: hsl(45, 90%, 35%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(45, 90%, 55%, 0.06) 0%, hsla(45, 90%, 55%, 0.1) 50%, hsla(45, 90%, 55%, 0.06) 100%);
+    --loader-text: hsl(45, 90%, 35%);
+    --spinner-border: hsla(45, 90%, 55%, 0.14);
+    --spinner-top: hsl(45, 90%, 55%);
+
+    --home-comp-bg: hsl(45, 10%, 98%);
+    --olive-dark: hsl(45, 90%, 90%);
+    --olive-mid: hsl(45, 90%, 80%);
+    --olive-accent: hsl(45, 90%, 65%);
+    --gold: hsl(45, 90%, 55%);
+    --gold-dim: hsla(45, 90%, 55%, 0.55);
+    --gold-faint: hsla(45, 90%, 55%, 0.12);
+    --text-bright: hsl(45, 90%, 10%);
+    --text-mid: hsl(45, 90%, 25%);
+    --text-dim: hsl(45, 90%, 35%);
+    
+    --mode-b-primary: hsl(45, 90%, 55%);
+    --mode-b-glow: hsla(45, 90%, 55%, 0.25);
+    --mode-b-faint: hsla(45, 90%, 55%, 0.08);
+    --mode-b-border: hsla(45, 90%, 55%, 0.22);
+    --mode-b-badge-bg: hsla(45, 90%, 55%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(45, 90%, 65%), hsl(45, 90%, 55%));
+    --mode-b-text: #ffffff;
+    
+    --mode-p-primary: hsl(85, 90%, 55%);
+    --mode-p-glow: hsla(85, 90%, 55%, 0.25);
+    --mode-p-faint: hsla(85, 90%, 55%, 0.08);
+    --mode-p-border: hsla(85, 90%, 55%, 0.22);
+    --mode-p-badge-bg: hsla(85, 90%, 55%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(85, 90%, 65%), hsl(85, 90%, 55%));
+    --mode-p-text: #ffffff;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, hsla(45, 90%, 85%, 0.7) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, hsla(15, 90%, 85%, 0.5) 0%, transparent 55%), linear-gradient(to bottom, hsl(45, 10%, 98%) 0%, hsl(45, 20%, 95%) 40%, hsl(45, 10%, 98%) 100%);
+    --home-noise-opacity: 0.08;
+    --home-grid-line: hsla(45, 90%, 55%, 0.15);
+    
+    --glass-bg: hsla(45, 10%, 100%, 0.85);
+    --glass-border: hsla(45, 90%, 55%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(45, 90%, 50%, 0.08);
+    
+    --card-bg: hsla(45, 10%, 100%, 0.65);
+    --card-border: hsla(45, 90%, 55%, 0.25);
+    --card-hover-bg: hsla(45, 10%, 100%, 0.9);
+    --card-hover-border: hsl(45, 90%, 55%);
+    
+    --status-bg: hsla(45, 90%, 90%, 0.5);
+    --status-border: hsla(45, 90%, 55%, 0.4);
+    --status-color: hsl(45, 90%, 55%);
+    --status-done-color: hsl(120, 60%, 40%);
+    --status-done-border: hsla(120, 60%, 40%, 0.3);
+    --status-done-bg: hsla(120, 60%, 40%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(45, 90%, 55%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(45, 90%, 55%, 0.3), transparent);
+    --deco-corner: hsla(45, 90%, 55%, 0.4);
+    --stream-dot: hsl(45, 90%, 55%);
+    
+    --tab-bg: hsla(45, 10%, 100%, 0.65);
+    --tab-active-bg: linear-gradient(45deg, hsl(45, 90%, 55%), hsl(15, 90%, 55%));
+    --tab-active-color: #ffffff;
+    --tab-active-b-bg: linear-gradient(45deg, hsl(45, 90%, 55%), hsl(15, 90%, 65%));
+    --tab-active-b-color: #ffffff;
+    --tab-active-p-bg: linear-gradient(45deg, hsl(85, 90%, 55%), hsl(125, 90%, 65%));
+    --tab-active-p-color: #ffffff;
+
+    --signup-comp: hsl(45, 70%, 96%);
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: hsla(45, 90%, 90%, 0.6);
+    --sign-bx-otc-light: hsla(45, 90%, 55%, 0.2);
+    --sign-txt-6xl: hsl(45, 90%, 55%);
+    --sign-highlight: hsl(45, 90%, 20%);
+    --sign-dashline: hsla(45, 90%, 55%, 0.3);
+    --sign-sct: hsl(45, 90%, 35%);
+    --sign-si: hsl(45, 90%, 55%);
+    --sign-header-inactive: hsl(45, 90%, 35%);
+    --sign-labels: hsl(45, 90%, 35%);
+    --sign-input: hsl(45, 90%, 20%);
+    --input-bg: #ffffff;
+    --input-border: hsla(45, 90%, 55%, 0.5);
+    --social-bg: hsl(45, 70%, 96%);
+    --social-border: hsla(45, 90%, 55%, 0.4);
+    
+    --nav-logo-1: hsl(45, 90%, 20%);
+    --nav-logo-2: hsl(45, 90%, 55%);
+}
+
+/* COTTON */
+[data-theme="cotton"] {
+    --bg-color: hsl(340, 60%, 96%);
+    --text-color: hsl(340, 80%, 20%);
+    --text-muted: hsl(340, 80%, 35%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(340, 80%, 65%, 0.06) 0%, hsla(340, 80%, 65%, 0.1) 50%, hsla(340, 80%, 65%, 0.06) 100%);
+    --loader-text: hsl(340, 80%, 35%);
+    --spinner-border: hsla(340, 80%, 65%, 0.14);
+    --spinner-top: hsl(340, 80%, 65%);
+
+    --home-comp-bg: hsl(340, 10%, 98%);
+    --olive-dark: hsl(340, 80%, 90%);
+    --olive-mid: hsl(340, 80%, 80%);
+    --olive-accent: hsl(340, 80%, 65%);
+    --gold: hsl(340, 80%, 65%);
+    --gold-dim: hsla(340, 80%, 65%, 0.55);
+    --gold-faint: hsla(340, 80%, 65%, 0.12);
+    --text-bright: hsl(340, 80%, 10%);
+    --text-mid: hsl(340, 80%, 25%);
+    --text-dim: hsl(340, 80%, 35%);
+    
+    --mode-b-primary: hsl(340, 80%, 65%);
+    --mode-b-glow: hsla(340, 80%, 65%, 0.25);
+    --mode-b-faint: hsla(340, 80%, 65%, 0.08);
+    --mode-b-border: hsla(340, 80%, 65%, 0.22);
+    --mode-b-badge-bg: hsla(340, 80%, 65%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(340, 80%, 75%), hsl(340, 80%, 65%));
+    --mode-b-text: #ffffff;
+    
+    --mode-p-primary: hsl(20, 80%, 65%);
+    --mode-p-glow: hsla(20, 80%, 65%, 0.25);
+    --mode-p-faint: hsla(20, 80%, 65%, 0.08);
+    --mode-p-border: hsla(20, 80%, 65%, 0.22);
+    --mode-p-badge-bg: hsla(20, 80%, 65%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(20, 80%, 75%), hsl(20, 80%, 65%));
+    --mode-p-text: #ffffff;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, hsla(340, 80%, 85%, 0.7) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, hsla(190, 80%, 85%, 0.5) 0%, transparent 55%), linear-gradient(to bottom, hsl(340, 10%, 98%) 0%, hsl(340, 20%, 95%) 40%, hsl(340, 10%, 98%) 100%);
+    --home-noise-opacity: 0.08;
+    --home-grid-line: hsla(340, 80%, 65%, 0.15);
+    
+    --glass-bg: hsla(340, 10%, 100%, 0.85);
+    --glass-border: hsla(340, 80%, 65%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(340, 80%, 50%, 0.08);
+    
+    --card-bg: hsla(340, 10%, 100%, 0.65);
+    --card-border: hsla(340, 80%, 65%, 0.25);
+    --card-hover-bg: hsla(340, 10%, 100%, 0.9);
+    --card-hover-border: hsl(340, 80%, 65%);
+    
+    --status-bg: hsla(340, 80%, 90%, 0.5);
+    --status-border: hsla(340, 80%, 65%, 0.4);
+    --status-color: hsl(340, 80%, 65%);
+    --status-done-color: hsl(120, 60%, 40%);
+    --status-done-border: hsla(120, 60%, 40%, 0.3);
+    --status-done-bg: hsla(120, 60%, 40%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(340, 80%, 65%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(340, 80%, 65%, 0.3), transparent);
+    --deco-corner: hsla(340, 80%, 65%, 0.4);
+    --stream-dot: hsl(340, 80%, 65%);
+    
+    --tab-bg: hsla(340, 10%, 100%, 0.65);
+    --tab-active-bg: linear-gradient(45deg, hsl(340, 80%, 65%), hsl(190, 80%, 65%));
+    --tab-active-color: #ffffff;
+    --tab-active-b-bg: linear-gradient(45deg, hsl(340, 80%, 65%), hsl(190, 80%, 75%));
+    --tab-active-b-color: #ffffff;
+    --tab-active-p-bg: linear-gradient(45deg, hsl(380, 80%, 65%), hsl(420, 80%, 75%));
+    --tab-active-p-color: #ffffff;
+
+    --signup-comp: hsl(340, 60%, 96%);
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: hsla(340, 80%, 90%, 0.6);
+    --sign-bx-otc-light: hsla(340, 80%, 65%, 0.2);
+    --sign-txt-6xl: hsl(340, 80%, 65%);
+    --sign-highlight: hsl(340, 80%, 20%);
+    --sign-dashline: hsla(340, 80%, 65%, 0.3);
+    --sign-sct: hsl(340, 80%, 35%);
+    --sign-si: hsl(340, 80%, 65%);
+    --sign-header-inactive: hsl(340, 80%, 35%);
+    --sign-labels: hsl(340, 80%, 35%);
+    --sign-input: hsl(340, 80%, 20%);
+    --input-bg: #ffffff;
+    --input-border: hsla(340, 80%, 65%, 0.5);
+    --social-bg: hsl(340, 60%, 96%);
+    --social-border: hsla(340, 80%, 65%, 0.4);
+    
+    --nav-logo-1: hsl(340, 80%, 20%);
+    --nav-logo-2: hsl(340, 80%, 65%);
+}
+
+/* MINTWAVE */
+[data-theme="mintwave"] {
+    --bg-color: hsl(160, 60%, 96%);
+    --text-color: hsl(160, 80%, 20%);
+    --text-muted: hsl(160, 80%, 35%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(160, 80%, 50%, 0.06) 0%, hsla(160, 80%, 50%, 0.1) 50%, hsla(160, 80%, 50%, 0.06) 100%);
+    --loader-text: hsl(160, 80%, 35%);
+    --spinner-border: hsla(160, 80%, 50%, 0.14);
+    --spinner-top: hsl(160, 80%, 50%);
+
+    --home-comp-bg: hsl(160, 10%, 98%);
+    --olive-dark: hsl(160, 80%, 90%);
+    --olive-mid: hsl(160, 80%, 80%);
+    --olive-accent: hsl(160, 80%, 65%);
+    --gold: hsl(160, 80%, 50%);
+    --gold-dim: hsla(160, 80%, 50%, 0.55);
+    --gold-faint: hsla(160, 80%, 50%, 0.12);
+    --text-bright: hsl(160, 80%, 10%);
+    --text-mid: hsl(160, 80%, 25%);
+    --text-dim: hsl(160, 80%, 35%);
+    
+    --mode-b-primary: hsl(160, 80%, 50%);
+    --mode-b-glow: hsla(160, 80%, 50%, 0.25);
+    --mode-b-faint: hsla(160, 80%, 50%, 0.08);
+    --mode-b-border: hsla(160, 80%, 50%, 0.22);
+    --mode-b-badge-bg: hsla(160, 80%, 50%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(160, 80%, 60%), hsl(160, 80%, 50%));
+    --mode-b-text: #ffffff;
+    
+    --mode-p-primary: hsl(200, 80%, 50%);
+    --mode-p-glow: hsla(200, 80%, 50%, 0.25);
+    --mode-p-faint: hsla(200, 80%, 50%, 0.08);
+    --mode-p-border: hsla(200, 80%, 50%, 0.22);
+    --mode-p-badge-bg: hsla(200, 80%, 50%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(200, 80%, 60%), hsl(200, 80%, 50%));
+    --mode-p-text: #ffffff;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, hsla(160, 80%, 85%, 0.7) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, hsla(190, 80%, 85%, 0.5) 0%, transparent 55%), linear-gradient(to bottom, hsl(160, 10%, 98%) 0%, hsl(160, 20%, 95%) 40%, hsl(160, 10%, 98%) 100%);
+    --home-noise-opacity: 0.08;
+    --home-grid-line: hsla(160, 80%, 50%, 0.15);
+    
+    --glass-bg: hsla(160, 10%, 100%, 0.85);
+    --glass-border: hsla(160, 80%, 50%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(160, 80%, 50%, 0.08);
+    
+    --card-bg: hsla(160, 10%, 100%, 0.65);
+    --card-border: hsla(160, 80%, 50%, 0.25);
+    --card-hover-bg: hsla(160, 10%, 100%, 0.9);
+    --card-hover-border: hsl(160, 80%, 50%);
+    
+    --status-bg: hsla(160, 80%, 90%, 0.5);
+    --status-border: hsla(160, 80%, 50%, 0.4);
+    --status-color: hsl(160, 80%, 50%);
+    --status-done-color: hsl(120, 60%, 40%);
+    --status-done-border: hsla(120, 60%, 40%, 0.3);
+    --status-done-bg: hsla(120, 60%, 40%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(160, 80%, 50%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(160, 80%, 50%, 0.3), transparent);
+    --deco-corner: hsla(160, 80%, 50%, 0.4);
+    --stream-dot: hsl(160, 80%, 50%);
+    
+    --tab-bg: hsla(160, 10%, 100%, 0.65);
+    --tab-active-bg: linear-gradient(45deg, hsl(160, 80%, 50%), hsl(190, 80%, 50%));
+    --tab-active-color: #ffffff;
+    --tab-active-b-bg: linear-gradient(45deg, hsl(160, 80%, 50%), hsl(190, 80%, 60%));
+    --tab-active-b-color: #ffffff;
+    --tab-active-p-bg: linear-gradient(45deg, hsl(200, 80%, 50%), hsl(240, 80%, 60%));
+    --tab-active-p-color: #ffffff;
+
+    --signup-comp: hsl(160, 60%, 96%);
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: hsla(160, 80%, 90%, 0.6);
+    --sign-bx-otc-light: hsla(160, 80%, 50%, 0.2);
+    --sign-txt-6xl: hsl(160, 80%, 50%);
+    --sign-highlight: hsl(160, 80%, 20%);
+    --sign-dashline: hsla(160, 80%, 50%, 0.3);
+    --sign-sct: hsl(160, 80%, 35%);
+    --sign-si: hsl(160, 80%, 50%);
+    --sign-header-inactive: hsl(160, 80%, 35%);
+    --sign-labels: hsl(160, 80%, 35%);
+    --sign-input: hsl(160, 80%, 20%);
+    --input-bg: #ffffff;
+    --input-border: hsla(160, 80%, 50%, 0.5);
+    --social-bg: hsl(160, 60%, 96%);
+    --social-border: hsla(160, 80%, 50%, 0.4);
+    
+    --nav-logo-1: hsl(160, 80%, 20%);
+    --nav-logo-2: hsl(160, 80%, 50%);
+}
+
+/* GOLDEN */
+[data-theme="golden"] {
+    --bg-color: hsl(35, 75%, 96%);
+    --text-color: hsl(35, 95%, 20%);
+    --text-muted: hsl(35, 95%, 35%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(35, 95%, 55%, 0.06) 0%, hsla(35, 95%, 55%, 0.1) 50%, hsla(35, 95%, 55%, 0.06) 100%);
+    --loader-text: hsl(35, 95%, 35%);
+    --spinner-border: hsla(35, 95%, 55%, 0.14);
+    --spinner-top: hsl(35, 95%, 55%);
+
+    --home-comp-bg: hsl(35, 10%, 98%);
+    --olive-dark: hsl(35, 95%, 90%);
+    --olive-mid: hsl(35, 95%, 80%);
+    --olive-accent: hsl(35, 95%, 65%);
+    --gold: hsl(35, 95%, 55%);
+    --gold-dim: hsla(35, 95%, 55%, 0.55);
+    --gold-faint: hsla(35, 95%, 55%, 0.12);
+    --text-bright: hsl(35, 95%, 10%);
+    --text-mid: hsl(35, 95%, 25%);
+    --text-dim: hsl(35, 95%, 35%);
+    
+    --mode-b-primary: hsl(35, 95%, 55%);
+    --mode-b-glow: hsla(35, 95%, 55%, 0.25);
+    --mode-b-faint: hsla(35, 95%, 55%, 0.08);
+    --mode-b-border: hsla(35, 95%, 55%, 0.22);
+    --mode-b-badge-bg: hsla(35, 95%, 55%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(35, 95%, 65%), hsl(35, 95%, 55%));
+    --mode-b-text: #ffffff;
+    
+    --mode-p-primary: hsl(75, 95%, 55%);
+    --mode-p-glow: hsla(75, 95%, 55%, 0.25);
+    --mode-p-faint: hsla(75, 95%, 55%, 0.08);
+    --mode-p-border: hsla(75, 95%, 55%, 0.22);
+    --mode-p-badge-bg: hsla(75, 95%, 55%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(75, 95%, 65%), hsl(75, 95%, 55%));
+    --mode-p-text: #ffffff;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, hsla(35, 95%, 85%, 0.7) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, hsla(350, 95%, 85%, 0.5) 0%, transparent 55%), linear-gradient(to bottom, hsl(35, 10%, 98%) 0%, hsl(35, 20%, 95%) 40%, hsl(35, 10%, 98%) 100%);
+    --home-noise-opacity: 0.08;
+    --home-grid-line: hsla(35, 95%, 55%, 0.15);
+    
+    --glass-bg: hsla(35, 10%, 100%, 0.85);
+    --glass-border: hsla(35, 95%, 55%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(35, 95%, 50%, 0.08);
+    
+    --card-bg: hsla(35, 10%, 100%, 0.65);
+    --card-border: hsla(35, 95%, 55%, 0.25);
+    --card-hover-bg: hsla(35, 10%, 100%, 0.9);
+    --card-hover-border: hsl(35, 95%, 55%);
+    
+    --status-bg: hsla(35, 95%, 90%, 0.5);
+    --status-border: hsla(35, 95%, 55%, 0.4);
+    --status-color: hsl(35, 95%, 55%);
+    --status-done-color: hsl(120, 60%, 40%);
+    --status-done-border: hsla(120, 60%, 40%, 0.3);
+    --status-done-bg: hsla(120, 60%, 40%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(35, 95%, 55%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(35, 95%, 55%, 0.3), transparent);
+    --deco-corner: hsla(35, 95%, 55%, 0.4);
+    --stream-dot: hsl(35, 95%, 55%);
+    
+    --tab-bg: hsla(35, 10%, 100%, 0.65);
+    --tab-active-bg: linear-gradient(45deg, hsl(35, 95%, 55%), hsl(350, 95%, 55%));
+    --tab-active-color: #ffffff;
+    --tab-active-b-bg: linear-gradient(45deg, hsl(35, 95%, 55%), hsl(350, 95%, 65%));
+    --tab-active-b-color: #ffffff;
+    --tab-active-p-bg: linear-gradient(45deg, hsl(75, 95%, 55%), hsl(115, 95%, 65%));
+    --tab-active-p-color: #ffffff;
+
+    --signup-comp: hsl(35, 75%, 96%);
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: hsla(35, 95%, 90%, 0.6);
+    --sign-bx-otc-light: hsla(35, 95%, 55%, 0.2);
+    --sign-txt-6xl: hsl(35, 95%, 55%);
+    --sign-highlight: hsl(35, 95%, 20%);
+    --sign-dashline: hsla(35, 95%, 55%, 0.3);
+    --sign-sct: hsl(35, 95%, 35%);
+    --sign-si: hsl(35, 95%, 55%);
+    --sign-header-inactive: hsl(35, 95%, 35%);
+    --sign-labels: hsl(35, 95%, 35%);
+    --sign-input: hsl(35, 95%, 20%);
+    --input-bg: #ffffff;
+    --input-border: hsla(35, 95%, 55%, 0.5);
+    --social-bg: hsl(35, 75%, 96%);
+    --social-border: hsla(35, 95%, 55%, 0.4);
+    
+    --nav-logo-1: hsl(35, 95%, 20%);
+    --nav-logo-2: hsl(35, 95%, 55%);
+}
+
+/* BERRY */
+[data-theme="berry"] {
+    --bg-color: hsl(290, 50%, 96%);
+    --text-color: hsl(290, 70%, 20%);
+    --text-muted: hsl(290, 70%, 35%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(290, 70%, 60%, 0.06) 0%, hsla(290, 70%, 60%, 0.1) 50%, hsla(290, 70%, 60%, 0.06) 100%);
+    --loader-text: hsl(290, 70%, 35%);
+    --spinner-border: hsla(290, 70%, 60%, 0.14);
+    --spinner-top: hsl(290, 70%, 60%);
+
+    --home-comp-bg: hsl(290, 10%, 98%);
+    --olive-dark: hsl(290, 70%, 90%);
+    --olive-mid: hsl(290, 70%, 80%);
+    --olive-accent: hsl(290, 70%, 65%);
+    --gold: hsl(290, 70%, 60%);
+    --gold-dim: hsla(290, 70%, 60%, 0.55);
+    --gold-faint: hsla(290, 70%, 60%, 0.12);
+    --text-bright: hsl(290, 70%, 10%);
+    --text-mid: hsl(290, 70%, 25%);
+    --text-dim: hsl(290, 70%, 35%);
+    
+    --mode-b-primary: hsl(290, 70%, 60%);
+    --mode-b-glow: hsla(290, 70%, 60%, 0.25);
+    --mode-b-faint: hsla(290, 70%, 60%, 0.08);
+    --mode-b-border: hsla(290, 70%, 60%, 0.22);
+    --mode-b-badge-bg: hsla(290, 70%, 60%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(290, 70%, 70%), hsl(290, 70%, 60%));
+    --mode-b-text: #ffffff;
+    
+    --mode-p-primary: hsl(330, 70%, 60%);
+    --mode-p-glow: hsla(330, 70%, 60%, 0.25);
+    --mode-p-faint: hsla(330, 70%, 60%, 0.08);
+    --mode-p-border: hsla(330, 70%, 60%, 0.22);
+    --mode-p-badge-bg: hsla(330, 70%, 60%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(330, 70%, 70%), hsl(330, 70%, 60%));
+    --mode-p-text: #ffffff;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, hsla(290, 70%, 85%, 0.7) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, hsla(340, 70%, 85%, 0.5) 0%, transparent 55%), linear-gradient(to bottom, hsl(290, 10%, 98%) 0%, hsl(290, 20%, 95%) 40%, hsl(290, 10%, 98%) 100%);
+    --home-noise-opacity: 0.08;
+    --home-grid-line: hsla(290, 70%, 60%, 0.15);
+    
+    --glass-bg: hsla(290, 10%, 100%, 0.85);
+    --glass-border: hsla(290, 70%, 60%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(290, 70%, 50%, 0.08);
+    
+    --card-bg: hsla(290, 10%, 100%, 0.65);
+    --card-border: hsla(290, 70%, 60%, 0.25);
+    --card-hover-bg: hsla(290, 10%, 100%, 0.9);
+    --card-hover-border: hsl(290, 70%, 60%);
+    
+    --status-bg: hsla(290, 70%, 90%, 0.5);
+    --status-border: hsla(290, 70%, 60%, 0.4);
+    --status-color: hsl(290, 70%, 60%);
+    --status-done-color: hsl(120, 60%, 40%);
+    --status-done-border: hsla(120, 60%, 40%, 0.3);
+    --status-done-bg: hsla(120, 60%, 40%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(290, 70%, 60%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(290, 70%, 60%, 0.3), transparent);
+    --deco-corner: hsla(290, 70%, 60%, 0.4);
+    --stream-dot: hsl(290, 70%, 60%);
+    
+    --tab-bg: hsla(290, 10%, 100%, 0.65);
+    --tab-active-bg: linear-gradient(45deg, hsl(290, 70%, 60%), hsl(340, 70%, 60%));
+    --tab-active-color: #ffffff;
+    --tab-active-b-bg: linear-gradient(45deg, hsl(290, 70%, 60%), hsl(340, 70%, 70%));
+    --tab-active-b-color: #ffffff;
+    --tab-active-p-bg: linear-gradient(45deg, hsl(330, 70%, 60%), hsl(370, 70%, 70%));
+    --tab-active-p-color: #ffffff;
+
+    --signup-comp: hsl(290, 50%, 96%);
+    --sign-otc-light: rgba(255,255,255, 0.8);
+    --sign-otc-dark: hsla(290, 70%, 90%, 0.6);
+    --sign-bx-otc-light: hsla(290, 70%, 60%, 0.2);
+    --sign-txt-6xl: hsl(290, 70%, 60%);
+    --sign-highlight: hsl(290, 70%, 20%);
+    --sign-dashline: hsla(290, 70%, 60%, 0.3);
+    --sign-sct: hsl(290, 70%, 35%);
+    --sign-si: hsl(290, 70%, 60%);
+    --sign-header-inactive: hsl(290, 70%, 35%);
+    --sign-labels: hsl(290, 70%, 35%);
+    --sign-input: hsl(290, 70%, 20%);
+    --input-bg: #ffffff;
+    --input-border: hsla(290, 70%, 60%, 0.5);
+    --social-bg: hsl(290, 50%, 96%);
+    --social-border: hsla(290, 70%, 60%, 0.4);
+    
+    --nav-logo-1: hsl(290, 70%, 20%);
+    --nav-logo-2: hsl(290, 70%, 60%);
+}
+
+/* MIDNIGHT */
+[data-theme="midnight"] {
+    --bg-color: hsl(220, 60%, 8%);
+    --text-color: hsl(220, 80%, 90%);
+    --text-muted: hsl(220, 80%, 70%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(220, 80%, 60%, 0.06) 0%, hsla(220, 80%, 60%, 0.1) 50%, hsla(220, 80%, 60%, 0.06) 100%);
+    --loader-text: hsl(220, 80%, 70%);
+    --spinner-border: hsla(220, 80%, 60%, 0.14);
+    --spinner-top: hsl(220, 80%, 60%);
+
+    --home-comp-bg: hsl(220, 15%, 10%);
+    --olive-dark: hsl(220, 30%, 15%);
+    --olive-mid: hsl(220, 30%, 20%);
+    --olive-accent: hsl(220, 30%, 25%);
+    --gold: hsl(220, 80%, 60%);
+    --gold-dim: hsla(220, 80%, 60%, 0.55);
+    --gold-faint: hsla(220, 80%, 60%, 0.12);
+    --text-bright: hsl(220, 80%, 98%);
+    --text-mid: hsl(220, 80%, 85%);
+    --text-dim: hsl(220, 80%, 70%);
+    
+    --mode-b-primary: hsl(220, 80%, 60%);
+    --mode-b-glow: hsla(220, 80%, 60%, 0.25);
+    --mode-b-faint: hsla(220, 80%, 60%, 0.08);
+    --mode-b-border: hsla(220, 80%, 60%, 0.22);
+    --mode-b-badge-bg: hsla(220, 80%, 60%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(220, 80%, 70%), hsl(220, 80%, 60%));
+    --mode-b-text: #000000;
+    
+    --mode-p-primary: hsl(260, 80%, 60%);
+    --mode-p-glow: hsla(260, 80%, 60%, 0.25);
+    --mode-p-faint: hsla(260, 80%, 60%, 0.08);
+    --mode-p-border: hsla(260, 80%, 60%, 0.22);
+    --mode-p-badge-bg: hsla(260, 80%, 60%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(260, 80%, 70%), hsl(260, 80%, 60%));
+    --mode-p-text: #000000;
+    
+    --home-page-bg: linear-gradient(to bottom, hsl(220, 60%, 8%) 0%, hsl(220, 15%, 6%) 100%);
+    --home-noise-opacity: 0.15;
+    --home-grid-line: hsla(220, 80%, 60%, 0.15);
+    
+    --glass-bg: hsla(220, 20%, 10%, 0.85);
+    --glass-border: hsla(220, 80%, 60%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
+    
+    --card-bg: hsla(220, 30%, 15%, 0.65);
+    --card-border: hsla(220, 80%, 60%, 0.25);
+    --card-hover-bg: hsla(220, 30%, 20%, 0.9);
+    --card-hover-border: hsl(220, 80%, 60%);
+    
+    --status-bg: hsla(220, 80%, 20%, 0.5);
+    --status-border: hsla(220, 80%, 60%, 0.4);
+    --status-color: hsl(220, 80%, 60%);
+    --status-done-color: hsl(120, 60%, 60%);
+    --status-done-border: hsla(120, 60%, 60%, 0.3);
+    --status-done-bg: hsla(120, 60%, 60%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(220, 80%, 60%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(220, 80%, 60%, 0.3), transparent);
+    --deco-corner: hsla(220, 80%, 60%, 0.4);
+    --stream-dot: hsl(220, 80%, 60%);
+    
+    --tab-bg: hsla(220, 30%, 15%, 0.65);
+    --tab-active-bg: hsl(220, 80%, 60%);
+    --tab-active-color: #000000;
+    --tab-active-b-bg: hsl(220, 80%, 60%);
+    --tab-active-b-color: #000000;
+    --tab-active-p-bg: hsl(260, 80%, 60%);
+    --tab-active-p-color: #000000;
+
+    --signup-comp: hsl(220, 60%, 8%);
+    --sign-otc-light: rgba(255,255,255, 0.05);
+    --sign-otc-dark: rgba(0,0,0, 0.4);
+    --sign-bx-otc-light: hsla(220, 80%, 60%, 0.2);
+    --sign-txt-6xl: hsl(220, 80%, 60%);
+    --sign-highlight: hsl(220, 80%, 90%);
+    --sign-dashline: hsla(220, 80%, 60%, 0.3);
+    --sign-sct: hsl(220, 80%, 70%);
+    --sign-si: hsl(220, 80%, 60%);
+    --sign-header-inactive: hsl(220, 80%, 70%);
+    --sign-labels: hsl(220, 80%, 70%);
+    --sign-input: hsl(220, 80%, 90%);
+    --input-bg: hsl(220, 20%, 15%);
+    --input-border: hsla(220, 80%, 60%, 0.5);
+    --social-bg: hsl(220, 60%, 8%);
+    --social-border: hsla(220, 80%, 60%, 0.4);
+    
+    --nav-logo-1: hsl(220, 80%, 90%);
+    --nav-logo-2: hsl(220, 80%, 60%);
+}
+
+/* CRIMSON */
+[data-theme="crimson"] {
+    --bg-color: hsl(350, 60%, 8%);
+    --text-color: hsl(350, 80%, 90%);
+    --text-muted: hsl(350, 80%, 70%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(350, 80%, 55%, 0.06) 0%, hsla(350, 80%, 55%, 0.1) 50%, hsla(350, 80%, 55%, 0.06) 100%);
+    --loader-text: hsl(350, 80%, 70%);
+    --spinner-border: hsla(350, 80%, 55%, 0.14);
+    --spinner-top: hsl(350, 80%, 55%);
+
+    --home-comp-bg: hsl(350, 15%, 10%);
+    --olive-dark: hsl(350, 30%, 15%);
+    --olive-mid: hsl(350, 30%, 20%);
+    --olive-accent: hsl(350, 30%, 25%);
+    --gold: hsl(350, 80%, 55%);
+    --gold-dim: hsla(350, 80%, 55%, 0.55);
+    --gold-faint: hsla(350, 80%, 55%, 0.12);
+    --text-bright: hsl(350, 80%, 98%);
+    --text-mid: hsl(350, 80%, 85%);
+    --text-dim: hsl(350, 80%, 70%);
+    
+    --mode-b-primary: hsl(350, 80%, 55%);
+    --mode-b-glow: hsla(350, 80%, 55%, 0.25);
+    --mode-b-faint: hsla(350, 80%, 55%, 0.08);
+    --mode-b-border: hsla(350, 80%, 55%, 0.22);
+    --mode-b-badge-bg: hsla(350, 80%, 55%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(350, 80%, 65%), hsl(350, 80%, 55%));
+    --mode-b-text: #000000;
+    
+    --mode-p-primary: hsl(30, 80%, 55%);
+    --mode-p-glow: hsla(30, 80%, 55%, 0.25);
+    --mode-p-faint: hsla(30, 80%, 55%, 0.08);
+    --mode-p-border: hsla(30, 80%, 55%, 0.22);
+    --mode-p-badge-bg: hsla(30, 80%, 55%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(30, 80%, 65%), hsl(30, 80%, 55%));
+    --mode-p-text: #000000;
+    
+    --home-page-bg: linear-gradient(to bottom, hsl(350, 60%, 8%) 0%, hsl(350, 15%, 6%) 100%);
+    --home-noise-opacity: 0.15;
+    --home-grid-line: hsla(350, 80%, 55%, 0.15);
+    
+    --glass-bg: hsla(350, 20%, 10%, 0.85);
+    --glass-border: hsla(350, 80%, 55%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
+    
+    --card-bg: hsla(350, 30%, 15%, 0.65);
+    --card-border: hsla(350, 80%, 55%, 0.25);
+    --card-hover-bg: hsla(350, 30%, 20%, 0.9);
+    --card-hover-border: hsl(350, 80%, 55%);
+    
+    --status-bg: hsla(350, 80%, 20%, 0.5);
+    --status-border: hsla(350, 80%, 55%, 0.4);
+    --status-color: hsl(350, 80%, 55%);
+    --status-done-color: hsl(120, 60%, 60%);
+    --status-done-border: hsla(120, 60%, 60%, 0.3);
+    --status-done-bg: hsla(120, 60%, 60%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(350, 80%, 55%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(350, 80%, 55%, 0.3), transparent);
+    --deco-corner: hsla(350, 80%, 55%, 0.4);
+    --stream-dot: hsl(350, 80%, 55%);
+    
+    --tab-bg: hsla(350, 30%, 15%, 0.65);
+    --tab-active-bg: hsl(350, 80%, 55%);
+    --tab-active-color: #000000;
+    --tab-active-b-bg: hsl(350, 80%, 55%);
+    --tab-active-b-color: #000000;
+    --tab-active-p-bg: hsl(30, 80%, 55%);
+    --tab-active-p-color: #000000;
+
+    --signup-comp: hsl(350, 60%, 8%);
+    --sign-otc-light: rgba(255,255,255, 0.05);
+    --sign-otc-dark: rgba(0,0,0, 0.4);
+    --sign-bx-otc-light: hsla(350, 80%, 55%, 0.2);
+    --sign-txt-6xl: hsl(350, 80%, 55%);
+    --sign-highlight: hsl(350, 80%, 90%);
+    --sign-dashline: hsla(350, 80%, 55%, 0.3);
+    --sign-sct: hsl(350, 80%, 70%);
+    --sign-si: hsl(350, 80%, 55%);
+    --sign-header-inactive: hsl(350, 80%, 70%);
+    --sign-labels: hsl(350, 80%, 70%);
+    --sign-input: hsl(350, 80%, 90%);
+    --input-bg: hsl(350, 20%, 15%);
+    --input-border: hsla(350, 80%, 55%, 0.5);
+    --social-bg: hsl(350, 60%, 8%);
+    --social-border: hsla(350, 80%, 55%, 0.4);
+    
+    --nav-logo-1: hsl(350, 80%, 90%);
+    --nav-logo-2: hsl(350, 80%, 55%);
+}
+
+/* SLATE */
+[data-theme="slate"] {
+    --bg-color: hsl(200, 10%, 8%);
+    --text-color: hsl(200, 20%, 90%);
+    --text-muted: hsl(200, 20%, 70%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(200, 20%, 50%, 0.06) 0%, hsla(200, 20%, 50%, 0.1) 50%, hsla(200, 20%, 50%, 0.06) 100%);
+    --loader-text: hsl(200, 20%, 70%);
+    --spinner-border: hsla(200, 20%, 50%, 0.14);
+    --spinner-top: hsl(200, 20%, 50%);
+
+    --home-comp-bg: hsl(200, 15%, 10%);
+    --olive-dark: hsl(200, 30%, 15%);
+    --olive-mid: hsl(200, 30%, 20%);
+    --olive-accent: hsl(200, 30%, 25%);
+    --gold: hsl(200, 20%, 50%);
+    --gold-dim: hsla(200, 20%, 50%, 0.55);
+    --gold-faint: hsla(200, 20%, 50%, 0.12);
+    --text-bright: hsl(200, 20%, 98%);
+    --text-mid: hsl(200, 20%, 85%);
+    --text-dim: hsl(200, 20%, 70%);
+    
+    --mode-b-primary: hsl(200, 20%, 50%);
+    --mode-b-glow: hsla(200, 20%, 50%, 0.25);
+    --mode-b-faint: hsla(200, 20%, 50%, 0.08);
+    --mode-b-border: hsla(200, 20%, 50%, 0.22);
+    --mode-b-badge-bg: hsla(200, 20%, 50%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(200, 20%, 60%), hsl(200, 20%, 50%));
+    --mode-b-text: #000000;
+    
+    --mode-p-primary: hsl(240, 20%, 50%);
+    --mode-p-glow: hsla(240, 20%, 50%, 0.25);
+    --mode-p-faint: hsla(240, 20%, 50%, 0.08);
+    --mode-p-border: hsla(240, 20%, 50%, 0.22);
+    --mode-p-badge-bg: hsla(240, 20%, 50%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(240, 20%, 60%), hsl(240, 20%, 50%));
+    --mode-p-text: #000000;
+    
+    --home-page-bg: linear-gradient(to bottom, hsl(200, 10%, 8%) 0%, hsl(200, 15%, 6%) 100%);
+    --home-noise-opacity: 0.15;
+    --home-grid-line: hsla(200, 20%, 50%, 0.15);
+    
+    --glass-bg: hsla(200, 20%, 10%, 0.85);
+    --glass-border: hsla(200, 20%, 50%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
+    
+    --card-bg: hsla(200, 30%, 15%, 0.65);
+    --card-border: hsla(200, 20%, 50%, 0.25);
+    --card-hover-bg: hsla(200, 30%, 20%, 0.9);
+    --card-hover-border: hsl(200, 20%, 50%);
+    
+    --status-bg: hsla(200, 20%, 20%, 0.5);
+    --status-border: hsla(200, 20%, 50%, 0.4);
+    --status-color: hsl(200, 20%, 50%);
+    --status-done-color: hsl(120, 60%, 60%);
+    --status-done-border: hsla(120, 60%, 60%, 0.3);
+    --status-done-bg: hsla(120, 60%, 60%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(200, 20%, 50%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(200, 20%, 50%, 0.3), transparent);
+    --deco-corner: hsla(200, 20%, 50%, 0.4);
+    --stream-dot: hsl(200, 20%, 50%);
+    
+    --tab-bg: hsla(200, 30%, 15%, 0.65);
+    --tab-active-bg: hsl(200, 20%, 50%);
+    --tab-active-color: #000000;
+    --tab-active-b-bg: hsl(200, 20%, 50%);
+    --tab-active-b-color: #000000;
+    --tab-active-p-bg: hsl(240, 20%, 50%);
+    --tab-active-p-color: #000000;
+
+    --signup-comp: hsl(200, 10%, 8%);
+    --sign-otc-light: rgba(255,255,255, 0.05);
+    --sign-otc-dark: rgba(0,0,0, 0.4);
+    --sign-bx-otc-light: hsla(200, 20%, 50%, 0.2);
+    --sign-txt-6xl: hsl(200, 20%, 50%);
+    --sign-highlight: hsl(200, 20%, 90%);
+    --sign-dashline: hsla(200, 20%, 50%, 0.3);
+    --sign-sct: hsl(200, 20%, 70%);
+    --sign-si: hsl(200, 20%, 50%);
+    --sign-header-inactive: hsl(200, 20%, 70%);
+    --sign-labels: hsl(200, 20%, 70%);
+    --sign-input: hsl(200, 20%, 90%);
+    --input-bg: hsl(200, 20%, 15%);
+    --input-border: hsla(200, 20%, 50%, 0.5);
+    --social-bg: hsl(200, 10%, 8%);
+    --social-border: hsla(200, 20%, 50%, 0.4);
+    
+    --nav-logo-1: hsl(200, 20%, 90%);
+    --nav-logo-2: hsl(200, 20%, 50%);
+}
+
+/* ESPRESSO */
+[data-theme="espresso"] {
+    --bg-color: hsl(25, 10%, 8%);
+    --text-color: hsl(25, 30%, 90%);
+    --text-muted: hsl(25, 30%, 70%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(25, 30%, 50%, 0.06) 0%, hsla(25, 30%, 50%, 0.1) 50%, hsla(25, 30%, 50%, 0.06) 100%);
+    --loader-text: hsl(25, 30%, 70%);
+    --spinner-border: hsla(25, 30%, 50%, 0.14);
+    --spinner-top: hsl(25, 30%, 50%);
+
+    --home-comp-bg: hsl(25, 15%, 10%);
+    --olive-dark: hsl(25, 30%, 15%);
+    --olive-mid: hsl(25, 30%, 20%);
+    --olive-accent: hsl(25, 30%, 25%);
+    --gold: hsl(25, 30%, 50%);
+    --gold-dim: hsla(25, 30%, 50%, 0.55);
+    --gold-faint: hsla(25, 30%, 50%, 0.12);
+    --text-bright: hsl(25, 30%, 98%);
+    --text-mid: hsl(25, 30%, 85%);
+    --text-dim: hsl(25, 30%, 70%);
+    
+    --mode-b-primary: hsl(25, 30%, 50%);
+    --mode-b-glow: hsla(25, 30%, 50%, 0.25);
+    --mode-b-faint: hsla(25, 30%, 50%, 0.08);
+    --mode-b-border: hsla(25, 30%, 50%, 0.22);
+    --mode-b-badge-bg: hsla(25, 30%, 50%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(25, 30%, 60%), hsl(25, 30%, 50%));
+    --mode-b-text: #000000;
+    
+    --mode-p-primary: hsl(65, 30%, 50%);
+    --mode-p-glow: hsla(65, 30%, 50%, 0.25);
+    --mode-p-faint: hsla(65, 30%, 50%, 0.08);
+    --mode-p-border: hsla(65, 30%, 50%, 0.22);
+    --mode-p-badge-bg: hsla(65, 30%, 50%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(65, 30%, 60%), hsl(65, 30%, 50%));
+    --mode-p-text: #000000;
+    
+    --home-page-bg: linear-gradient(to bottom, hsl(25, 10%, 8%) 0%, hsl(25, 15%, 6%) 100%);
+    --home-noise-opacity: 0.15;
+    --home-grid-line: hsla(25, 30%, 50%, 0.15);
+    
+    --glass-bg: hsla(25, 20%, 10%, 0.85);
+    --glass-border: hsla(25, 30%, 50%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
+    
+    --card-bg: hsla(25, 30%, 15%, 0.65);
+    --card-border: hsla(25, 30%, 50%, 0.25);
+    --card-hover-bg: hsla(25, 30%, 20%, 0.9);
+    --card-hover-border: hsl(25, 30%, 50%);
+    
+    --status-bg: hsla(25, 30%, 20%, 0.5);
+    --status-border: hsla(25, 30%, 50%, 0.4);
+    --status-color: hsl(25, 30%, 50%);
+    --status-done-color: hsl(120, 60%, 60%);
+    --status-done-border: hsla(120, 60%, 60%, 0.3);
+    --status-done-bg: hsla(120, 60%, 60%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(25, 30%, 50%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(25, 30%, 50%, 0.3), transparent);
+    --deco-corner: hsla(25, 30%, 50%, 0.4);
+    --stream-dot: hsl(25, 30%, 50%);
+    
+    --tab-bg: hsla(25, 30%, 15%, 0.65);
+    --tab-active-bg: hsl(25, 30%, 50%);
+    --tab-active-color: #000000;
+    --tab-active-b-bg: hsl(25, 30%, 50%);
+    --tab-active-b-color: #000000;
+    --tab-active-p-bg: hsl(65, 30%, 50%);
+    --tab-active-p-color: #000000;
+
+    --signup-comp: hsl(25, 10%, 8%);
+    --sign-otc-light: rgba(255,255,255, 0.05);
+    --sign-otc-dark: rgba(0,0,0, 0.4);
+    --sign-bx-otc-light: hsla(25, 30%, 50%, 0.2);
+    --sign-txt-6xl: hsl(25, 30%, 50%);
+    --sign-highlight: hsl(25, 30%, 90%);
+    --sign-dashline: hsla(25, 30%, 50%, 0.3);
+    --sign-sct: hsl(25, 30%, 70%);
+    --sign-si: hsl(25, 30%, 50%);
+    --sign-header-inactive: hsl(25, 30%, 70%);
+    --sign-labels: hsl(25, 30%, 70%);
+    --sign-input: hsl(25, 30%, 90%);
+    --input-bg: hsl(25, 20%, 15%);
+    --input-border: hsla(25, 30%, 50%, 0.5);
+    --social-bg: hsl(25, 10%, 8%);
+    --social-border: hsla(25, 30%, 50%, 0.4);
+    
+    --nav-logo-1: hsl(25, 30%, 90%);
+    --nav-logo-2: hsl(25, 30%, 50%);
+}
+
+/* MATRIX */
+[data-theme="matrix"] {
+    --bg-color: hsl(140, 80%, 8%);
+    --text-color: hsl(140, 100%, 90%);
+    --text-muted: hsl(140, 100%, 70%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(140, 100%, 45%, 0.06) 0%, hsla(140, 100%, 45%, 0.1) 50%, hsla(140, 100%, 45%, 0.06) 100%);
+    --loader-text: hsl(140, 100%, 70%);
+    --spinner-border: hsla(140, 100%, 45%, 0.14);
+    --spinner-top: hsl(140, 100%, 45%);
+
+    --home-comp-bg: hsl(140, 15%, 10%);
+    --olive-dark: hsl(140, 30%, 15%);
+    --olive-mid: hsl(140, 30%, 20%);
+    --olive-accent: hsl(140, 30%, 25%);
+    --gold: hsl(140, 100%, 45%);
+    --gold-dim: hsla(140, 100%, 45%, 0.55);
+    --gold-faint: hsla(140, 100%, 45%, 0.12);
+    --text-bright: hsl(140, 100%, 98%);
+    --text-mid: hsl(140, 100%, 85%);
+    --text-dim: hsl(140, 100%, 70%);
+    
+    --mode-b-primary: hsl(140, 100%, 45%);
+    --mode-b-glow: hsla(140, 100%, 45%, 0.25);
+    --mode-b-faint: hsla(140, 100%, 45%, 0.08);
+    --mode-b-border: hsla(140, 100%, 45%, 0.22);
+    --mode-b-badge-bg: hsla(140, 100%, 45%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(140, 100%, 55%), hsl(140, 100%, 45%));
+    --mode-b-text: #000000;
+    
+    --mode-p-primary: hsl(180, 100%, 45%);
+    --mode-p-glow: hsla(180, 100%, 45%, 0.25);
+    --mode-p-faint: hsla(180, 100%, 45%, 0.08);
+    --mode-p-border: hsla(180, 100%, 45%, 0.22);
+    --mode-p-badge-bg: hsla(180, 100%, 45%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(180, 100%, 55%), hsl(180, 100%, 45%));
+    --mode-p-text: #000000;
+    
+    --home-page-bg: linear-gradient(to bottom, hsl(140, 80%, 8%) 0%, hsl(140, 15%, 6%) 100%);
+    --home-noise-opacity: 0.15;
+    --home-grid-line: hsla(140, 100%, 45%, 0.15);
+    
+    --glass-bg: hsla(140, 20%, 10%, 0.85);
+    --glass-border: hsla(140, 100%, 45%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
+    
+    --card-bg: hsla(140, 30%, 15%, 0.65);
+    --card-border: hsla(140, 100%, 45%, 0.25);
+    --card-hover-bg: hsla(140, 30%, 20%, 0.9);
+    --card-hover-border: hsl(140, 100%, 45%);
+    
+    --status-bg: hsla(140, 100%, 20%, 0.5);
+    --status-border: hsla(140, 100%, 45%, 0.4);
+    --status-color: hsl(140, 100%, 45%);
+    --status-done-color: hsl(120, 60%, 60%);
+    --status-done-border: hsla(120, 60%, 60%, 0.3);
+    --status-done-bg: hsla(120, 60%, 60%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(140, 100%, 45%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(140, 100%, 45%, 0.3), transparent);
+    --deco-corner: hsla(140, 100%, 45%, 0.4);
+    --stream-dot: hsl(140, 100%, 45%);
+    
+    --tab-bg: hsla(140, 30%, 15%, 0.65);
+    --tab-active-bg: hsl(140, 100%, 45%);
+    --tab-active-color: #000000;
+    --tab-active-b-bg: hsl(140, 100%, 45%);
+    --tab-active-b-color: #000000;
+    --tab-active-p-bg: hsl(180, 100%, 45%);
+    --tab-active-p-color: #000000;
+
+    --signup-comp: hsl(140, 80%, 8%);
+    --sign-otc-light: rgba(255,255,255, 0.05);
+    --sign-otc-dark: rgba(0,0,0, 0.4);
+    --sign-bx-otc-light: hsla(140, 100%, 45%, 0.2);
+    --sign-txt-6xl: hsl(140, 100%, 45%);
+    --sign-highlight: hsl(140, 100%, 90%);
+    --sign-dashline: hsla(140, 100%, 45%, 0.3);
+    --sign-sct: hsl(140, 100%, 70%);
+    --sign-si: hsl(140, 100%, 45%);
+    --sign-header-inactive: hsl(140, 100%, 70%);
+    --sign-labels: hsl(140, 100%, 70%);
+    --sign-input: hsl(140, 100%, 90%);
+    --input-bg: hsl(140, 20%, 15%);
+    --input-border: hsla(140, 100%, 45%, 0.5);
+    --social-bg: hsl(140, 80%, 8%);
+    --social-border: hsla(140, 100%, 45%, 0.4);
+    
+    --nav-logo-1: hsl(140, 100%, 90%);
+    --nav-logo-2: hsl(140, 100%, 45%);
+}
+
+/* NEBULA */
+[data-theme="nebula"] {
+    --bg-color: hsl(270, 60%, 8%);
+    --text-color: hsl(270, 80%, 90%);
+    --text-muted: hsl(270, 80%, 70%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(270, 80%, 55%, 0.06) 0%, hsla(270, 80%, 55%, 0.1) 50%, hsla(270, 80%, 55%, 0.06) 100%);
+    --loader-text: hsl(270, 80%, 70%);
+    --spinner-border: hsla(270, 80%, 55%, 0.14);
+    --spinner-top: hsl(270, 80%, 55%);
+
+    --home-comp-bg: hsl(270, 15%, 10%);
+    --olive-dark: hsl(270, 30%, 15%);
+    --olive-mid: hsl(270, 30%, 20%);
+    --olive-accent: hsl(270, 30%, 25%);
+    --gold: hsl(270, 80%, 55%);
+    --gold-dim: hsla(270, 80%, 55%, 0.55);
+    --gold-faint: hsla(270, 80%, 55%, 0.12);
+    --text-bright: hsl(270, 80%, 98%);
+    --text-mid: hsl(270, 80%, 85%);
+    --text-dim: hsl(270, 80%, 70%);
+    
+    --mode-b-primary: hsl(270, 80%, 55%);
+    --mode-b-glow: hsla(270, 80%, 55%, 0.25);
+    --mode-b-faint: hsla(270, 80%, 55%, 0.08);
+    --mode-b-border: hsla(270, 80%, 55%, 0.22);
+    --mode-b-badge-bg: hsla(270, 80%, 55%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(270, 80%, 65%), hsl(270, 80%, 55%));
+    --mode-b-text: #000000;
+    
+    --mode-p-primary: hsl(310, 80%, 55%);
+    --mode-p-glow: hsla(310, 80%, 55%, 0.25);
+    --mode-p-faint: hsla(310, 80%, 55%, 0.08);
+    --mode-p-border: hsla(310, 80%, 55%, 0.22);
+    --mode-p-badge-bg: hsla(310, 80%, 55%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(310, 80%, 65%), hsl(310, 80%, 55%));
+    --mode-p-text: #000000;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, hsla(270, 80%, 30%, 0.4) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, hsla(230, 80%, 30%, 0.5) 0%, transparent 55%), linear-gradient(to bottom, hsl(270, 30%, 12%) 0%, hsl(270, 20%, 8%) 40%, hsl(270, 10%, 5%) 100%);
+    --home-noise-opacity: 0.15;
+    --home-grid-line: hsla(270, 80%, 55%, 0.15);
+    
+    --glass-bg: hsla(270, 20%, 10%, 0.85);
+    --glass-border: hsla(270, 80%, 55%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
+    
+    --card-bg: hsla(270, 30%, 15%, 0.65);
+    --card-border: hsla(270, 80%, 55%, 0.25);
+    --card-hover-bg: hsla(270, 30%, 20%, 0.9);
+    --card-hover-border: hsl(270, 80%, 55%);
+    
+    --status-bg: hsla(270, 80%, 20%, 0.5);
+    --status-border: hsla(270, 80%, 55%, 0.4);
+    --status-color: hsl(270, 80%, 55%);
+    --status-done-color: hsl(120, 60%, 60%);
+    --status-done-border: hsla(120, 60%, 60%, 0.3);
+    --status-done-bg: hsla(120, 60%, 60%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(270, 80%, 55%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(270, 80%, 55%, 0.3), transparent);
+    --deco-corner: hsla(270, 80%, 55%, 0.4);
+    --stream-dot: hsl(270, 80%, 55%);
+    
+    --tab-bg: hsla(270, 30%, 15%, 0.65);
+    --tab-active-bg: linear-gradient(45deg, hsl(270, 80%, 55%), hsl(230, 80%, 55%));
+    --tab-active-color: #000000;
+    --tab-active-b-bg: linear-gradient(45deg, hsl(270, 80%, 55%), hsl(230, 80%, 65%));
+    --tab-active-b-color: #000000;
+    --tab-active-p-bg: linear-gradient(45deg, hsl(310, 80%, 55%), hsl(350, 80%, 65%));
+    --tab-active-p-color: #000000;
+
+    --signup-comp: hsl(270, 60%, 8%);
+    --sign-otc-light: rgba(255,255,255, 0.05);
+    --sign-otc-dark: rgba(0,0,0, 0.4);
+    --sign-bx-otc-light: hsla(270, 80%, 55%, 0.2);
+    --sign-txt-6xl: hsl(270, 80%, 55%);
+    --sign-highlight: hsl(270, 80%, 90%);
+    --sign-dashline: hsla(270, 80%, 55%, 0.3);
+    --sign-sct: hsl(270, 80%, 70%);
+    --sign-si: hsl(270, 80%, 55%);
+    --sign-header-inactive: hsl(270, 80%, 70%);
+    --sign-labels: hsl(270, 80%, 70%);
+    --sign-input: hsl(270, 80%, 90%);
+    --input-bg: hsl(270, 20%, 15%);
+    --input-border: hsla(270, 80%, 55%, 0.5);
+    --social-bg: hsl(270, 60%, 8%);
+    --social-border: hsla(270, 80%, 55%, 0.4);
+    
+    --nav-logo-1: hsl(270, 80%, 90%);
+    --nav-logo-2: hsl(270, 80%, 55%);
+}
+
+/* BLOODMOON */
+[data-theme="bloodmoon"] {
+    --bg-color: hsl(0, 70%, 8%);
+    --text-color: hsl(0, 90%, 90%);
+    --text-muted: hsl(0, 90%, 70%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(0, 90%, 50%, 0.06) 0%, hsla(0, 90%, 50%, 0.1) 50%, hsla(0, 90%, 50%, 0.06) 100%);
+    --loader-text: hsl(0, 90%, 70%);
+    --spinner-border: hsla(0, 90%, 50%, 0.14);
+    --spinner-top: hsl(0, 90%, 50%);
+
+    --home-comp-bg: hsl(0, 15%, 10%);
+    --olive-dark: hsl(0, 30%, 15%);
+    --olive-mid: hsl(0, 30%, 20%);
+    --olive-accent: hsl(0, 30%, 25%);
+    --gold: hsl(0, 90%, 50%);
+    --gold-dim: hsla(0, 90%, 50%, 0.55);
+    --gold-faint: hsla(0, 90%, 50%, 0.12);
+    --text-bright: hsl(0, 90%, 98%);
+    --text-mid: hsl(0, 90%, 85%);
+    --text-dim: hsl(0, 90%, 70%);
+    
+    --mode-b-primary: hsl(0, 90%, 50%);
+    --mode-b-glow: hsla(0, 90%, 50%, 0.25);
+    --mode-b-faint: hsla(0, 90%, 50%, 0.08);
+    --mode-b-border: hsla(0, 90%, 50%, 0.22);
+    --mode-b-badge-bg: hsla(0, 90%, 50%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(0, 90%, 60%), hsl(0, 90%, 50%));
+    --mode-b-text: #000000;
+    
+    --mode-p-primary: hsl(40, 90%, 50%);
+    --mode-p-glow: hsla(40, 90%, 50%, 0.25);
+    --mode-p-faint: hsla(40, 90%, 50%, 0.08);
+    --mode-p-border: hsla(40, 90%, 50%, 0.22);
+    --mode-p-badge-bg: hsla(40, 90%, 50%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(40, 90%, 60%), hsl(40, 90%, 50%));
+    --mode-p-text: #000000;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, hsla(0, 90%, 30%, 0.4) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, hsla(330, 90%, 30%, 0.5) 0%, transparent 55%), linear-gradient(to bottom, hsl(0, 30%, 12%) 0%, hsl(0, 20%, 8%) 40%, hsl(0, 10%, 5%) 100%);
+    --home-noise-opacity: 0.15;
+    --home-grid-line: hsla(0, 90%, 50%, 0.15);
+    
+    --glass-bg: hsla(0, 20%, 10%, 0.85);
+    --glass-border: hsla(0, 90%, 50%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
+    
+    --card-bg: hsla(0, 30%, 15%, 0.65);
+    --card-border: hsla(0, 90%, 50%, 0.25);
+    --card-hover-bg: hsla(0, 30%, 20%, 0.9);
+    --card-hover-border: hsl(0, 90%, 50%);
+    
+    --status-bg: hsla(0, 90%, 20%, 0.5);
+    --status-border: hsla(0, 90%, 50%, 0.4);
+    --status-color: hsl(0, 90%, 50%);
+    --status-done-color: hsl(120, 60%, 60%);
+    --status-done-border: hsla(120, 60%, 60%, 0.3);
+    --status-done-bg: hsla(120, 60%, 60%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(0, 90%, 50%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(0, 90%, 50%, 0.3), transparent);
+    --deco-corner: hsla(0, 90%, 50%, 0.4);
+    --stream-dot: hsl(0, 90%, 50%);
+    
+    --tab-bg: hsla(0, 30%, 15%, 0.65);
+    --tab-active-bg: linear-gradient(45deg, hsl(0, 90%, 50%), hsl(330, 90%, 50%));
+    --tab-active-color: #000000;
+    --tab-active-b-bg: linear-gradient(45deg, hsl(0, 90%, 50%), hsl(330, 90%, 60%));
+    --tab-active-b-color: #000000;
+    --tab-active-p-bg: linear-gradient(45deg, hsl(40, 90%, 50%), hsl(80, 90%, 60%));
+    --tab-active-p-color: #000000;
+
+    --signup-comp: hsl(0, 70%, 8%);
+    --sign-otc-light: rgba(255,255,255, 0.05);
+    --sign-otc-dark: rgba(0,0,0, 0.4);
+    --sign-bx-otc-light: hsla(0, 90%, 50%, 0.2);
+    --sign-txt-6xl: hsl(0, 90%, 50%);
+    --sign-highlight: hsl(0, 90%, 90%);
+    --sign-dashline: hsla(0, 90%, 50%, 0.3);
+    --sign-sct: hsl(0, 90%, 70%);
+    --sign-si: hsl(0, 90%, 50%);
+    --sign-header-inactive: hsl(0, 90%, 70%);
+    --sign-labels: hsl(0, 90%, 70%);
+    --sign-input: hsl(0, 90%, 90%);
+    --input-bg: hsl(0, 20%, 15%);
+    --input-border: hsla(0, 90%, 50%, 0.5);
+    --social-bg: hsl(0, 70%, 8%);
+    --social-border: hsla(0, 90%, 50%, 0.4);
+    
+    --nav-logo-1: hsl(0, 90%, 90%);
+    --nav-logo-2: hsl(0, 90%, 50%);
+}
+
+/* COSMIC */
+[data-theme="cosmic"] {
+    --bg-color: hsl(200, 70%, 8%);
+    --text-color: hsl(200, 90%, 90%);
+    --text-muted: hsl(200, 90%, 70%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(200, 90%, 50%, 0.06) 0%, hsla(200, 90%, 50%, 0.1) 50%, hsla(200, 90%, 50%, 0.06) 100%);
+    --loader-text: hsl(200, 90%, 70%);
+    --spinner-border: hsla(200, 90%, 50%, 0.14);
+    --spinner-top: hsl(200, 90%, 50%);
+
+    --home-comp-bg: hsl(200, 15%, 10%);
+    --olive-dark: hsl(200, 30%, 15%);
+    --olive-mid: hsl(200, 30%, 20%);
+    --olive-accent: hsl(200, 30%, 25%);
+    --gold: hsl(200, 90%, 50%);
+    --gold-dim: hsla(200, 90%, 50%, 0.55);
+    --gold-faint: hsla(200, 90%, 50%, 0.12);
+    --text-bright: hsl(200, 90%, 98%);
+    --text-mid: hsl(200, 90%, 85%);
+    --text-dim: hsl(200, 90%, 70%);
+    
+    --mode-b-primary: hsl(200, 90%, 50%);
+    --mode-b-glow: hsla(200, 90%, 50%, 0.25);
+    --mode-b-faint: hsla(200, 90%, 50%, 0.08);
+    --mode-b-border: hsla(200, 90%, 50%, 0.22);
+    --mode-b-badge-bg: hsla(200, 90%, 50%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(200, 90%, 60%), hsl(200, 90%, 50%));
+    --mode-b-text: #000000;
+    
+    --mode-p-primary: hsl(240, 90%, 50%);
+    --mode-p-glow: hsla(240, 90%, 50%, 0.25);
+    --mode-p-faint: hsla(240, 90%, 50%, 0.08);
+    --mode-p-border: hsla(240, 90%, 50%, 0.22);
+    --mode-p-badge-bg: hsla(240, 90%, 50%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(240, 90%, 60%), hsl(240, 90%, 50%));
+    --mode-p-text: #000000;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, hsla(200, 90%, 30%, 0.4) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, hsla(160, 90%, 30%, 0.5) 0%, transparent 55%), linear-gradient(to bottom, hsl(200, 30%, 12%) 0%, hsl(200, 20%, 8%) 40%, hsl(200, 10%, 5%) 100%);
+    --home-noise-opacity: 0.15;
+    --home-grid-line: hsla(200, 90%, 50%, 0.15);
+    
+    --glass-bg: hsla(200, 20%, 10%, 0.85);
+    --glass-border: hsla(200, 90%, 50%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
+    
+    --card-bg: hsla(200, 30%, 15%, 0.65);
+    --card-border: hsla(200, 90%, 50%, 0.25);
+    --card-hover-bg: hsla(200, 30%, 20%, 0.9);
+    --card-hover-border: hsl(200, 90%, 50%);
+    
+    --status-bg: hsla(200, 90%, 20%, 0.5);
+    --status-border: hsla(200, 90%, 50%, 0.4);
+    --status-color: hsl(200, 90%, 50%);
+    --status-done-color: hsl(120, 60%, 60%);
+    --status-done-border: hsla(120, 60%, 60%, 0.3);
+    --status-done-bg: hsla(120, 60%, 60%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(200, 90%, 50%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(200, 90%, 50%, 0.3), transparent);
+    --deco-corner: hsla(200, 90%, 50%, 0.4);
+    --stream-dot: hsl(200, 90%, 50%);
+    
+    --tab-bg: hsla(200, 30%, 15%, 0.65);
+    --tab-active-bg: linear-gradient(45deg, hsl(200, 90%, 50%), hsl(160, 90%, 50%));
+    --tab-active-color: #000000;
+    --tab-active-b-bg: linear-gradient(45deg, hsl(200, 90%, 50%), hsl(160, 90%, 60%));
+    --tab-active-b-color: #000000;
+    --tab-active-p-bg: linear-gradient(45deg, hsl(240, 90%, 50%), hsl(280, 90%, 60%));
+    --tab-active-p-color: #000000;
+
+    --signup-comp: hsl(200, 70%, 8%);
+    --sign-otc-light: rgba(255,255,255, 0.05);
+    --sign-otc-dark: rgba(0,0,0, 0.4);
+    --sign-bx-otc-light: hsla(200, 90%, 50%, 0.2);
+    --sign-txt-6xl: hsl(200, 90%, 50%);
+    --sign-highlight: hsl(200, 90%, 90%);
+    --sign-dashline: hsla(200, 90%, 50%, 0.3);
+    --sign-sct: hsl(200, 90%, 70%);
+    --sign-si: hsl(200, 90%, 50%);
+    --sign-header-inactive: hsl(200, 90%, 70%);
+    --sign-labels: hsl(200, 90%, 70%);
+    --sign-input: hsl(200, 90%, 90%);
+    --input-bg: hsl(200, 20%, 15%);
+    --input-border: hsla(200, 90%, 50%, 0.5);
+    --social-bg: hsl(200, 70%, 8%);
+    --social-border: hsla(200, 90%, 50%, 0.4);
+    
+    --nav-logo-1: hsl(200, 90%, 90%);
+    --nav-logo-2: hsl(200, 90%, 50%);
+}
+
+/* TOXIC */
+[data-theme="toxic"] {
+    --bg-color: hsl(120, 60%, 8%);
+    --text-color: hsl(120, 80%, 90%);
+    --text-muted: hsl(120, 80%, 70%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(120, 80%, 45%, 0.06) 0%, hsla(120, 80%, 45%, 0.1) 50%, hsla(120, 80%, 45%, 0.06) 100%);
+    --loader-text: hsl(120, 80%, 70%);
+    --spinner-border: hsla(120, 80%, 45%, 0.14);
+    --spinner-top: hsl(120, 80%, 45%);
+
+    --home-comp-bg: hsl(120, 15%, 10%);
+    --olive-dark: hsl(120, 30%, 15%);
+    --olive-mid: hsl(120, 30%, 20%);
+    --olive-accent: hsl(120, 30%, 25%);
+    --gold: hsl(120, 80%, 45%);
+    --gold-dim: hsla(120, 80%, 45%, 0.55);
+    --gold-faint: hsla(120, 80%, 45%, 0.12);
+    --text-bright: hsl(120, 80%, 98%);
+    --text-mid: hsl(120, 80%, 85%);
+    --text-dim: hsl(120, 80%, 70%);
+    
+    --mode-b-primary: hsl(120, 80%, 45%);
+    --mode-b-glow: hsla(120, 80%, 45%, 0.25);
+    --mode-b-faint: hsla(120, 80%, 45%, 0.08);
+    --mode-b-border: hsla(120, 80%, 45%, 0.22);
+    --mode-b-badge-bg: hsla(120, 80%, 45%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(120, 80%, 55%), hsl(120, 80%, 45%));
+    --mode-b-text: #000000;
+    
+    --mode-p-primary: hsl(160, 80%, 45%);
+    --mode-p-glow: hsla(160, 80%, 45%, 0.25);
+    --mode-p-faint: hsla(160, 80%, 45%, 0.08);
+    --mode-p-border: hsla(160, 80%, 45%, 0.22);
+    --mode-p-badge-bg: hsla(160, 80%, 45%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(160, 80%, 55%), hsl(160, 80%, 45%));
+    --mode-p-text: #000000;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, hsla(120, 80%, 30%, 0.4) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, hsla(150, 80%, 30%, 0.5) 0%, transparent 55%), linear-gradient(to bottom, hsl(120, 30%, 12%) 0%, hsl(120, 20%, 8%) 40%, hsl(120, 10%, 5%) 100%);
+    --home-noise-opacity: 0.15;
+    --home-grid-line: hsla(120, 80%, 45%, 0.15);
+    
+    --glass-bg: hsla(120, 20%, 10%, 0.85);
+    --glass-border: hsla(120, 80%, 45%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
+    
+    --card-bg: hsla(120, 30%, 15%, 0.65);
+    --card-border: hsla(120, 80%, 45%, 0.25);
+    --card-hover-bg: hsla(120, 30%, 20%, 0.9);
+    --card-hover-border: hsl(120, 80%, 45%);
+    
+    --status-bg: hsla(120, 80%, 20%, 0.5);
+    --status-border: hsla(120, 80%, 45%, 0.4);
+    --status-color: hsl(120, 80%, 45%);
+    --status-done-color: hsl(120, 60%, 60%);
+    --status-done-border: hsla(120, 60%, 60%, 0.3);
+    --status-done-bg: hsla(120, 60%, 60%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(120, 80%, 45%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(120, 80%, 45%, 0.3), transparent);
+    --deco-corner: hsla(120, 80%, 45%, 0.4);
+    --stream-dot: hsl(120, 80%, 45%);
+    
+    --tab-bg: hsla(120, 30%, 15%, 0.65);
+    --tab-active-bg: linear-gradient(45deg, hsl(120, 80%, 45%), hsl(150, 80%, 45%));
+    --tab-active-color: #000000;
+    --tab-active-b-bg: linear-gradient(45deg, hsl(120, 80%, 45%), hsl(150, 80%, 55%));
+    --tab-active-b-color: #000000;
+    --tab-active-p-bg: linear-gradient(45deg, hsl(160, 80%, 45%), hsl(200, 80%, 55%));
+    --tab-active-p-color: #000000;
+
+    --signup-comp: hsl(120, 60%, 8%);
+    --sign-otc-light: rgba(255,255,255, 0.05);
+    --sign-otc-dark: rgba(0,0,0, 0.4);
+    --sign-bx-otc-light: hsla(120, 80%, 45%, 0.2);
+    --sign-txt-6xl: hsl(120, 80%, 45%);
+    --sign-highlight: hsl(120, 80%, 90%);
+    --sign-dashline: hsla(120, 80%, 45%, 0.3);
+    --sign-sct: hsl(120, 80%, 70%);
+    --sign-si: hsl(120, 80%, 45%);
+    --sign-header-inactive: hsl(120, 80%, 70%);
+    --sign-labels: hsl(120, 80%, 70%);
+    --sign-input: hsl(120, 80%, 90%);
+    --input-bg: hsl(120, 20%, 15%);
+    --input-border: hsla(120, 80%, 45%, 0.5);
+    --social-bg: hsl(120, 60%, 8%);
+    --social-border: hsla(120, 80%, 45%, 0.4);
+    
+    --nav-logo-1: hsl(120, 80%, 90%);
+    --nav-logo-2: hsl(120, 80%, 45%);
+}
+
+/* NEON */
+[data-theme="neon"] {
+    --bg-color: hsl(300, 70%, 8%);
+    --text-color: hsl(300, 90%, 90%);
+    --text-muted: hsl(300, 90%, 70%);
+    
+    --skeleton-bg: linear-gradient(90deg, hsla(300, 90%, 55%, 0.06) 0%, hsla(300, 90%, 55%, 0.1) 50%, hsla(300, 90%, 55%, 0.06) 100%);
+    --loader-text: hsl(300, 90%, 70%);
+    --spinner-border: hsla(300, 90%, 55%, 0.14);
+    --spinner-top: hsl(300, 90%, 55%);
+
+    --home-comp-bg: hsl(300, 15%, 10%);
+    --olive-dark: hsl(300, 30%, 15%);
+    --olive-mid: hsl(300, 30%, 20%);
+    --olive-accent: hsl(300, 30%, 25%);
+    --gold: hsl(300, 90%, 55%);
+    --gold-dim: hsla(300, 90%, 55%, 0.55);
+    --gold-faint: hsla(300, 90%, 55%, 0.12);
+    --text-bright: hsl(300, 90%, 98%);
+    --text-mid: hsl(300, 90%, 85%);
+    --text-dim: hsl(300, 90%, 70%);
+    
+    --mode-b-primary: hsl(300, 90%, 55%);
+    --mode-b-glow: hsla(300, 90%, 55%, 0.25);
+    --mode-b-faint: hsla(300, 90%, 55%, 0.08);
+    --mode-b-border: hsla(300, 90%, 55%, 0.22);
+    --mode-b-badge-bg: hsla(300, 90%, 55%, 0.06);
+    --mode-b-highlight: linear-gradient(to right, hsl(300, 90%, 65%), hsl(300, 90%, 55%));
+    --mode-b-text: #000000;
+    
+    --mode-p-primary: hsl(340, 90%, 55%);
+    --mode-p-glow: hsla(340, 90%, 55%, 0.25);
+    --mode-p-faint: hsla(340, 90%, 55%, 0.08);
+    --mode-p-border: hsla(340, 90%, 55%, 0.22);
+    --mode-p-badge-bg: hsla(340, 90%, 55%, 0.06);
+    --mode-p-highlight: linear-gradient(to right, hsl(340, 90%, 65%), hsl(340, 90%, 55%));
+    --mode-p-text: #000000;
+    
+    --home-page-bg: radial-gradient(ellipse at 70% 0%, hsla(300, 90%, 30%, 0.4) 0%, transparent 55%), radial-gradient(ellipse at 0% 60%, hsla(340, 90%, 30%, 0.5) 0%, transparent 55%), linear-gradient(to bottom, hsl(300, 30%, 12%) 0%, hsl(300, 20%, 8%) 40%, hsl(300, 10%, 5%) 100%);
+    --home-noise-opacity: 0.15;
+    --home-grid-line: hsla(300, 90%, 55%, 0.15);
+    
+    --glass-bg: hsla(300, 20%, 10%, 0.85);
+    --glass-border: hsla(300, 90%, 55%, 0.3);
+    --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
+    
+    --card-bg: hsla(300, 30%, 15%, 0.65);
+    --card-border: hsla(300, 90%, 55%, 0.25);
+    --card-hover-bg: hsla(300, 30%, 20%, 0.9);
+    --card-hover-border: hsl(300, 90%, 55%);
+    
+    --status-bg: hsla(300, 90%, 20%, 0.5);
+    --status-border: hsla(300, 90%, 55%, 0.4);
+    --status-color: hsl(300, 90%, 55%);
+    --status-done-color: hsl(120, 60%, 60%);
+    --status-done-border: hsla(120, 60%, 60%, 0.3);
+    --status-done-bg: hsla(120, 60%, 60%, 0.1);
+    
+    --deco-line-grad: linear-gradient(to bottom, transparent, hsla(300, 90%, 55%, 0.3), transparent);
+    --deco-line: linear-gradient(to bottom, transparent, hsla(300, 90%, 55%, 0.3), transparent);
+    --deco-corner: hsla(300, 90%, 55%, 0.4);
+    --stream-dot: hsl(300, 90%, 55%);
+    
+    --tab-bg: hsla(300, 30%, 15%, 0.65);
+    --tab-active-bg: linear-gradient(45deg, hsl(300, 90%, 55%), hsl(340, 90%, 55%));
+    --tab-active-color: #000000;
+    --tab-active-b-bg: linear-gradient(45deg, hsl(300, 90%, 55%), hsl(340, 90%, 65%));
+    --tab-active-b-color: #000000;
+    --tab-active-p-bg: linear-gradient(45deg, hsl(340, 90%, 55%), hsl(380, 90%, 65%));
+    --tab-active-p-color: #000000;
+
+    --signup-comp: hsl(300, 70%, 8%);
+    --sign-otc-light: rgba(255,255,255, 0.05);
+    --sign-otc-dark: rgba(0,0,0, 0.4);
+    --sign-bx-otc-light: hsla(300, 90%, 55%, 0.2);
+    --sign-txt-6xl: hsl(300, 90%, 55%);
+    --sign-highlight: hsl(300, 90%, 90%);
+    --sign-dashline: hsla(300, 90%, 55%, 0.3);
+    --sign-sct: hsl(300, 90%, 70%);
+    --sign-si: hsl(300, 90%, 55%);
+    --sign-header-inactive: hsl(300, 90%, 70%);
+    --sign-labels: hsl(300, 90%, 70%);
+    --sign-input: hsl(300, 90%, 90%);
+    --input-bg: hsl(300, 20%, 15%);
+    --input-border: hsla(300, 90%, 55%, 0.5);
+    --social-bg: hsl(300, 70%, 8%);
+    --social-border: hsla(300, 90%, 55%, 0.4);
+    
+    --nav-logo-1: hsl(300, 90%, 90%);
+    --nav-logo-2: hsl(300, 90%, 55%);
+}
+

@@ -1,23 +1,23 @@
 /* src/scss/task-details-modal.scss */
 
 .td-modal-overlay {
-    /* --- TASK DETAILS LOCAL VARIABLES --- */
-    --td-bg: var(--task-modalBG, #202020);
-    --td-text-main: var(--sidenav-H1, #fff);
-    --td-text-sub: var(--sidenav-ISO, #ccc); 
-    --td-border: rgba(255, 255, 255, 0.05);
-    --td-header-bg: linear-gradient(to right, rgba(255,255,255,0.01), transparent);
-    --td-sidebar-bg: rgba(0, 0, 0, 0.1);
-    --td-input-bg: rgba(255, 255, 255, 0.03);
-    --td-input-border: rgba(255, 255, 255, 0.05);
-    --td-footer-bg: rgba(0, 0, 0, 0.15);
-    --td-btn-hover: rgba(255, 255, 255, 0.05);
-    --td-progress-track: rgba(255, 255, 255, 0.05);
+    /* --- TASK DETAILS LOCAL VARIABLES (inherits from global) --- */
+    --td-bg: var(--glass-bg, var(--task-modalBG, #202020));
+    --td-text-main: var(--text-bright, var(--sidenav-H1, #fff));
+    --td-text-sub: var(--text-dim, var(--sidenav-ISO, #ccc)); 
+    --td-border: var(--glass-border, rgba(255, 255, 255, 0.05));
+    --td-header-bg: var(--gold-faint, linear-gradient(to right, rgba(255,255,255,0.01), transparent));
+    --td-sidebar-bg: var(--card-bg, rgba(0, 0, 0, 0.1));
+    --td-input-bg: var(--gold-faint, rgba(255, 255, 255, 0.03));
+    --td-input-border: var(--glass-border, rgba(255, 255, 255, 0.05));
+    --td-footer-bg: var(--card-bg, rgba(0, 0, 0, 0.15));
+    --td-btn-hover: var(--gold-faint, rgba(255, 255, 255, 0.05));
+    --td-progress-track: var(--gold-faint, rgba(255, 255, 255, 0.05));
     
     --td-chip-bg: transparent;
-    --td-chip-hover: rgba(255, 255, 255, 0.03);
-    --td-chip-active: rgba(83, 143, 255, 0.1);
-    --td-icon-color: rgba(255, 255, 255, 0.3);
+    --td-chip-hover: var(--gold-faint, rgba(255, 255, 255, 0.03));
+    --td-chip-active: var(--gold-faint, rgba(83, 143, 255, 0.1));
+    --td-icon-color: var(--text-dim, rgba(255, 255, 255, 0.3));
     --td-icon-hover: #f44336;
     
     position: fixed;
@@ -34,25 +34,7 @@
     animation: tdFadeIn 0.2s ease-out;
 }
 
-/* --- LIGHT MODE OVERRIDES --- */
-[data-theme="light"] .td-modal-overlay {
-    --td-bg: #ffffff;
-    --td-text-main: #1e293b;
-    --td-text-sub: #64748b;
-    --td-border: rgba(0, 0, 0, 0.08);
-    --td-header-bg: #f8fafc;
-    --td-sidebar-bg: #f1f5f9;
-    --td-input-bg: #ffffff;
-    --td-input-border: #cbd5e1;
-    --td-footer-bg: #f8fafc;
-    --td-btn-hover: rgba(0, 0, 0, 0.05);
-    --td-progress-track: #e2e8f0;
-    --td-chip-hover: rgba(0, 0, 0, 0.05);
-    --td-chip-active: rgba(83, 143, 255, 0.15);
-    --td-icon-color: #94a3b8;
-    
-    background: rgba(0, 0, 0, 0.4); /* slightly lighter backdrop */
-}
+/* Light mode handled by global theme variable cascade */
 
 .td-modal-container {
     background: var(--td-bg);
@@ -69,11 +51,6 @@
     overflow: hidden;
     animation: tdScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
-}
-
-[data-theme="light"] .td-modal-container {
-    box-shadow: 0 20px 48px rgba(0,0,0,0.2);
-    color: var(--td-text-main);
 }
 
 /* Animations */

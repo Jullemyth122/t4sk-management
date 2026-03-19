@@ -186,22 +186,11 @@ export default function SubmissionModal({
 
                         {/* Feedback Note Preview */}
                         {card?.submission?.reviewNote && (
-                            <div style={{
-                                marginTop: 16,
-                                padding: '12px',
-                                borderRadius: '8px',
-                                background: card.submission.reviewStatus === 'rejected' ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.08)',
-                                borderLeft: `3px solid ${card.submission.reviewStatus === 'rejected' ? '#ef4444' : '#10b981'}`
-                            }}>
-                                <strong style={{
-                                    display: 'block',
-                                    fontSize: '0.8rem',
-                                    color: card.submission.reviewStatus === 'rejected' ? '#ef4444' : '#10b981',
-                                    marginBottom: 4
-                                }}>
+                            <div className={`sd-feedback-note ${card.submission.reviewStatus === 'rejected' ? 'sd-feedback-rejected' : 'sd-feedback-approved'}`}>
+                                <strong className="sd-feedback-label">
                                     {card.submission.reviewStatus === 'rejected' ? 'Rejection Feedback:' : 'Approval Note:'}
                                 </strong>
-                                <span style={{ fontSize: '0.85rem', color: 'var(--bd-text-main)', opacity: 0.9 }}>
+                                <span className="sd-feedback-text">
                                     "{card.submission.reviewNote}"
                                 </span>
                             </div>
@@ -228,52 +217,17 @@ export default function SubmissionModal({
                         {card?.subtasks && card.subtasks.length > 0 && (
                             <div className="sd-assignees" style={{ marginTop: 16 }}>
                                 <strong>Tasks · {card.subtasks.filter(s => s.completed).length} of {card.subtasks.length} complete</strong>
-                                <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                <div className="sd-subtasks-list">
                                     {card.subtasks.map((st, idx) => (
                                         <div
                                             key={st.id || idx}
                                             onClick={() => onSubtaskToggle?.(idx, !st.completed)}
-                                            style={{
-                                                display: 'flex',
-                                                gap: 8,
-                                                alignItems: 'center',
-                                                padding: '6px 8px',
-                                                borderRadius: 6,
-                                                background: st.completed ? 'rgba(76, 175, 80, 0.08)' : 'rgba(0,0,0,0.03)',
-                                                cursor: onSubtaskToggle ? 'pointer' : 'default',
-                                                transition: 'background 0.15s ease'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                if (onSubtaskToggle) e.currentTarget.style.background = st.completed ? 'rgba(76, 175, 80, 0.15)' : 'rgba(0,0,0,0.06)';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.background = st.completed ? 'rgba(76, 175, 80, 0.08)' : 'rgba(0,0,0,0.03)';
-                                            }}
+                                            className={`sd-subtask-row ${st.completed ? 'sd-subtask-done' : ''} ${onSubtaskToggle ? 'sd-subtask-clickable' : ''}`}
                                         >
-                                            {/* Checkbox visual */}
-                                            <div style={{
-                                                minWidth: 18,
-                                                height: 18,
-                                                borderRadius: 4,
-                                                border: `2px solid ${st.completed ? '#4caf50' : '#888'}`,
-                                                background: st.completed ? '#4caf50' : 'transparent',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                color: 'white',
-                                                fontSize: 11,
-                                                fontWeight: 'bold',
-                                                transition: 'all 0.15s ease'
-                                            }}>
+                                            <div className={`sd-subtask-checkbox ${st.completed ? 'checked' : ''}`}>
                                                 {st.completed && '✓'}
                                             </div>
-                                            <div style={{
-                                                flex: 1,
-                                                fontSize: 13,
-                                                textDecoration: st.completed ? 'line-through' : 'none',
-                                                color: st.completed ? 'var(--sidenav-ISO)' : 'inherit',
-                                                opacity: st.completed ? 0.7 : 1
-                                            }}>
+                                            <div className="sd-subtask-text">
                                                 {st.text}
                                             </div>
                                         </div>
@@ -307,7 +261,7 @@ export default function SubmissionModal({
                                 <label className="sd-label">
                                     Assign reviewer
                                     {reviewerSourceLabel && (
-                                        <span style={{ fontSize: '0.8rem', color: 'var(--sidenav-ISO)', fontWeight: 400, marginLeft: 8 }}>
+                                        <span className="sd-reviewer-source-label">
                                             — {reviewerSourceLabel.replace('Showing ', '')}
                                         </span>
                                     )}

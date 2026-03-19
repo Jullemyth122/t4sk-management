@@ -636,3 +636,65 @@ export async function processImageForTasks(imageFile, details = {}, options = {}
     throw err;
   }
 }
+
+export async function generateBoardLayout(promptText, candidateEmails = []) {
+  if (!promptText) throw new Error("No prompt provided.");
+
+  const schema = `
+You are an expert agile project manager AI. Your task is to generate a complete project Board structure based on the user's requested prompt.
+Return ONLY valid JSON format. Do NOT wrap in markdown fences.
+Schema required:
+{
+  "boardName": "String (A catchy name for the board)",
+  "lists": [
+    {
+      "name": "String (Name of the list, e.g. To Do, Phase 1)",
+      "cards": [
+        {
+          "title": "String (Task title)",
+          "description": "String (Detailed task description)",
+          "priorityScale": "String (easy, medium, hard, high)",
+          "effort": "Number (1-10 estimate)",
+          "assignees": ["String (Select optionally 1-2 emails from CANDIDATE_EMAILS, or empty array)"],
+          "subtasks": [
+            {
+              "text": "String (Subtask description)",
+              "weight": "Number (Integer weight. Ensure weights for all subtasks in a card sum exactly to 100)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+`;
+
+  const candidateBlock = candidateEmails.length > 0 
+    ? `\nCANDIDATE_EMAILS (Use these exact emails to allocate tasks where it makes sense):\n${candidateEmails.join('\n')}\n`
+    : '';
+
+  const finalPrompt = schema + candidateBlock + `\nUSER PROMPT:\n"${promptText}"`;
+
+  try {
+    const result = await model.generateContent([{ text: finalPrompt }], { generationConfig: { responseMimeType: 'application/json' } });
+    let rawText = null;
+    if (typeof result.response?.text === 'function') {
+        rawText = await result.response.text();
+    } else if (result.response?.candidates?.length > 0) {
+        rawText = result.response.candidates[0]?.content?.parts?.[0]?.text;
+    }
+    
+    if (!rawText) throw new Error("Empty response from AI");
+
+    let parsed = parseLooseJSON(rawText);
+    if (!parsed) {
+        const fenceMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+        if (fenceMatch) parsed = parseLooseJSON(fenceMatch[1]);
+    }
+    if (!parsed) throw new Error("Failed to parse AI JSON response.");
+    return parsed;
+  } catch(e) {
+    console.error("Board generation failed", e);
+    throw e;
+  }
+}

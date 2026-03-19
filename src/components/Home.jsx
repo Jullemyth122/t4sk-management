@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import "../scss/home.scss";
 import HomeSkeleton from "./loaders/HomeSkeleton";
 
@@ -290,7 +291,7 @@ const Home = ({ simulateLoading = false }) => {
 
                             {/* Honeycomb Data Grid */}
                             <div className="honeycomb-layout-wrapper">
-                                <h4 className="honeycomb-title">Neural Metric Array v1.0</h4>
+                                <h4 className="honeycomb-title"> T A S K F I E L D S </h4>
                                 <div className="honeycomb-grid">
                                     {/* Map personal active features into Hex Cells */}
                                     {activeFeatures.map((feat, idx) => (
@@ -308,6 +309,7 @@ const Home = ({ simulateLoading = false }) => {
                                             </div>
                                         </div>
                                     ))}
+
                                 </div>
                             </div>
                     </>
@@ -435,7 +437,7 @@ const Home = ({ simulateLoading = false }) => {
                                 <li><a href="#">Features</a></li>
                                 <li><a href="#">Integrations</a></li>
                                 <li><a href="#">Pricing</a></li>
-                                <li><a href="#">Changelog</a></li>
+                                <li><Link to="/changelog">Changelog</Link></li>
                             </ul>
                         </div>
 

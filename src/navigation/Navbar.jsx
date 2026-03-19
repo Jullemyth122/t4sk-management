@@ -13,14 +13,17 @@ import {
 
 import NavbarSkeleton from "../components/loaders/NavbarSkeleton";
 import NotificationDropdown from "../components/NotificationDropdown";
+import { useTheme } from "../context/ThemeContext";
 
 const Navbar = ({ simulateLoading = true }) => {
     const { currentUser, signOut, refreshProfile } = useAuth();
+    const { theme, setTheme, themes } = useTheme();
     const [notifications, setNotifications] = useState([]);
     const [rawInvites, setRawInvites] = useState([]); // as stored in account.invitesEmail
     const [invites, setInvites] = useState([]); // enriched invites with businessName + friendly fields
     const [showNotifs, setShowNotifs] = useState(false);
     const [showInvites, setShowInvites] = useState(false);
+    const [showThemes, setShowThemes] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
 
     // per-invite loading flags
@@ -402,10 +405,68 @@ const Navbar = ({ simulateLoading = true }) => {
                                 );
                                 })
                             )}
-                            </div>
+                        </div>
                         )}
                         </div>
                     )}
+                    {/* --- THEME SWITCHER --- */}
+                    <div
+                        className="nav-link theme-toggle-btn"
+                        onClick={() => {
+                            setShowThemes((s) => !s);
+                            setShowInvites(false);
+                            setShowNotifs(false);
+                        }}
+                    >
+                        {/* Paint Palette Icon */}
+                        <svg className="cursor-pointer" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.06 0 2-.94 2-2 0-.46-.18-.9-.5-1.26-.3-.34-.48-.77-.48-1.24 0-1.06.94-2 2-2h1.59c2.97 0 5.39-2.42 5.39-5.39C22 7.03 17.52 2 12 2zm-4.5 9c-.83 0-1.5-.67-1.5-1.5S6.67 8 7.5 8 9 8.67 9 9.5 8.33 11 7.5 11zm3-3c-.83 0-1.5-.67-1.5-1.5S9.67 5 10.5 5 12 5.67 12 6.5 11.33 8 10.5 8zm4.5 0c-.83 0-1.5-.67-1.5-1.5S14.17 5 15 5s1.5.67 1.5 1.5S15.83 8 15 8zm3 3c-.83 0-1.5-.67-1.5-1.5S17.67 8 18.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
+                        </svg>
+
+                        {showThemes && (
+                            <div
+                                className="theme-dropdown-panel"
+                                onMouseLeave={() => setShowThemes(false)}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="theme-dd-header">
+                                    <span className="theme-dd-title">Customize theme</span>
+                                    <span className="theme-dd-sub">Choose your workspace palette</span>
+                                </div>
+
+                                <div className="theme-dd-list">
+                                    {themes.map((t) => (
+                                        <button
+                                            key={t.id}
+                                            className={`theme-dd-item${theme === t.id ? ' active' : ''}`}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setTheme(t.id);
+                                                setShowThemes(false);
+                                            }}
+                                        >
+                                            <span
+                                                className="theme-dd-swatch"
+                                                style={{
+                                                    backgroundColor: t.hex,
+                                                    boxShadow: theme === t.id ? `0 0 10px ${t.hex}` : 'none'
+                                                }}
+                                            />
+                                            <span className="theme-dd-label">{t.name}</span>
+                                            <span className="theme-dd-badge">{t.type}</span>
+
+                                            {theme === t.id && (
+                                                <svg className="theme-dd-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.hex} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                    <polyline points="20 6 9 17 4 12" />
+                                                </svg>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
                     <button
                         className="mobile-menu-button md:hidden p-4"
                         aria-label="Toggle menu"

@@ -1,7 +1,16 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useDeferredValue } from "react";
 import useHasPerm from "../useHasPerm";
 
 export function usePermissionsAndDerived({ profile, businessId, planType = 'free', roles = [], members = [],boards, boardQuery, memberQuery, lists = [], uid, userEmail, getMemberLevel, businessOwnerUid }) {
+    const deferredBoardQuery = useDeferredValue(boardQuery || '');
+    const deferredMemberQuery = useDeferredValue(memberQuery || '');
+    const userIdentifiers = useMemo(() => {
+        const set = new Set();
+        if (uid) set.add(String(uid).toLowerCase());
+        if (userEmail) set.add(String(userEmail).toLowerCase());
+        return set;
+    }, [uid, userEmail]);
+
     const userRoleId = useMemo(() => {
         if (!profile || !Array.isArray(profile.businessAffiliations) || !businessId) return null;
         const a = profile.businessAffiliations.find((x) => x.businessId === businessId);
@@ -42,7 +51,7 @@ export function usePermissionsAndDerived({ profile, businessId, planType = 'free
     const isOwner = String(uid) === String(businessOwnerUid) || userRoleId === 'owner';
 
     // Feature Gating
-    const isPremium = planType === 'pro' || planType === 'enterprise';
+    const isPremium = ['pro', 'enterprise'].includes(String(planType || '').toLowerCase());
     
     // For Free plan, only the business owner gets limited access to premium features (OCR, AI, Calendar)
     const canUseOCR = can('ocr.use') && (isPremium || isOwner);
@@ -52,24 +61,18 @@ export function usePermissionsAndDerived({ profile, businessId, planType = 'free
     // Premium features
     const canUseCalendar = isPremium;
     const boardsFiltered = useMemo(() => {
-        if (!boardQuery) return boards || [];
-        const q = boardQuery.toLowerCase();
+        if (!deferredBoardQuery) return boards || [];
+        const q = deferredBoardQuery.toLowerCase();
         return (boards || []).filter((b) => ((b.name || '') + ' ' + (b.description || '')).toLowerCase().includes(q));
-    }, [boards, boardQuery]);
+    }, [boards, deferredBoardQuery]);
 
     // For low-level users: filter boards to only show boards where user has assigned tasks
     // This requires cardsMap from the parent - we receive it indirectly through the filtering functions
     // We expose a helper that the parent can call to filter boards after cardsMap is populated
     const filterBoardsByAssignee = useCallback((allBoards, allLists, allCardsMap) => {
-        // High-level users or owners see all boards
         if (userLevel > 2) return allBoards;
-        
-        const userIdentifiers = new Set();
-        if (uid) userIdentifiers.add(String(uid).toLowerCase());
-        if (userEmail) userIdentifiers.add(String(userEmail).toLowerCase());
         if (userIdentifiers.size === 0) return allBoards;
 
-        // Build a set of boardIds that have at least one card assigned to this user
         const boardsWithAssignedCards = new Set();
         (allLists || []).forEach(list => {
             const cards = allCardsMap[list.id] || [];
@@ -82,7 +85,6 @@ export function usePermissionsAndDerived({ profile, businessId, planType = 'free
             });
         });
 
-        // Also check list-level assignees (user is assigned to a list in this board)
         (allLists || []).forEach(list => {
             const listAssignees = list.assignees || [];
             const hasUser = listAssignees.some(a => userIdentifiers.has(String(a).toLowerCase()));
@@ -92,10 +94,10 @@ export function usePermissionsAndDerived({ profile, businessId, planType = 'free
         });
 
         return allBoards.filter(b => boardsWithAssignedCards.has(b.id));
-    }, [userLevel, uid, userEmail]);
+    }, [userLevel, userIdentifiers]);
 
     const membersFiltered = useMemo(() => {
-        const q = (memberQuery || '').toLowerCase();
+        const q = deferredMemberQuery.toLowerCase();
         const filtered = (members || []).filter((m) => {
             if (!q) return true;
             const roleFromList = roles.find((r) => r.id === m.roleId);
@@ -109,35 +111,25 @@ export function usePermissionsAndDerived({ profile, businessId, planType = 'free
             return (a.name || '').localeCompare(b.name || '');
         });
         return filtered;
-    }, [members, memberQuery, roles, getMemberLevel]);
+    }, [members, deferredMemberQuery, roles, getMemberLevel]);
 
     const listsVisible = useMemo(() => {
         if (!Array.isArray(lists)) return [];
-        // High-level users see all lists
         if (userLevel > 2) return lists;
-        // For boards.read permission holders who are low-level: filter by assignee
+        if (userIdentifiers.size === 0) return [];
+
         if (can('boards.read')) {
-            const userIdentifiers = new Set();
-            if (uid) userIdentifiers.add(String(uid).toLowerCase());
-            if (userEmail) userIdentifiers.add(String(userEmail).toLowerCase());
-            if (userIdentifiers.size === 0) return [];
             return lists.filter(l => {
                 const assignees = l.assignees || [];
                 return assignees.some(x => userIdentifiers.has(String(x).trim().toLowerCase()));
             });
         }
-        // Fallback for restricted users: only see lists they are assigned to
-        return lists.filter(l => (l.assignees || []).some(x => String(x).trim() === uid || String(x).trim().toLowerCase() === userEmail));
-    }, [lists, can, uid, userEmail, userLevel]);
+        return lists.filter(l => (l.assignees || []).some(x => userIdentifiers.has(String(x).trim().toLowerCase())));
+    }, [lists, can, userIdentifiers, userLevel]);
 
     // Card-level filtering: for low-level users, only show cards assigned to them
     const filterCardsByAssignee = useCallback((cardsMap) => {
-        // High-level users see all cards
         if (userLevel > 2) return cardsMap;
-
-        const userIdentifiers = new Set();
-        if (uid) userIdentifiers.add(String(uid).toLowerCase());
-        if (userEmail) userIdentifiers.add(String(userEmail).toLowerCase());
         if (userIdentifiers.size === 0) return {};
 
         const filtered = {};
@@ -149,7 +141,7 @@ export function usePermissionsAndDerived({ profile, businessId, planType = 'free
             });
         });
         return filtered;
-    }, [userLevel, uid, userEmail]);
+    }, [userLevel, userIdentifiers]);
 
     const reviewerOptions = useMemo(() => {
         if (!Array.isArray(members) || members.length === 0) return null;

@@ -1,14 +1,18 @@
 import { useCallback, useRef } from "react";
-import { clampInt, deriveListName, inferDueDateFromItem, normalizeToTargetSum, parseISODateToDate } from "../../utils/dashboardUtils";
+import { clampInt, deriveListName, inferDueDateFromItem, normalizeToTargetSum, parseISODateToDate, normalizeTokenForEmail, autoBalanceSubtaskList, levenshtein } from "../../utils/dashboardUtils";
 import * as boardSvc from '../../services/boardService'
 import { db } from "../../config/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { computePriority } from "../../utils/prioritization";
 
-export function useApplyOCR({ selectedBoardId, canCreateList, ocrResult, lists, businessId, uid, dispatchSet, cardsMap, emailMap, members, membersMap, getMemberLevel, roles, businessOwnerUid }) {
+export function useApplyOCR(props) {
+    const depsRef = useRef(props);
+    depsRef.current = props;
     const snapshotRef = useRef({});
 
     const handleApplyOCRToBoard = useCallback(async () => {
+        const { selectedBoardId, canCreateList, ocrResult, lists, businessId, uid, dispatchSet, cardsMap, emailMap, members, membersMap, getMemberLevel, roles, businessOwnerUid } = depsRef.current;
+
         if (!selectedBoardId) return dispatchSet('uiError', 'Select a board to import into.');
         if (!canCreateList) return dispatchSet('uiError', 'Permission denied to create lists.');
         if (!ocrResult) return dispatchSet('uiError', 'No OCR data to import.');
@@ -17,29 +21,6 @@ export function useApplyOCR({ selectedBoardId, canCreateList, ocrResult, lists, 
         dispatchSet('loading', true);
 
         // --- 1. Prepare Data Logic ---
-
-        // Helpers for Assignee Resolution
-        const normalizeTokenForEmail = (tok = '') => {
-            if (!tok) return '';
-            return String(tok).trim().toLowerCase().replace(/[()\[\]<>,"'`]/g, '').replace(/\s+/g, '');
-        };
-
-        const levenshtein = (a = '', b = '') => {
-            const A = String(a || ''), B = String(b || '');
-            const al = A.length, bl = B.length;
-            if (al === 0) return bl;
-            if (bl === 0) return al;
-            const dp = Array.from({ length: al + 1 }, () => new Array(bl + 1).fill(0));
-            for (let i = 0; i <= al; i++) dp[i][0] = i;
-            for (let j = 0; j <= bl; j++) dp[0][j] = j;
-            for (let i = 1; i <= al; i++) {
-                for (let j = 1; j <= bl; j++) {
-                    const cost = A[i - 1] === B[j - 1] ? 0 : 1;
-                    dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
-                }
-            }
-            return dp[al][bl];
-        };
 
         // Determine lists to create
         let listsToCreate = [];
@@ -303,7 +284,7 @@ export function useApplyOCR({ selectedBoardId, canCreateList, ocrResult, lists, 
                         title, description, assignees: finalAssignees, 
                         labels: item.labels || [], priority: cp.priorityLabel, priorityRank: cp.priorityRank,
                         status: 'todo', dueDate, startDate: item.startDate || null,
-                        effort: effortVal, weight: w, subtasks: item.subtasks || [],
+                        effort: effortVal, weight: w, subtasks: autoBalanceSubtaskList(item.subtasks || []),
                         createdAt: new Date(), createdBy: uid
                      };
                      
@@ -352,8 +333,7 @@ export function useApplyOCR({ selectedBoardId, canCreateList, ocrResult, lists, 
         } finally {
             dispatchSet('loading', false);
         }
-    }, [
-        selectedBoardId, canCreateList, ocrResult, lists, businessId, uid, dispatchSet, computePriority, boardSvc, cardsMap, emailMap, members, membersMap, getMemberLevel, roles, businessOwnerUid
-    ]);
+    }, []); // Zero dependencies, totally stable hook using depsRef
+
     return { handleApplyOCRToBoard };
 }

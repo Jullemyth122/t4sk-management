@@ -1,4 +1,4 @@
-/* src/scss/ErrorBoundary.scss */
+/* src/scss/ErrorBoundary.scss — Uses global theme variables */
 
 .error-boundary-wrapper {
   display: flex;
@@ -6,16 +6,11 @@
   justify-content: center;
   height: 100vh;
   width: 100vw;
-  background-color: var(--bg-color, #0f172a);
-  color: var(--text-main, #f8fafc);
+  background-color: var(--bg-color, var(--home-comp-bg, #0f172a));
+  color: var(--text-bright, var(--text-main, #f8fafc));
   overflow: hidden;
   position: relative;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-}
-
-[data-theme="light"] .error-boundary-wrapper {
-  background-color: #f8fafc;
-  color: #0f172a;
 }
 
 .error-boundary-shapes {
@@ -42,7 +37,7 @@
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background-color: rgba(83, 143, 255, 0.4);
+  background-color: var(--gold-dim, rgba(83, 143, 255, 0.4));
   animation-delay: 0s;
 }
 
@@ -51,7 +46,7 @@
   right: -10%;
   width: 60vw;
   height: 60vw;
-  background-color: rgba(43, 8, 161, 0.3);
+  background-color: var(--olive-accent, rgba(43, 8, 161, 0.3));
   animation-delay: -3s;
 }
 
@@ -60,20 +55,8 @@
   left: 60%;
   width: 40vw;
   height: 40vw;
-  background-color: rgba(14, 165, 233, 0.3);
+  background-color: var(--gold-faint, rgba(14, 165, 233, 0.3));
   animation-delay: -6s;
-}
-
-[data-theme="light"] .eb-shape1 {
-  background-color: rgba(59, 130, 246, 0.2);
-}
-
-[data-theme="light"] .eb-shape2 {
-  background-color: rgba(139, 92, 246, 0.15);
-}
-
-[data-theme="light"] .eb-shape3 {
-  background-color: rgba(14, 165, 233, 0.15);
 }
 
 @keyframes floatShape {
@@ -85,44 +68,31 @@
 .error-boundary-content {
   position: relative;
   z-index: 2;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.05));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
   padding: 3rem 4rem;
   border-radius: 24px;
   text-align: center;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--glass-shadow, 0 24px 48px rgba(0, 0, 0, 0.2));
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
 }
 
-[data-theme="light"] .error-boundary-content {
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.05);
-}
-
 .error-boundary-code {
   font-size: 4rem;
   font-weight: 800;
   letter-spacing: 0.5rem;
-  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  background: linear-gradient(135deg, var(--gold, #60a5fa), var(--gold-dim, #a78bfa));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 0.5rem;
   display: flex;
   gap: 4px;
-}
-
-[data-theme="light"] .error-boundary-code {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .error-boundary-code span {
@@ -141,20 +111,16 @@
 
 .error-boundary-msg {
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-mid, rgba(255, 255, 255, 0.8));
   max-width: 300px;
   line-height: 1.6;
-}
-
-[data-theme="light"] .error-boundary-msg {
-  color: #475569;
 }
 
 .error-boundary-btn {
   margin-top: 1rem;
   padding: 12px 24px;
-  background: linear-gradient(135deg, rgba(83, 143, 255, 0.9), rgba(65, 124, 200, 0.9));
-  color: white;
+  background: linear-gradient(135deg, var(--gold, rgba(83, 143, 255, 0.9)), var(--gold-dim, rgba(65, 124, 200, 0.9)));
+  color: var(--home-comp-bg, white);
   border: none;
   border-radius: 12px;
   font-size: 1rem;
@@ -162,15 +128,16 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
-  box-shadow: 0 4px 15px rgba(83, 143, 255, 0.3);
+  box-shadow: 0 4px 15px var(--gold-faint, rgba(83, 143, 255, 0.3));
 }
 
 .error-boundary-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(83, 143, 255, 0.4);
+  box-shadow: 0 8px 25px var(--gold-faint, rgba(83, 143, 255, 0.4));
   filter: brightness(1.1);
 }
 
 .error-boundary-btn:active {
   transform: translateY(0);
 }
+

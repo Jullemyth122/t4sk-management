@@ -64,6 +64,7 @@ export default function ListColumn({
     const [expandedMap, setExpandedMap] = useState({});
     const [collapsed, setCollapsed] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false); // New Premium Modal State
+    const [showAssigneeDropdown, setShowAssigneeDropdown] = useState(false);
 
     useEffect(() => {
         setCollapsed(false);
@@ -449,35 +450,56 @@ export default function ListColumn({
             </div>
 
             {resolvedAssignees.length > 0 && (
-                <div className="list-assignees" title={fullTitle}>
-                    <div className="assignees-left">
-                        <div className="assignees-chips" role="list">
-                            {visible.map((a) => (
-                                <div key={a.key} className="assignee-chip" role="listitem" title={a.email ? `${a.name} — ${a.email}` : a.name}>
-                                    <span className="assignee-avatar" aria-hidden style={{ backgroundColor: `hsl(${a.hue} 60% 60%)` }}>
-                                        {a.initials}
-                                    </span>
-                                    <span className="assignee-meta">
-                                        <span className="assignee-name">{a.name}</span>
-                                        {a.email ? <span className="assignee-email">{a.email}</span> : null}
-                                        {isOverloaded && isOverloaded(a.key) && (
-                                            <span className="assignee-overloaded" title="High Workload">🔥</span>
-                                        )}
-                                    </span>
-                                </div>
-                            ))}
-                            {moreCount > 0 && (
-                                <button
-                                    type="button"
-                                    className="assignee-more"
-                                    aria-label={`Show ${moreCount} more assignees`}
-                                    title={resolvedAssignees.slice(visibleCount).map((r) => (r.email ? `${r.name} <${r.email}>` : r.name)).join(', ')}
-                                >
-                                    +{moreCount}
-                                </button>
-                            )}
-                        </div>
+                <div
+                    className="list-assignees-container"
+                    title={fullTitle}
+                    onMouseEnter={() => setShowAssigneeDropdown(true)}
+                    onMouseLeave={() => setShowAssigneeDropdown(false)}
+                    onClick={() => setShowAssigneeDropdown(prev => !prev)}
+                >
+                    <div className="list-assignees-stack">
+                        {visible.map((a, i) => (
+                            <div
+                                key={a.key}
+                                className={`list-stacked-avatar ${isOverloaded && isOverloaded(a.key) ? 'is-overloaded' : ''}`}
+                                style={{ backgroundColor: `hsl(${a.hue} 60% 60%)`, zIndex: visible.length - i }}
+                                title={a.name}
+                            >
+                                {a.initials}
+                            </div>
+                        ))}
+                        {moreCount > 0 && (
+                            <div className="list-stacked-avatar more-avatar" style={{ zIndex: 0 }}>
+                                +{moreCount}
+                            </div>
+                        )}
                     </div>
+
+                    {showAssigneeDropdown && (
+                        <div className="list-assignees-dropdown">
+                            <div className="assignees-dropdown-header">List Assignees</div>
+                            <div className="assignees-dropdown-list">
+                                {resolvedAssignees.map(a => {
+                                    const overloaded = isOverloaded && isOverloaded(a.key);
+                                    return (
+                                        <div key={a.key} className="assignees-dropdown-item">
+                                            <div className="dropdown-avatar" style={{ backgroundColor: `hsl(${a.hue} 60% 60%)` }}>
+                                                {a.initials}
+                                            </div>
+                                            <div className="dropdown-meta">
+                                                <div className="dropdown-name">{a.name}</div>
+                                                {overloaded ? (
+                                                    <div className="workload-badge">High Workload</div>
+                                                ) : (
+                                                    a.email && <div className="dropdown-email">{a.email}</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -734,11 +756,12 @@ export default function ListColumn({
                                 style={{
                                     width: '100%',
                                     justifyContent: 'center',
-                                    padding: '12px', /* Taller, more click area */
-                                    fontSize: '0.95rem',
+                                    padding: '8px', /* Reduced padding */
+                                    fontSize: '0.85rem',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '8px'
+                                    gap: '6px',
+                                    borderRadius: '8px'
                                 }}
                             >
                                 <span style={{ fontSize: '1.2rem', lineHeight: '1', fontWeight: 'bold' }}>+</span>
