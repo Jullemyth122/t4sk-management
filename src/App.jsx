@@ -18,7 +18,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 
 import TermsPage from "./components/authentication/TermsPage";
 import PrivacyPolicy from "./components/authentication/PrivacyPolicy";
-import SignUpTrial from "./components/authentication/SignUpTrial";
+import SignupTrial from "./components/authentication/SignupTrial";
 
 // import SecureRoute from "./routes/SecureRoute";
 // import RequireAccountType from "./routes/RequireAccountType";
@@ -37,12 +37,11 @@ const router = createBrowserRouter([
       </ErrorBoundary>
     ),
     errorElement: <ErrorBoundary />,
-    errorElement: <ErrorBoundary />,
     children: [   
       { path: "home", element: <PublicRoute><Home simulateLoading={true}/></PublicRoute> },
       { path: "changelog", element: <PublicRoute><Changelog /></PublicRoute> },
       // { path: "signup", element: <PublicRoute><Signup simulateLoading={true}/></PublicRoute> },
-      { path: "signup", element: <PublicRoute><SignUpTrial /></PublicRoute> },
+      { path: "signup", element: <PublicRoute><SignupTrial /></PublicRoute> },
       { path: "terms", element: <PublicRoute><TermsPage /></PublicRoute> },
       { path: "privacy", element: <PublicRoute><PrivacyPolicy /></PublicRoute> },
       // These are children of Task so they show navbar (AuthGuard above will block access if no accountType)

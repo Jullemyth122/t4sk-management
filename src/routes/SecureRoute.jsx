@@ -1,8 +1,8 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/useAuth';
+import { useReduxAuth } from '../context/ReduxAuthContext';
 
 const SecureRoute = ({ children }) => {
-    const { currentUser } = useAuth();
+    const { currentUser } = useReduxAuth();
     
     // If the user is logged in, redirect them to the dashboard.
     if (!currentUser) {

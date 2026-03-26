@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
+    "@reduxjs/toolkit": "^2.11.2",
     "@tailwindcss/vite": "^4.1.11",
     "axios": "^1.13.6",
     "express": "^5.2.1",
@@ -24,6 +25,7 @@
     "react-dom": "^19.1.0",
     "react-i18next": "^15.6.1",
     "react-player": "^3.4.0",
+    "react-redux": "^9.2.0",
     "react-router-dom": "^7.7.1",
     "recharts": "^3.7.0",
     "sass": "^1.89.2",

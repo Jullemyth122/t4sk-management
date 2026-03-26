@@ -1,9 +1,9 @@
 import { useCallback, useReducer } from "react";
-import { useAuth } from "../../context/useAuth";
+import { useReduxAuth } from "../../context/ReduxAuthContext";
 import { reducer } from "../../reducer/reducer";
 
 export function useUserData(propBusinessId, initialState) {
-    const authCtx = useAuth();
+    const authCtx = useReduxAuth();
     const currentUser = authCtx?.currentUser || null;
     const profile = authCtx?.profile ?? currentUser?.profile ?? null;
     const uid = currentUser?.uid || profile?.uid || null;

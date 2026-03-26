@@ -1,10 +1,10 @@
 // RequireAccountType.jsx
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/useAuth";
+import { useReduxAuth } from "../context/ReduxAuthContext";
 
 export default function RequireAccountType({ children }) {
-    const { currentUser } = useAuth();
+    const { currentUser } = useReduxAuth();
 
     if (!currentUser) {
         return <Navigate to="/signup" replace />;

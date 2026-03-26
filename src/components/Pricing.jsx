@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { useAuth } from '../context/useAuth';
+import { useReduxAuth } from '../context/ReduxAuthContext';
 import '../scss/pricing.scss';
 
 export default function Pricing() {
   // CRITICAL: useAuth() returns { currentUser } where profile lives at currentUser.profile
   // There is NO separate "profile" export from useAuth!
-  const { currentUser } = useAuth();
+  const { currentUser } = useReduxAuth();
   const profile = currentUser?.profile || null;
   const uid = currentUser?.uid || null;
   const navigate = useNavigate();

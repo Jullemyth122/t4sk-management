@@ -224,10 +224,9 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
                             <span className="pd-priority-badge pd-priority-badge--none">No priority</span>
                         )}
 
-                        {/* Task Weight Display */}
                         {card.weight != null && (
                             <span className="pd-priority-badge pd-weight-badge" style={{ background: 'rgba(177, 182, 137, 0.15)', color: 'var(--task-modalbtnBG, #b1b689)' }}>
-                                P {card.weight}
+                                Wt: {card.weight}
                             </span>
                         )}
                     </div>
@@ -327,10 +326,9 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
                         <span className="pd-priority-badge pd-priority-badge--none">No priority</span>
                     )}
 
-                    {/* Task Weight Display */}
                     {card.weight != null && (
                         <span className="pd-priority-badge pd-weight-badge" style={{ background: 'rgba(177, 182, 137, 0.15)', color: 'var(--task-modalbtnBG, #b1b689)' }}>
-                            P {card.weight}
+                            Wt: {card.weight}
                         </span>
                     )}
                 </div>

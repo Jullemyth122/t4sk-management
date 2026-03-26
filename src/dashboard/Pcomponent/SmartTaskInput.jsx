@@ -75,24 +75,47 @@ export default function SmartTaskInput({
         
         const slashIndex = textBefore.lastIndexOf('/');
         let newText = value;
+        let cleanedBefore = textBefore;
 
         if (slashIndex !== -1) {
-            const beforeSlash = textBefore.slice(0, slashIndex);
-            newText = beforeSlash + textAfter; 
+            cleanedBefore = textBefore.slice(0, slashIndex);
+            newText = cleanedBefore + textAfter; 
         }
 
-        switch (command.id) {
-            case 'todo':
-                newText = newText + '\n- [ ] ';
-                break;
-            case 'code':
-                newText = newText + '\n```\n\n```';
-                break;
-            case 'table':
-                newText = newText + '\n| Header 1 | Header 2 |\n|----------|----------|\n| cell     | cell     |';
-                break;
-            default:
-                break;
+        // Detect if we're on an empty checkbox line (e.g. user typed `- [ ] /code`)
+        const lastNewline = cleanedBefore.lastIndexOf('\n');
+        const currentLineBefore = cleanedBefore.slice(lastNewline + 1);
+        const isOnEmptyCheckbox = /^\s*-\s*\[[ xX]\]\s*$/.test(currentLineBefore);
+        const checkboxIndent = currentLineBefore.match(/^(\s*)/)[1];
+        const childIndent = checkboxIndent + '    '; // 4 spaces deeper
+
+        if (isOnEmptyCheckbox && (command.id === 'code' || command.id === 'table')) {
+            // Keep the checkbox, add the smart token
+            const lineStart = cleanedBefore.slice(0, lastNewline + 1);
+            const checkboxLine = currentLineBefore.trimEnd();
+            
+            switch (command.id) {
+                case 'code':
+                    newText = lineStart + checkboxLine + ' (/code)\n' + childIndent + '\n' + textAfter;
+                    break;
+                case 'table':
+                    newText = lineStart + checkboxLine + ' (/table)\n' + childIndent + '| Header 1 | Header 2 |\n' + childIndent + '|----------|----------|\n' + childIndent + '| cell     | cell     |\n' + textAfter;
+                    break;
+            }
+        } else {
+            switch (command.id) {
+                case 'todo':
+                    newText = newText + '\n- [ ] ';
+                    break;
+                case 'code':
+                    newText = newText + '\n```\n\n```';
+                    break;
+                case 'table':
+                    newText = newText + '\n| Header 1 | Header 2 |\n|----------|----------|\n| cell     | cell     |';
+                    break;
+                default:
+                    break;
+            }
         }
 
         if (onChange) onChange(newText);
@@ -101,9 +124,26 @@ export default function SmartTaskInput({
         
         setTimeout(() => {
             if (inputRef.current) {
-                inputRef.current.focus();
-                const newPos = newText.length;
-                inputRef.current.setSelectionRange(newPos, newPos);
+                if (isOnEmptyCheckbox && command.id === 'code') {
+                    // Place cursor on the empty line inside code content
+                    const tokenPos = newText.indexOf('(/code)\n');
+                    if (tokenPos !== -1) {
+                        const pos = tokenPos + 8 + childIndent.length;
+                        inputRef.current.setSelectionRange(pos, pos);
+                    } else {
+                        inputRef.current.setSelectionRange(newText.length, newText.length);
+                    }
+                } else if (command.id === 'code') {
+                    const codeStart = newText.lastIndexOf('```\n');
+                    if (codeStart !== -1) {
+                        const pos = codeStart + 4;
+                        inputRef.current.setSelectionRange(pos, pos);
+                    } else {
+                        inputRef.current.setSelectionRange(newText.length, newText.length);
+                    }
+                } else {
+                    inputRef.current.setSelectionRange(newText.length, newText.length);
+                }
             }
         }, 10);
     };
@@ -128,11 +168,60 @@ export default function SmartTaskInput({
             return;
         }
 
-        // Only submit on unmodified Enter if onSubmit is provided
-        if (e.key === 'Enter' && !e.shiftKey && onSubmit) {
+        if (e.key === 'Tab') {
             e.preventDefault();
-            if (value.trim()) {
-                onSubmit(value.trim());
+            const start = inputRef.current.selectionStart;
+            const end = inputRef.current.selectionEnd;
+            const newText = value.substring(0, start) + '    ' + value.substring(end);
+            if (onChange) onChange(newText);
+            setTimeout(() => {
+                if (inputRef.current) {
+                    inputRef.current.setSelectionRange(start + 4, start + 4);
+                }
+            }, 10);
+            return;
+        }
+
+        if (e.key === 'Enter' && !e.shiftKey) {
+            if (onSubmit) {
+                e.preventDefault();
+                if (value.trim()) onSubmit(value.trim());
+                return;
+            }
+
+            const start = inputRef.current.selectionStart;
+            const textBefore = value.substring(0, start);
+            const lines = textBefore.split('\n');
+            const currentLine = lines[lines.length - 1];
+
+            const match = currentLine.match(/^(\s*(?:-\s\[[ x]\]\s|-\s|\*\s))/i);
+
+            if (match) {
+                e.preventDefault();
+                const prefix = match[1];
+
+                if (currentLine === prefix.trimEnd() || currentLine === prefix) {
+                    const newText = value.substring(0, start - currentLine.length) + '\n' + value.substring(inputRef.current.selectionEnd);
+                    if (onChange) onChange(newText);
+                    setTimeout(() => {
+                        if (inputRef.current) {
+                            const newPos = start - currentLine.length + 1;
+                            inputRef.current.setSelectionRange(newPos, newPos);
+                        }
+                    }, 10);
+                    return;
+                }
+
+                const newPrefix = prefix.replace(/\[x\]/i, '[ ]');
+                const newText = value.substring(0, start) + '\n' + newPrefix + value.substring(inputRef.current.selectionEnd);
+                if (onChange) onChange(newText);
+                setTimeout(() => {
+                    if (inputRef.current) {
+                        const newPos = start + 1 + newPrefix.length;
+                        inputRef.current.setSelectionRange(newPos, newPos);
+                    }
+                }, 10);
+                return;
             }
         } else if (e.key === 'Escape' && onCancel) {
             onCancel();

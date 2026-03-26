@@ -2,11 +2,38 @@ import React, { useState, useRef, useEffect } from 'react';
 import PersonalCard from './PersonalCard';
 import PersonalListMenu from './PersonalListMenu';
 
-export default function PersonalList({ list, onCardClick, onAddTask, highlightItemId }) {
+export default function PersonalList({
+    list,
+    allLists,
+    onCardClick,
+    onAddTask,
+    onRenameList,
+    onUpdateListColor,
+    onDeleteList,
+    onDuplicateList,
+    onSortCards,
+    onMoveAllCards,
+    highlightItemId
+}) {
 
     const { id, name, color, cards } = list;
     const [menuOpen, setMenuOpen] = useState(false);
+    const [isRenaming, setIsRenaming] = useState(false);
+    const [renameValue, setRenameValue] = useState(name || '');
     const menuBtnRef = useRef(null);
+
+    const handleStartRename = () => {
+        setRenameValue(name);
+        setIsRenaming(true);
+        setMenuOpen(false);
+    };
+
+    const handleConfirmRename = () => {
+        if (renameValue.trim() && renameValue.trim() !== name) {
+            onRenameList && onRenameList(list.id, renameValue.trim());
+        }
+        setIsRenaming(false);
+    };
 
     const highlightClass = id === highlightItemId ? 'pd-highlight-pulse' : '';
 

@@ -698,3 +698,46 @@ Schema required:
     throw e;
   }
 }
+
+export async function suggestTaskDates(title, description, priority) {
+  const prompt = `
+Given the following task details, suggest a realistic start date and due date.
+Consider the complexity of the task based on its title and description. 
+Assume today is ${new Date().toISOString().split('T')[0]}.
+The priority is ${priority}.
+
+Task Title: ${title || "Untitled Task"}
+Description: ${description || "No description"}
+
+Respond ONLY with a valid JSON object matching this schema, with NO markdown formatting:
+{
+  "startDate": "YYYY-MM-DD",
+  "dueDate": "YYYY-MM-DD"
+}
+`;
+
+  try {
+    const result = await model.generateContent([{ text: prompt }], { generationConfig: { responseMimeType: 'application/json' } });
+    let rawText = null;
+    if (typeof result.response?.text === 'function') {
+        rawText = await result.response.text();
+    } else if (result.response?.candidates?.length > 0) {
+        rawText = result.response.candidates[0]?.content?.parts?.[0]?.text;
+    }
+    
+    if (!rawText) throw new Error("Empty response from AI");
+
+    let parsed = parseLooseJSON(rawText);
+    if (!parsed) {
+        const fenceMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+        if (fenceMatch) parsed = parseLooseJSON(fenceMatch[1]);
+    }
+    if (!parsed || (!parsed.startDate && !parsed.dueDate)) {
+        throw new Error("Failed to parse expected AI JSON response.");
+    }
+    return parsed;
+  } catch(e) {
+    console.error("Task date suggestion failed", e);
+    throw e;
+  }
+}

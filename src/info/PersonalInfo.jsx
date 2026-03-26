@@ -1,10 +1,10 @@
 // src/info/PersonalInfo.jsx
 import React, { useEffect, useCallback, useRef } from "react";
-import { useAuth } from "../context/useAuth";
+import { useReduxAuth } from "../context/ReduxAuthContext";
 import { useNavigate } from "react-router-dom";
 import { usePersonalProfile } from "../hooks/personal/usePersonalProfile";
 import { useProfileForm } from "../hooks/personal/useProfileForm";
-import { useTheme } from "../context/ThemeContext";
+import { useReduxTheme } from "../context/ReduxThemeContext";
 import "../scss/personal-info.scss";
 
 /* ----------------------------- constants --------------------------------- */
@@ -35,11 +35,11 @@ const IconChevron = () => (
 
 /* ========================== component ==================================== */
 export default function PersonalInfo({ simulateLoading = false }) {
-    const { currentUser, refreshProfile } = useAuth();
+    const { currentUser, refreshProfile } = useReduxAuth();
     const navigate = useNavigate();
     const uid = currentUser?.uid ?? currentUser?.profile?.uid ?? null;
     const timezoneRef = useRef(null);
-    const { setTheme } = useTheme();
+    const { setTheme } = useReduxTheme();
 
     // --- Hooks ---
     const { profile, loading: profileLoading, error: loadError, profileExists } = usePersonalProfile(uid);
