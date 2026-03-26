@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/useAuth';
+import { useReduxAuth } from '../../context/ReduxAuthContext';
 import { sendEmailVerification } from 'firebase/auth';
 import '../../scss/signup2.scss';
 
 export default function VerifyEmail() {
-  const { currentUser, signOut } = useAuth();
+  const { currentUser, signOut } = useReduxAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [resendStatus, setResendStatus] = useState('');

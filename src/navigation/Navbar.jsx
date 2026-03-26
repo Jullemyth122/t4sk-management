@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import "../scss/navbar.scss";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/useAuth";
+import { useReduxAuth } from "../context/ReduxAuthContext";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../config/firebase";
 import {
@@ -13,11 +13,11 @@ import {
 
 import NavbarSkeleton from "../components/loaders/NavbarSkeleton";
 import NotificationDropdown from "../components/NotificationDropdown";
-import { useTheme } from "../context/ThemeContext";
+import { useReduxTheme } from "../context/ReduxThemeContext";
 
 const Navbar = ({ simulateLoading = true }) => {
-    const { currentUser, signOut, refreshProfile } = useAuth();
-    const { theme, setTheme, themes } = useTheme();
+    const { currentUser, signOut, refreshProfile } = useReduxAuth();
+    const { theme, setTheme, themes } = useReduxTheme();
     const [notifications, setNotifications] = useState([]);
     const [rawInvites, setRawInvites] = useState([]); // as stored in account.invitesEmail
     const [invites, setInvites] = useState([]); // enriched invites with businessName + friendly fields

@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
-import { useAuth } from '../context/useAuth';
+import { useReduxAuth } from '../context/ReduxAuthContext';
 
 /**
  * Hook to check if the current user has specific permissions.
  * 
  * NOTE: This hook assumes that the consuming component is somehow providing the 
- * "current business" context or roles list, OR it relies on what's available in useAuth/profile.
+ * "current business" context or roles list, OR it relies on what's available in useReduxAuth/profile.
  * 
  * However, since permissions are typically tied to a specific business role, 
  * and a user might be an owner (all perms) or a member with a specific role,
@@ -17,7 +17,7 @@ import { useAuth } from '../context/useAuth';
  * @param {String} currentBusinessId - ID of the business we are checking (optional)
  */
 export default function useHasPerm(roles = [], currentBusinessId = null) {
-    const { currentUser } = useAuth();
+    const { currentUser } = useReduxAuth();
 
     /**
      * Check if user has permission(s).

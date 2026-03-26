@@ -1,6 +1,6 @@
 // src/routes/AuthGuard.jsx
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/useAuth";
+import { useReduxAuth } from "../context/ReduxAuthContext";
 
 /**
  * Props:
@@ -27,7 +27,7 @@ export default function AuthGuard({
     requireType = "any",
     redirectTo = "/signup",
 }) {
-    const { currentUser, loading } = useAuth();
+    const { currentUser, loading } = useReduxAuth();
     const location = useLocation();
 
     // Avoid flashing while auth + profile are still loading

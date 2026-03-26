@@ -1,7 +1,7 @@
 // src/pages/ChooseAccountType.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/useAuth";
+import { useReduxAuth } from "../context/ReduxAuthContext";
 import {
   updateAccountType,
   acceptInvite as svcAcceptInvite,
@@ -17,7 +17,7 @@ import { db } from "../config/firebase";
 
 export default function ChooseAccountType() {
     
-    const { currentUser, refreshProfile } = useAuth();
+    const { currentUser, refreshProfile } = useReduxAuth();
     const navigate = useNavigate();
     const [loadingFor, setLoadingFor] = useState("");
     const [error, setError] = useState("");

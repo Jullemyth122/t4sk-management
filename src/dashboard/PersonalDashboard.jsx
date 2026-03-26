@@ -1,6 +1,6 @@
 // src/dashboard/PersonalDashboard.jsx
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { useAuth } from '../context/useAuth';
+import { useReduxAuth } from '../context/ReduxAuthContext';
 import * as boardSvc from '../services/boardService';
 
 import PersonalSidebar from './Pcomponent/PersonalSidebar';
@@ -13,7 +13,7 @@ import '../scss/personal-dashboard.scss';
 
 // Import newly grouped AI integrations
 import AICopilotPanel from './Bcomponent/AICopilotPanel';
-import ReviewModal from './Bcomponent/ReviewModal';
+import AIVerifyModal from './Pcomponent/AIVerifyModal';
 
 // Import hooks
 import { usePersonalBoards } from '../hooks/personal/usePersonalBoards';
@@ -24,11 +24,12 @@ import { usePersonalGenerativeBoard } from '../hooks/personal/usePersonalGenerat
 import { usePersonalAICopilot } from '../hooks/personal/usePersonalAICopilot';
 import { usePersonalOCRHandling } from '../hooks/personal/usePersonalOCRHandling';
 import { usePersonalApplyOCR } from '../hooks/personal/usePersonalApplyOCR';
+import PersonalCanvas from './Pcomponent/PersonalCanvas';
 
 const DEFAULT_COLORS = ['#f59e0b', '#6366f1', '#10b981', '#ec4899', '#8b5cf6', '#3b82f6'];
 
 export default function PersonalDashboard() {
-    const { currentUser } = useAuth();
+    const { currentUser } = useReduxAuth();
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [viewMode, setViewMode] = useState('board');
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -622,6 +623,39 @@ export default function PersonalDashboard() {
                     {activeTab === 'stats' && (
                         <PersonalStatistics lists={lists} />
                     )}
+                    {activeTab === 'canvas' && (
+                        <PersonalCanvas
+                            lists={lists}
+                            allLists={lists}
+                            onUpdateCard={handleUpdateCard}
+                            onDeleteCard={handleDeleteCard}
+                            onMoveCard={handleMoveCard}
+                            onAddTask={async (listId, title) => {
+                                if (!title) return;
+                                try {
+                                    await boardSvc.createCard({
+                                        uid, boardId: selectedBoardId, listId,
+                                        card: { title, status: 'todo' },
+                                        actorName: currentUser?.displayName || 'Me',
+                                        boardName: selectedBoard?.name || 'Board'
+                                    });
+                                } catch (e) {
+                                    setUiError("Failed to add task");
+                                }
+                            }}
+                            onAddList={async (name) => {
+                                if (!name) return;
+                                try {
+                                    await boardSvc.createList({ uid, boardId: selectedBoardId, name, assignees: [] });
+                                } catch (e) {
+                                    setUiError("Failed to add list");
+                                }
+                            }}
+                            onRenameList={handleRenameList}
+                            onDeleteList={handleDeleteList}
+                            onUpdateListColor={handleUpdateListColor}
+                        />
+                    )}
                 </div>
             </main>
 
@@ -640,7 +674,7 @@ export default function PersonalDashboard() {
 
             {/* AI Board Verification Modal */}
             {(aiVerificationOpen && aiResult) && (
-                <ReviewModal
+                <AIVerifyModal
                     isOpen={aiVerificationOpen}
                     onClose={() => setAiVerificationOpen(false)}
                     aiResult={aiResult}
@@ -654,7 +688,7 @@ export default function PersonalDashboard() {
 
             {/* OCR Verification Modal */}
             {(ocrVerificationOpen && ocrResult) && (
-                <ReviewModal
+                <AIVerifyModal
                     isOpen={ocrVerificationOpen}
                     onClose={() => setOcrVerificationOpen(false)}
                     aiResult={ocrResult}

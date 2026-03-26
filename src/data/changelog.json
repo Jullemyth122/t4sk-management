@@ -1,9 +1,36 @@
 [
   {
+    "version": "0.0.3",
+    "title": "Redux Migration, Nested Subtasks & Smart Markdown Tokens & Canvas Node View & Interactive Board Management in Personal Management",
+    "date": "March 26, 2026",
+    "isLatest": true,
+    "changes": [
+      "Migrated global state management from React Context API to Redux Toolkit for improved performance, dev-tools support, and scalable architecture",
+      "Created dedicated Redux slices: authSlice for authentication state and themeSlice for theme management",
+      "Implemented recursive cascading checkbox logic — checking a parent subtask now automatically checks all descendant children",
+      "Cascade-up logic ensures toggling any nested child bubbles up through all ancestor levels to update their checked state",
+      "Single-child auto-completion — when a parent has only one child and that child is checked, the parent is automatically completed",
+      "Introduced Smart Markdown Tokens: (/code) for embedding fenced code blocks and (/table) for embedding tables inside checklists",
+      "Bidirectional subtask ↔ description sync via hidden HTML comment markers (<!-- subtask:N -->) for reliable mapping between subtask array and markdown",
+      "MarkdownPreview component now renders code blocks with syntax highlighting, tables, inline code, bold, italic, strikethrough, and nested checklists",
+      "Fixed edge cases where deeply-nested checkbox toggling would not propagate correctly to the top-level task status",
+      "Introduced Canvas View — an infinite-pan, zoomable node-based task visualization inspired by flowchart tools like Obsidian Canvas and Miro",
+      "Auto-layout engine that arranges list header nodes as columns with task card nodes flowing beneath, connected by smooth SVG Bézier curves",
+      "Minimap overlay showing a bird's-eye view of all nodes with a live viewport indicator",
+      "Drag-and-drop card reparenting — drag a task node onto a different list node to move it between lists instantly",
+      "Smart click vs. drag detection — dragging a node no longer accidentally opens the task modal",
+      "Canvas list nodes feature inline action buttons: Add Task (+), Rename (✎), Change Color (🎨), and Delete (🗑)",
+      "Global 'New List Node' floating button on the canvas for quick list creation",
+      "Replaced all native browser prompts (window.prompt / window.confirm) with a custom-themed PcPromptModal component",
+      "PcPromptModal uses proper SCSS and global CSS theme variables (--pd-bg-card, --pd-border, --pd-text, --pd-danger, etc.) for full theme consistency",
+      "Sidebar board management now uses dedicated Rename and Delete icon buttons with custom modals instead of the old text-prompt workflow"
+    ]
+  },
+  {
     "version": "0.0.2",
     "title": "AI Expansion, Optimizations, & UX Polish Update",
     "date": "March 19, 2026",
-    "isLatest": true,
+    "isLatest": false,
     "changes": [
       "Integrated AI Co-Pilot into the Personal Dashboard for natural language task creation and board querying",
       "Added OCR Task Import to the Personal Dashboard for converting images and scanned documents into task lists",
@@ -48,3 +75,4 @@
     ]
   }
 ]
+

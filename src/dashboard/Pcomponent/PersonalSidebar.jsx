@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import PcPromptModal from './PcPromptModal';
 
 const NAV_ITEMS = [
     { id: 'dashboard', label: 'Dashboard', icon: (
@@ -26,6 +27,12 @@ const NAV_ITEMS = [
     { id: 'stats', label: 'Statistics', icon: (
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M2 16h14M4 12v4M8 8v8M12 5v11M16 2v14" strokeLinecap="round" />
+        </svg>
+    )},
+    { id: 'canvas', label: 'Canvas', icon: (
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M4 4h10v10H4zM4 9h10M9 4v10" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="9" cy="9" r="2" fill="currentColor" />
         </svg>
     )},
 ];
@@ -66,6 +73,11 @@ export default function PersonalSidebar({
         setNewBoardName('');
         setIsCreatingBoard(false);
     };
+
+    const [promptOpts, setPromptOpts] = useState(null);
+    const requestPrompt = useCallback((opts) => {
+        setPromptOpts({ ...opts, onCancel: () => setPromptOpts(null) });
+    }, []);
 
     // Calculate task count per board — for the selected board, use lists prop
     const getBoardTaskCount = (boardId) => {
@@ -199,44 +211,55 @@ export default function PersonalSidebar({
                                         <span className="pd-board-name">{board.name}</span>
                                         {count != null && <span className="pd-board-count">{count}</span>}
                                         {board.id === selectedBoardId && (
-                                            <button
-                                                className="pd-board-options-btn"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    // Add simple native prompts for now to guarantee no z-index/clipping issues
-                                                    const action = window.prompt(`Options for "${board.name}":\nType "rename" to change name\nType "delete" to remove this board`);
-                                                    if (action?.toLowerCase() === 'rename') {
-                                                        const newName = window.prompt('Enter new board name:', board.name);
-                                                        if (newName && newName.trim() && newName !== board.name) {
-                                                            onRenameBoard && onRenameBoard(board.id, newName.trim());
-                                                        }
-                                                    } else if (action?.toLowerCase() === 'delete') {
-                                                        if (window.confirm(`Are you sure you want to delete the board "${board.name}" and all its contents? This cannot be undone.`)) {
-                                                            onDeleteBoard && onDeleteBoard(board.id);
-                                                        }
-                                                    }
-                                                }}
-                                                title="Board Options"
-                                                style={{
-                                                    marginLeft: 'auto',
-                                                    background: 'transparent',
-                                                    border: 'none',
-                                                    color: 'inherit',
-                                                    opacity: 0.6,
-                                                    cursor: 'pointer',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    padding: '2px',
-                                                    borderRadius: '4px'
-                                                }}
-                                            >
-                                                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-                                                    <circle cx="8" cy="3" r="1.5" />
-                                                    <circle cx="8" cy="8" r="1.5" />
-                                                    <circle cx="8" cy="13" r="1.5" />
-                                                </svg>
-                                            </button>
+                                            <div style={{ display: 'flex', gap: '4px', marginLeft: 'auto' }}>
+                                                <button
+                                                    className="pd-board-options-btn"
+                                                    title="Rename Board"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        requestPrompt({
+                                                            title: 'Rename Board',
+                                                            fields: [{ id: 'name', label: 'Board Name', defaultValue: board.name }],
+                                                            submitText: 'Save',
+                                                            onConfirm: (vals) => {
+                                                                if (vals.name && vals.name.trim() && vals.name !== board.name) {
+                                                                    onRenameBoard && onRenameBoard(board.id, vals.name.trim());
+                                                                }
+                                                            }
+                                                        });
+                                                    }}
+                                                    style={{ background: 'transparent', border: 'none', color: 'inherit', opacity: 0.6, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px', borderRadius: '4px' }}
+                                                    onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                                                    onMouseLeave={e => e.currentTarget.style.opacity = 0.6}
+                                                >
+                                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                                        <path d="M12 2l2 2-9 9H3v-2l9-9zM3 13h10" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    className="pd-board-options-btn"
+                                                    title="Delete Board"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        requestPrompt({
+                                                            title: `Delete Board "${board.name}"?`,
+                                                            description: 'Are you sure you want to delete this board and all its contents? This cannot be undone.',
+                                                            submitText: 'Delete Board',
+                                                            danger: true,
+                                                            onConfirm: () => {
+                                                                onDeleteBoard && onDeleteBoard(board.id);
+                                                            }
+                                                        });
+                                                    }}
+                                                    style={{ background: 'transparent', border: 'none', color: '#ef4444', opacity: 0.6, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px', borderRadius: '4px' }}
+                                                    onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                                                    onMouseLeave={e => e.currentTarget.style.opacity = 0.6}
+                                                >
+                                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                                        <path d="M12 4v9a2 2 0 01-2 2H6a2 2 0 01-2-2V4M2 4h12M6 4V2a1 1 0 011-1h2a1 1 0 011 1v2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         )}
                                     </>
                                 )}
@@ -313,6 +336,9 @@ export default function PersonalSidebar({
                     {!sidebarCollapsed && <span className="pd-nav-text">Settings</span>}
                 </button>
             </div>
+            
+            {/* Custom Prompt Modal */}
+            <PcPromptModal opts={promptOpts} />
         </aside>
     );
 }

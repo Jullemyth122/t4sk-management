@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { useAuth } from '../context/useAuth';
+import { useReduxAuth } from '../context/ReduxAuthContext';
 import '../scss/pricing.scss'; // Reuse pricing styles for the success page aesthetic
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser } = useReduxAuth();
   
   const [status, setStatus] = useState('processing'); // 'processing', 'success', 'error'
   const [errorMsg, setErrorMsg] = useState('');

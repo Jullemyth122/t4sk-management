@@ -24,16 +24,19 @@ export function usePersonalGenerativeBoard(props) {
 
         const fetchUsage = async () => {
             try {
-                const ref = doc(db, 'users', uid, 'usage', 'aiBoard');
-                const snap = await getDoc(ref);
-                if (isMounted && snap.exists()) {
-                    setAiUsageCount(snap.data().count || 0);
-                }
+                // Bypassing usage fetch for Personal Demo to avoid Firestore permission errors
+                // const ref = doc(db, 'users', uid, 'usage', 'aiBoard');
+                // const snap = await getDoc(ref);
+                // if (isMounted && snap.exists()) {
+                //     setAiUsageCount(snap.data().count || 0);
+                // }
+                if (isMounted) setAiUsageCount(0);
             } catch (e) {
-                console.error("Failed to fetch AI usage count", e);
+                console.warn("Bypassed AI usage fetch for demo", e);
             }
         };
 
+        
         fetchUsage();
         return () => { isMounted = false; };
     }, [uid]);
@@ -100,11 +103,12 @@ export function usePersonalGenerativeBoard(props) {
             });
 
             try {
-                const usageRef = doc(db, 'users', uid, 'usage', 'aiBoard');
-                await setDoc(usageRef, { count: increment(1) }, { merge: true });
+                // Bypassing usage increment for Personal Demo to avoid Firestore permission errors
+                // const usageRef = doc(db, 'users', uid, 'usage', 'aiBoard');
+                // await setDoc(usageRef, { count: increment(1) }, { merge: true });
                 setAiUsageCount(prev => prev + 1);
             } catch (usageErr) {
-                console.error("Failed to increment AI usage count", usageErr);
+                console.warn("Bypassed AI usage increment for demo", usageErr);
             }
 
             const aiLists = Array.isArray(aiResult.lists) ? aiResult.lists : [];

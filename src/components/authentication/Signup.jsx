@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../context/useAuth';
+import { useReduxAuth } from '../../context/ReduxAuthContext';
 import gsap from 'gsap';
 import '../../scss/signup.scss';
 import SignupSkeleton from '../loaders/SignupSkeleton';
@@ -19,7 +19,7 @@ const Signup = ({ simulateLoading = false }) => {
     setUsername,setEmail,setPassword,
     errorMessage, setErrorMessage,
     successMessage, setSuccessMessage
-  } = useAuth()
+  } = useReduxAuth()
   
   // ----- Declare ALL hooks up front (important) -----
   const [loading, setLoading] = useState(Boolean(simulateLoading));
