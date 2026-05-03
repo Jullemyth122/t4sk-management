@@ -46,6 +46,9 @@ export default function AuthGuard({
     // If we require accountType present but user doesn't have it, force choose-account
     // EXCEPT if they are heading to /verify-email (we must allow them to verify first)
     if (requireType === "present" && !type && location.pathname !== "/verify-email") {
+        if (!currentUser.emailVerified) {
+            return <Navigate to="/verify-email" state={{ from: location }} replace />;
+        }
         // pass where they came from so after choosing you can route back
         return <Navigate to="/choose-account" state={{ from: location }} replace />;
     }

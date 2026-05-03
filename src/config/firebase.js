@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { getAI, getGenerativeModel, GoogleAIBackend } from "firebase/ai"; // Add this import
 import { FacebookAuthProvider, getAuth, GoogleAuthProvider } from "firebase/auth";
 
@@ -21,6 +22,20 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Initialize App Check
+let appCheck;
+if (typeof window !== "undefined") {
+    // Enable debug token for local development
+    if (import.meta.env.DEV) {
+        self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    }
+    appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY1),
+        isTokenAutoRefreshEnabled: true
+    });
+}
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 const dbRealtime = getDatabase(app);

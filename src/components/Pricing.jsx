@@ -23,11 +23,36 @@ export default function Pricing() {
   useEffect(() => {
     if (!currentUser || !profile) return;
 
+    if (profile.accountType === 'personal') {
+      setIsOwner(true);
+      setBusinessId(uid); // Use uid as the target ID for billing
+      const fetchPersonalPlan = async () => {
+        try {
+          const docRef = await getDoc(doc(db, 'account', uid));
+          if (docRef.exists()) {
+            setCurrentPlan(docRef.data().planType || 'free');
+          }
+        } catch (e) {
+          console.error('Error fetching personal plan:', e);
+        } finally {
+          setOwnerCheckComplete(true);
+        }
+      };
+      fetchPersonalPlan();
+      return;
+    }
+
     const affiliations = profile.businessAffiliations;
-    if (!Array.isArray(affiliations) || affiliations.length === 0) return;
+    if (!Array.isArray(affiliations) || affiliations.length === 0) {
+      setOwnerCheckComplete(true);
+      return;
+    }
 
     const bId = affiliations[0].businessId;
-    if (!bId) return;
+    if (!bId) {
+      setOwnerCheckComplete(true);
+      return;
+    }
     setBusinessId(bId);
 
     const fetchBusiness = async () => {
@@ -94,7 +119,7 @@ export default function Pricing() {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessId, planType }),
+        body: JSON.stringify({ businessId, planType, accountType: profile.accountType }),
       });
 
       const data = await response.json();
@@ -121,7 +146,8 @@ export default function Pricing() {
   const handleDevToggle = async (type) => {
     if (!businessId) return alert('No business ID found to toggle.');
     try {
-      await updateDoc(doc(db, 'businesses', businessId), { planType: type });
+      const collectionName = profile.accountType === 'personal' ? 'account' : 'businesses';
+      await updateDoc(doc(db, collectionName, businessId), { planType: type });
       setCurrentPlan(type);
       alert(`Developer Toggle: Successfully changed plan to ${type.toUpperCase()}`);
     } catch (e) {

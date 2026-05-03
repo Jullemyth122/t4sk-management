@@ -30,12 +30,13 @@ export default async function handler(req, res) {
     if (!secretKey) {
       console.warn("⚠️ PAYMONGO_SECRET_KEY missing - MOCKING SUCCESSFUL PAYMENT.");
       // In mock mode, still update Firestore if businessId and planType are provided
-      const { businessId, planType } = req.body;
+      const { businessId, planType, accountType } = req.body;
       let dbUpdateFailed = true;
       if (db && businessId && planType) {
         try {
-          await db.collection('businesses').doc(businessId).update({ planType });
-          console.log(`[Mock Verify] Upgraded business ${businessId} to ${planType}`);
+          const collectionName = accountType === 'personal' ? 'account' : 'businesses';
+          await db.collection(collectionName).doc(businessId).update({ planType });
+          console.log(`[Mock Verify] Upgraded ${collectionName} ${businessId} to ${planType}`);
           dbUpdateFailed = false;
         } catch (e) {
           console.error(`[Mock Verify] Failed to update Firestore:`, e.message);
@@ -75,13 +76,15 @@ export default async function handler(req, res) {
       let dbUpdateFailed = true;
       if (db && metadata?.businessId && metadata?.planType) {
          try {
-             await db.collection('businesses').doc(metadata.businessId).update({
+             const accountType = metadata.accountType || 'business';
+             const collectionName = accountType === 'personal' ? 'account' : 'businesses';
+             await db.collection(collectionName).doc(metadata.businessId).update({
                  planType: metadata.planType
              });
-             console.log(`[Verify] Successfully upgraded business ${metadata.businessId} to ${metadata.planType}`);
+             console.log(`[Verify] Successfully upgraded ${collectionName} ${metadata.businessId} to ${metadata.planType}`);
              dbUpdateFailed = false;
          } catch(e) {
-             console.error(`[Verify] Failed to update business ${metadata.businessId}:`, e.message);
+             console.error(`[Verify] Failed to update ${metadata.businessId}:`, e.message);
          }
       }
 

@@ -4,6 +4,7 @@ import { useReduxAuth } from '../../context/ReduxAuthContext';
 import gsap from 'gsap';
 import '../../scss/signup.scss';
 import SignupSkeleton from '../loaders/SignupSkeleton';
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Signup = ({ simulateLoading = false }) => {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ const Signup = ({ simulateLoading = false }) => {
   const [emailForReset, setEmailForReset] = useState("");
   const containerRef = useRef(null);
   const [activeView, setActiveView] = useState("SignUp");
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
 
   // simulate loading (demo)
   useEffect(() => {
@@ -113,6 +115,10 @@ const Signup = ({ simulateLoading = false }) => {
     }
     if (!acceptedTerms) {
       setErrorMessage("Please accept the Terms of Service and Privacy Policy");
+      return;
+    }
+    if (!recaptchaToken) {
+      setErrorMessage("Please complete the CAPTCHA to verify you are not a robot.");
       return;
     }
 
@@ -236,6 +242,16 @@ const Signup = ({ simulateLoading = false }) => {
                       </span>
                     </label>
                   </div>
+                  
+                  {/* === CAPTCHA WIDGET === */}
+                  <div className="w-full flex justify-center mt-2 mb-4">
+                    <ReCAPTCHA
+                      sitekey={import.meta.env.VITE_RECAPTCHA_V2_SITE_KEY || "dummy_key_if_missing"}
+                      onChange={(token) => setRecaptchaToken(token)}
+                      theme="dark"
+                    />
+                  </div>
+
                   {/* Create Account Button */}
                   <div className="result-input">
                     <button

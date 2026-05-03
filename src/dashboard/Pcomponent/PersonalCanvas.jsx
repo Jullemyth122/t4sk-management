@@ -11,18 +11,54 @@ const LIST_NODE_W = 220;
 const CARD_NODE_W = 260;
 const CARD_NODE_H_EST = 100;
 const CANVAS_PADDING = 120;
+const GRID_SIZE = 20;
 
 /**
  * Auto-layout: arrange lists as columns, cards below each list.
- * Returns an array of node objects with { id, type, x, y, ... }
+ * Uses canvasX/canvasY from DB when available, otherwise auto-assigns
+ * positions in a simple left-to-right column grid.
  */
 function buildNodeLayout(lists) {
     const nodes = [];
-    let colX = CANVAS_PADDING;
 
+    // --- Step 1: Determine auto-layout X positions for lists without saved positions ---
+    // We auto-assign column positions sequentially. Lists WITH saved positions keep them;
+    // lists WITHOUT get placed in the next available column slot after all positioned lists.
+    let autoColIndex = 0;
+
+    // First pass: figure out how many lists lack a saved X so we can place them
+    // after the right-most saved list.
+    const listsWithX = lists.filter(l => l.canvasX !== undefined && l.canvasX !== null && !isNaN(l.canvasX));
+    const listsWithoutX = lists.filter(l => l.canvasX === undefined || l.canvasX === null || isNaN(l.canvasX));
+
+    // Find the right-most saved list X to know where to start auto-placing
+    let maxSavedX = -Infinity;
+    for (const l of listsWithX) {
+        if (l.canvasX > maxSavedX) maxSavedX = l.canvasX;
+    }
+
+    // If no lists have saved positions, start from CANVAS_PADDING
+    let nextAutoX = listsWithX.length > 0
+        ? maxSavedX + NODE_GAP_X
+        : CANVAS_PADDING;
+
+    // Build a map of auto-assigned X for lists without saved positions
+    const autoXMap = new Map();
+    for (const l of listsWithoutX) {
+        autoXMap.set(l.id, nextAutoX);
+        nextAutoX += NODE_GAP_X;
+    }
+
+    // --- Step 2: Build nodes ---
     for (const list of lists) {
         const cards = list.cards || [];
-        // List header node
+
+        // Determine list position
+        const hasX = list.canvasX !== undefined && list.canvasX !== null && !isNaN(list.canvasX);
+        const hasY = list.canvasY !== undefined && list.canvasY !== null && !isNaN(list.canvasY);
+        const lX = hasX ? list.canvasX : autoXMap.get(list.id);
+        const lY = hasY ? list.canvasY : CANVAS_PADDING;
+
         nodes.push({
             id: `list-${list.id}`,
             type: 'list',
@@ -30,14 +66,21 @@ function buildNodeLayout(lists) {
             name: list.name,
             color: list.color,
             cardCount: cards.length,
-            x: colX,
-            y: CANVAS_PADDING,
+            x: lX,
+            y: lY,
             width: LIST_NODE_W,
         });
 
-        // Card nodes beneath
-        let cardY = CANVAS_PADDING + 80 + NODE_GAP_Y;
+        // Cards: place below the list header, stacked vertically
+        let nextCardY = lY + 80 + NODE_GAP_Y;
+
         for (const card of cards) {
+            const cHasX = card.canvasX !== undefined && card.canvasX !== null && !isNaN(card.canvasX);
+            const cHasY = card.canvasY !== undefined && card.canvasY !== null && !isNaN(card.canvasY);
+
+            const cX = cHasX ? card.canvasX : (lX + (LIST_NODE_W - CARD_NODE_W) / 2);
+            const cY = cHasY ? card.canvasY : nextCardY;
+
             nodes.push({
                 id: `card-${card.id}`,
                 type: 'card',
@@ -45,14 +88,14 @@ function buildNodeLayout(lists) {
                 cardId: card.id,
                 card,
                 listColor: list.color,
-                x: colX + (LIST_NODE_W - CARD_NODE_W) / 2,
-                y: cardY,
+                x: cX,
+                y: cY,
                 width: CARD_NODE_W,
             });
-            cardY += CARD_NODE_H_EST + 16;
-        }
 
-        colX += NODE_GAP_X;
+            // Advance auto Y for the next unsaved card
+            nextCardY = cY + CARD_NODE_H_EST + 16;
+        }
     }
 
     return nodes;
@@ -92,6 +135,7 @@ export default function PersonalCanvas({
     onRenameList,
     onDeleteList,
     onUpdateListColor,
+    onUpdateNodePosition,
 }) {
     const containerRef = useRef(null);
     const [zoom, setZoom] = useState(0.85);
@@ -100,10 +144,10 @@ export default function PersonalCanvas({
     const panStart = useRef({ x: 0, y: 0 });
     const panOrigin = useRef({ x: 0, y: 0 });
 
-    // Node positions (override layout with user-dragged positions)
-    const [nodePositions, setNodePositions] = useState({});
-    const dragRef = useRef({ nodeId: null, startX: 0, startY: 0, origX: 0, origY: 0 });
-    const dragEndPos = useRef(null);
+    // Drag overrides: map of nodeId -> { x, y } for all nodes being moved (parent + children)
+    const [dragOverrides, setDragOverrides] = useState({});
+    const dragRef = useRef({ nodeId: null, startX: 0, startY: 0, origX: 0, origY: 0, childOffsets: {} });
+    const isDraggingRef = useRef(false);
 
     // Modal states
     const [promptOpts, setPromptOpts] = useState(null);
@@ -116,24 +160,28 @@ export default function PersonalCanvas({
         setPromptOpts({ ...opts, onCancel: () => setPromptOpts(null) });
     }, []);
 
-    // Build layout nodes
+    // Build layout nodes from DB data
     const layoutNodes = useMemo(() => buildNodeLayout(lists), [lists]);
 
-    // Merge layout with user-dragged positions
+    // Final nodes: apply drag overrides for all nodes being moved
     const nodes = useMemo(() => {
+        const keys = Object.keys(dragOverrides);
+        if (keys.length === 0) return layoutNodes;
         return layoutNodes.map(n => {
-            const pos = nodePositions[n.id];
-            if (pos) return { ...n, x: pos.x, y: pos.y };
+            const ov = dragOverrides[n.id];
+            if (ov) return { ...n, x: ov.x, y: ov.y };
             return n;
         });
-    }, [layoutNodes, nodePositions]);
+    }, [layoutNodes, dragOverrides]);
 
     const connections = useMemo(() => buildConnections(nodes), [nodes]);
 
-    // Reset positions when lists change significantly
+    // Clear drag overrides when DB data updates (lists/cards change)
     useEffect(() => {
-        setNodePositions({});
-    }, [lists.length]);
+        if (!isDraggingRef.current) {
+            setDragOverrides({});
+        }
+    }, [lists]);
 
     // ── Pan handlers ──
     const handleCanvasMouseDown = useCallback((e) => {
@@ -150,18 +198,21 @@ export default function PersonalCanvas({
             setPan({ x: panOrigin.current.x + dx, y: panOrigin.current.y + dy });
             return;
         }
-        // Node dragging
+        // Node dragging with grid snap
         if (dragRef.current.nodeId) {
             const dx = (e.clientX - dragRef.current.startX) / zoom;
             const dy = (e.clientY - dragRef.current.startY) / zoom;
-            const finalX = dragRef.current.origX + dx;
-            const finalY = dragRef.current.origY + dy;
-            dragEndPos.current = { x: finalX, y: finalY };
+            const snappedX = Math.round((dragRef.current.origX + dx) / GRID_SIZE) * GRID_SIZE;
+            const snappedY = Math.round((dragRef.current.origY + dy) / GRID_SIZE) * GRID_SIZE;
 
-            setNodePositions(prev => ({
-                ...prev,
-                [dragRef.current.nodeId]: { x: finalX, y: finalY },
-            }));
+            const overrides = { [dragRef.current.nodeId]: { x: snappedX, y: snappedY } };
+
+            // Move child nodes (cards under a dragged list) with the same delta
+            for (const [childId, offset] of Object.entries(dragRef.current.childOffsets)) {
+                overrides[childId] = { x: snappedX + offset.dx, y: snappedY + offset.dy };
+            }
+
+            setDragOverrides(overrides);
         }
     }, [isPanning, zoom]);
 
@@ -169,34 +220,47 @@ export default function PersonalCanvas({
         setIsPanning(false);
         const draggedNodeId = dragRef.current.nodeId;
 
-        if (draggedNodeId && dragEndPos.current) {
-            const draggedNodeRaw = layoutNodes.find(n => n.id === draggedNodeId);
-            if (draggedNodeRaw && draggedNodeRaw.type === 'card' && onMoveCard) {
-                const cardX = dragEndPos.current.x;
-                const cardY = dragEndPos.current.y;
-                const cardW = draggedNodeRaw.width || CARD_NODE_W;
-                const cardH = CARD_NODE_H_EST;
-                const centerX = cardX + cardW / 2;
-                const centerY = cardY + cardH / 2;
-
-                const listNodes = layoutNodes.filter(n => n.type === 'list');
-                for (const listNode of listNodes) {
-                    const listX = listNode.x;
-                    const listY = listNode.y;
-                    const listW = listNode.width || LIST_NODE_W;
-                    if (centerX >= listX && centerX <= listX + listW && centerY >= listY) {
-                        if (listNode.listId !== draggedNodeRaw.listId) {
-                            onMoveCard(draggedNodeRaw.cardId, draggedNodeRaw.listId, listNode.listId, 0);
+        if (draggedNodeId && Object.keys(dragOverrides).length > 0) {
+            // Persist ALL moved node positions to database
+            if (onUpdateNodePosition) {
+                for (const [nodeId, pos] of Object.entries(dragOverrides)) {
+                    const node = layoutNodes.find(n => n.id === nodeId);
+                    if (node) {
+                        if (node.type === 'list') {
+                            onUpdateNodePosition('list', node.listId, null, pos.x, pos.y);
+                        } else if (node.type === 'card') {
+                            onUpdateNodePosition('card', node.cardId, node.listId, pos.x, pos.y);
                         }
-                        break;
+                    }
+                }
+            }
+
+            // Check for card → list transfer (only for card drags)
+            const draggedNode = layoutNodes.find(n => n.id === draggedNodeId);
+            if (draggedNode && draggedNode.type === 'card' && onMoveCard) {
+                const finalPos = dragOverrides[draggedNodeId];
+                if (finalPos) {
+                    const cardW = draggedNode.width || CARD_NODE_W;
+                    const centerX = finalPos.x + cardW / 2;
+                    const centerY = finalPos.y + CARD_NODE_H_EST / 2;
+                    const listNodes = layoutNodes.filter(n => n.type === 'list');
+                    for (const listNode of listNodes) {
+                        const listW = listNode.width || LIST_NODE_W;
+                        if (centerX >= listNode.x && centerX <= listNode.x + listW && centerY >= listNode.y) {
+                            if (listNode.listId !== draggedNode.listId) {
+                                onMoveCard(draggedNode.cardId, draggedNode.listId, listNode.listId, 0);
+                            }
+                            break;
+                        }
                     }
                 }
             }
         }
 
-        dragRef.current.nodeId = null;
-        dragEndPos.current = null;
-    }, [layoutNodes, onMoveCard]);
+        isDraggingRef.current = false;
+        dragRef.current = { nodeId: null, startX: 0, startY: 0, origX: 0, origY: 0, childOffsets: {} };
+        // Don't clear dragOverrides here — keep until DB data arrives via lists prop change
+    }, [layoutNodes, dragOverrides, onMoveCard, onUpdateNodePosition]);
 
     // ── Zoom handler ──
     const handleWheel = useCallback((e) => {
@@ -217,12 +281,24 @@ export default function PersonalCanvas({
     const handleNodeDragStart = useCallback((nodeId, e) => {
         const node = nodes.find(n => n.id === nodeId);
         if (!node) return;
+        isDraggingRef.current = true;
+
+        // If dragging a list node, also track its child card nodes
+        const childOffsets = {};
+        if (node.type === 'list') {
+            const children = nodes.filter(n => n.type === 'card' && n.listId === node.listId);
+            for (const child of children) {
+                childOffsets[child.id] = { dx: child.x - node.x, dy: child.y - node.y };
+            }
+        }
+
         dragRef.current = {
             nodeId,
             startX: e.clientX,
             startY: e.clientY,
             origX: node.x,
             origY: node.y,
+            childOffsets,
         };
     }, [nodes]);
 

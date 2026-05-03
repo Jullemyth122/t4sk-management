@@ -13,7 +13,18 @@ export default function PersonalList({
     onDuplicateList,
     onSortCards,
     onMoveAllCards,
-    highlightItemId
+    highlightItemId,
+    // DnD props
+    dragState,
+    dropTarget,
+    onDragStartCard,
+    onDragOverCard,
+    onDragEndCard,
+    onDropCard,
+    onDragOverList,
+    onDragLeaveList,
+    onDropOnList,
+    onMoveCard,
 }) {
 
     const { id, name, color, cards } = list;
@@ -36,6 +47,8 @@ export default function PersonalList({
     };
 
     const highlightClass = id === highlightItemId ? 'pd-highlight-pulse' : '';
+    const isDragOver = dropTarget && dropTarget.listId === id;
+    const isDraggingFromHere = dragState && dragState.fromListId === id;
 
     React.useEffect(() => {
         if (highlightItemId === id) {
@@ -44,8 +57,84 @@ export default function PersonalList({
         }
     }, [highlightItemId, id]);
 
+    // Build card list with drop indicators
+    const renderCardsWithIndicators = () => {
+        const elements = [];
+
+        // If no cards and dragging over, show a single drop indicator
+        if (cards.length === 0 && isDragOver) {
+            elements.push(
+                <div key="drop-indicator-empty" className="pd-drop-indicator" />
+            );
+        }
+
+        for (let i = 0; i < cards.length; i++) {
+            const card = cards[i];
+            const isBeingDragged = dragState && dragState.cardId === card.id;
+
+            // Show drop indicator BEFORE this card
+            if (
+                isDragOver &&
+                dropTarget.index === i &&
+                dragState &&
+                !(dragState.fromListId === id && (dragState.fromIndex === i || dragState.fromIndex === i - 1))
+            ) {
+                elements.push(
+                    <div key={`drop-indicator-${i}`} className="pd-drop-indicator" />
+                );
+            }
+
+            elements.push(
+                <PersonalCard
+                    key={card.id}
+                    card={card}
+                    index={i}
+                    listColor={color}
+                    listId={list.id}
+                    allLists={allLists}
+                    onClick={() => onCardClick && onCardClick(card, name, color)}
+                    highlightItemId={highlightItemId}
+                    onMoveCard={onMoveCard}
+                    isDragging={isBeingDragged}
+                    onDragStartCard={onDragStartCard}
+                    onDragOverCard={onDragOverCard}
+                    onDragEndCard={onDragEndCard}
+                    onDropCard={onDropCard}
+                />
+            );
+        }
+
+        // Show drop indicator AFTER last card
+        if (
+            isDragOver &&
+            dropTarget.index === cards.length &&
+            dragState &&
+            !(dragState.fromListId === id && dragState.fromIndex === cards.length - 1)
+        ) {
+            elements.push(
+                <div key={`drop-indicator-${cards.length}`} className="pd-drop-indicator" />
+            );
+        }
+
+        return elements;
+    };
+
     return (
-        <div id={`list-${id}`} className={`pd-list ${highlightClass}`}>
+        <div
+            id={`list-${id}`}
+            className={`pd-list ${highlightClass} ${isDragOver ? 'pd-list--drag-over' : ''}`}
+            onDragOver={(e) => {
+                e.preventDefault();
+                onDragOverList && onDragOverList(e, id);
+            }}
+            onDragLeave={(e) => {
+                onDragLeaveList && onDragLeaveList(e, id);
+            }}
+            onDrop={(e) => {
+                e.preventDefault();
+                onDropOnList && onDropOnList(e, id);
+            }}
+        >
             {/* List Header */}
             <div className="pd-list-header">
                 <div className="pd-list-header-left">
@@ -125,18 +214,7 @@ export default function PersonalList({
 
             {/* Cards */}
             <div className="pd-list-body">
-                {cards.map((card, index) => (
-                    <PersonalCard
-                        key={card.id}
-                        card={card}
-                        index={index}
-                        listColor={color}
-                        listId={list.id}
-                        allLists={allLists}
-                        onClick={() => onCardClick && onCardClick(card, name, color)}
-                        highlightItemId={highlightItemId}
-                    />
-                ))}
+                {renderCardsWithIndicators()}
             </div>
 
             {/* Add Card Button — opens Create Modal */}

@@ -579,7 +579,7 @@ export default function PersonalCardModal({ card, isCreate = false, listId, list
                                                 <path d="M16.4165 10.0005C17.326 9.99726 18.1985 9.64014 18.8492 9.00477C19.4999 8.36941 19.8778 7.5057 19.9027 6.59657C19.9277 5.68745 19.5978 4.80431 18.9829 4.1342C18.368 3.46409 17.5164 3.05964 16.6085 3.0065C15.8845 2.9655 15.1505 3.0065 14.4255 3.0065C14.2929 3.0065 14.1657 3.05918 14.072 3.15295C13.9782 3.24672 13.9255 3.3739 13.9255 3.5065C13.9255 3.63911 13.9782 3.76629 14.072 3.86006C14.1657 3.95383 14.2929 4.0065 14.4255 4.0065C15.7485 4.0065 17.3405 3.7445 18.3165 4.8495C18.6258 5.21502 18.8247 5.66104 18.8898 6.13541C18.955 6.60977 18.8838 7.09289 18.6845 7.52827C18.4852 7.96366 18.1661 8.33331 17.7645 8.59402C17.3629 8.85473 16.8953 8.99572 16.4165 9.0005H11.1065C10.6515 9.03293 10.1942 8.98728 9.75452 8.8655C9.21408 8.66727 8.75817 8.28936 8.46313 7.79506C8.16809 7.30077 8.05184 6.72012 8.13386 6.15034C8.21588 5.58056 8.49117 5.05627 8.91365 4.66526C9.33612 4.27425 9.88011 4.04027 10.4545 4.0025C10.5871 4.0025 10.7143 3.94983 10.8081 3.85606C10.9018 3.76229 10.9545 3.63511 10.9545 3.5025C10.9545 3.3699 10.9018 3.24272 10.8081 3.14895C10.7143 3.05518 10.5871 3.0025 10.4545 3.0025C9.85577 3.02431 9.27257 3.19912 8.76054 3.51025C8.24851 3.82139 7.8247 4.25849 7.52951 4.77988C7.23432 5.30127 7.0776 5.88957 7.07427 6.48872C7.07095 7.08786 7.22114 7.67787 7.51052 8.2025C7.81891 8.74396 8.26401 9.195 8.80135 9.51052C9.33868 9.82604 9.94942 9.995 10.5725 10.0005H16.4165Z" strokeLinecap="round" />
                                             </svg>
                                         </button>
-                                        <div className="pd-modal-subtask-weight">
+                                        <div className="pd-modal-subtask-weight" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <span className="pd-modal-weight-label">Wt:</span>
                                             <input
                                                 type="number"
@@ -587,7 +587,15 @@ export default function PersonalCardModal({ card, isCreate = false, listId, list
                                                 value={st.weight || 1}
                                                 onChange={e => handleSubtaskChange(i, 'weight', e.target.value)}
                                                 min="1"
+                                                style={{ width: '40px', padding: '4px' }}
                                             />
+                                            <span style={{ fontSize: '0.7rem', color: 'var(--pd-text-muted)', width: '30px', textAlign: 'right' }}>
+                                                {(() => {
+                                                    const totalWeight = subtasks.reduce((sum, s) => sum + (Number(s.weight) > 0 ? Number(s.weight) : 1), 0);
+                                                    const w = Number(st.weight) > 0 ? Number(st.weight) : 1;
+                                                    return totalWeight > 0 ? Math.round((w / totalWeight) * 100) + '%' : '0%';
+                                                })()}
+                                            </span>
                                         </div>
                                         <button
                                             className="pd-modal-subtask-remove"

@@ -4,6 +4,7 @@ import { useReduxAuth } from '../../context/ReduxAuthContext';
 import gsap from 'gsap';
 import '../../scss/signup2.scss';
 import SignupSkeleton from '../loaders/SignupSkeleton';
+import ReCAPTCHA from "react-google-recaptcha";
 
 const SignupTrial = ({ simulateLoading = false }) => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const SignupTrial = ({ simulateLoading = false }) => {
   const [emailForReset, setEmailForReset] = useState("");
   const containerRef = useRef(null);
   const [activeView, setActiveView] = useState("SignIn");
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
 
   useEffect(() => {
     if (!simulateLoading) return;
@@ -89,6 +91,7 @@ const SignupTrial = ({ simulateLoading = false }) => {
     if (!email.trim()) { setErrorMessage("Email is required"); return; }
     if (password.length < 6) { setErrorMessage("Password must be at least 6 characters"); return; }
     if (!acceptedTerms) { setErrorMessage("Please accept the Terms of Service and Privacy Policy"); return; }
+    if (!recaptchaToken) { setErrorMessage("Please complete the CAPTCHA to verify you are not a robot."); return; }
     await handleSignup(e, acceptedTerms);
   };
 
@@ -240,6 +243,14 @@ const SignupTrial = ({ simulateLoading = false }) => {
                     />
                     <span>I agree to the <Link to="/terms">Terms</Link> &amp; <Link to="/privacy">Privacy Policy</Link></span>
                   </label>
+
+                  <div className="w-full flex justify-center mt-2 mb-4" style={{ display: 'flex', justifyContent: 'center' }}>
+                    <ReCAPTCHA
+                      sitekey={import.meta.env.VITE_RECAPTCHA_V2_SITE_KEY || "dummy_key_if_missing"}
+                      onChange={(token) => setRecaptchaToken(token)}
+                      theme="dark"
+                    />
+                  </div>
 
                   <button className="auth-btn primary" onClick={handleRegister}>
                     Create Account

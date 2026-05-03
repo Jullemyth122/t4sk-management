@@ -16,6 +16,7 @@ import {
     limit,
     collectionGroup,
     where,
+    writeBatch,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { COLLECTIONS, ensure, sendNotification, sanitizeString } from "./accountService"; // Assuming cross-import if needed; otherwise, duplicate or import from a shared helpers.

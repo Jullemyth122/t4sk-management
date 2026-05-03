@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import MarkdownPreview from './MarkdownPreview';
 
 const PRIORITY_STYLES = {
@@ -18,7 +18,7 @@ function formatCardDate(d) {
     } catch { return null; }
 }
 
-export default function PersonalCard({ card, listColor, onClick, index, listId, allLists = [], onMoveCard, highlightItemId }) {
+export default function PersonalCard({ card, listColor, onClick, index, listId, allLists = [], onMoveCard, highlightItemId, isDragging, onDragStartCard, onDragOverCard, onDragEndCard, onDropCard }) {
     const {
         title,
         description,
@@ -34,6 +34,7 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
 
     const [moveMenuOpen, setMoveMenuOpen] = useState(false);
     const moveMenuRef = useRef(null);
+    const dragDidHappenRef = useRef(false);
 
     useEffect(() => {
         if (!moveMenuOpen) return;
@@ -252,8 +253,38 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
     return (
         <div
             id={`card-${card.id}`}
-            className={`pd-card ${isDone ? 'pd-card--done' : ''} ${highlightClass}`}
-            onClick={() => onClick && onClick(card)}
+            className={`pd-card ${isDone ? 'pd-card--done' : ''} ${highlightClass} ${isDragging ? 'pd-card--dragging' : ''}`}
+            onClick={(e) => {
+                // Skip click if a drag just happened
+                if (dragDidHappenRef.current) {
+                    dragDidHappenRef.current = false;
+                    return;
+                }
+                onClick && onClick(card);
+            }}
+            draggable="true"
+            onDragStart={(e) => {
+                dragDidHappenRef.current = true;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', card.id);
+                onDragStartCard && onDragStartCard(e, card.id, listId, index);
+            }}
+            onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.dataTransfer.dropEffect = 'move';
+                onDragOverCard && onDragOverCard(e, listId, index);
+            }}
+            onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDropCard && onDropCard(e, listId, index);
+            }}
+            onDragEnd={(e) => {
+                onDragEndCard && onDragEndCard(e);
+                // Reset the drag flag after a short delay (after click would have fired)
+                setTimeout(() => { dragDidHappenRef.current = false; }, 50);
+            }}
         >
             {renderMoveMenu()}
 
