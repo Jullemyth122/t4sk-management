@@ -1105,6 +1105,158 @@
 }
 
 /* =============================================
+   Drag & Drop — Board View
+   ============================================= */
+
+/* Card being dragged */
+.pd-card.pd-card--dragging {
+    opacity: 0.4;
+    transform: rotate(1.5deg) scale(0.97);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    border: 1.5px dashed var(--pd-accent);
+    transition: none !important;
+    pointer-events: none;
+}
+
+/* Card drag handle cursor */
+.pd-card[draggable="true"] {
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+
+    &:active {
+        cursor: grabbing;
+    }
+
+    /* Prevent text/content from intercepting drag */
+    .pd-card-desc-preview,
+    .pd-card-md,
+    .pd-card-title,
+    .pd-card-tags,
+    .pd-card-dates,
+    .pd-card-footer,
+    .pd-card-progress {
+        pointer-events: none;
+    }
+}
+
+/* Drop indicator line between cards */
+.pd-drop-indicator {
+    height: 3px;
+    border-radius: 3px;
+    background: var(--pd-accent, #b1b689);
+    box-shadow: 0 0 10px var(--pd-accent, #b1b689),
+                0 0 20px rgba(177, 182, 137, 0.3);
+    margin: 2px 0;
+    transition: opacity 0.15s ease;
+    animation: pdDropPulse 1.2s ease-in-out infinite;
+    pointer-events: none;
+    position: relative;
+
+    &::before, &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--pd-accent, #b1b689);
+        box-shadow: 0 0 6px var(--pd-accent, #b1b689);
+    }
+    &::before { left: -2px; }
+    &::after  { right: -2px; }
+}
+
+@keyframes pdDropPulse {
+    0%, 100% { opacity: 0.7; box-shadow: 0 0 10px var(--pd-accent, #b1b689), 0 0 20px rgba(177, 182, 137, 0.3); }
+    50%      { opacity: 1;   box-shadow: 0 0 16px var(--pd-accent, #b1b689), 0 0 30px rgba(177, 182, 137, 0.5); }
+}
+
+/* List column glow when card is dragged over */
+.pd-list.pd-list--drag-over {
+    border-color: var(--pd-accent);
+    box-shadow: var(--pd-shadow),
+                0 0 20px rgba(177, 182, 137, 0.15),
+                inset 0 0 40px rgba(177, 182, 137, 0.03);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+    .pd-list-body {
+        background: rgba(177, 182, 137, 0.02);
+    }
+}
+
+/* Empty list drop zone hint */
+.pd-list-body--empty-drop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    border: 2px dashed rgba(177, 182, 137, 0.25);
+    border-radius: var(--pd-radius-sm);
+    margin: 4px;
+    transition: all 0.2s ease;
+    color: var(--pd-text-muted);
+    font-size: 0.75rem;
+}
+
+/* =============================================
+   Drag & Drop — List View
+   ============================================= */
+
+.pd-listview-row[draggable="true"] {
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+
+    &:active {
+        cursor: grabbing;
+    }
+}
+
+.pd-listview-row.pd-listview-row--dragging {
+    opacity: 0.35;
+    transform: scale(0.98);
+    border: 1.5px dashed var(--pd-accent);
+    transition: none !important;
+    pointer-events: none;
+}
+
+/* Drop indicator for list view */
+.pd-listview-drop-indicator {
+    height: 3px;
+    border-radius: 3px;
+    background: var(--pd-accent, #b1b689);
+    box-shadow: 0 0 10px var(--pd-accent, #b1b689),
+                0 0 20px rgba(177, 182, 137, 0.3);
+    margin: 1px 0;
+    animation: pdDropPulse 1.2s ease-in-out infinite;
+    pointer-events: none;
+    position: relative;
+
+    &::before, &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--pd-accent, #b1b689);
+        box-shadow: 0 0 6px var(--pd-accent, #b1b689);
+    }
+    &::before { left: -2px; }
+    &::after  { right: -2px; }
+}
+
+/* List group highlight on drag-over */
+.pd-listview-group.pd-listview-group--drag-over {
+    background: rgba(177, 182, 137, 0.03);
+    border-radius: var(--pd-radius-sm);
+    transition: background 0.2s ease;
+}
+
+/* =============================================
    Add List
    ============================================= */
 .pd-add-list {

@@ -15,6 +15,7 @@ export default function PaymentSuccess() {
 
   const planType = searchParams.get('plan');
   const businessId = searchParams.get('biz');
+  const accountType = searchParams.get('type') || 'business';
   // Optional: session_id from Stripe if you wanted to verify it via another serverless function
 
   useEffect(() => {
@@ -49,7 +50,8 @@ export default function PaymentSuccess() {
             body: JSON.stringify({ 
                 sessionId: sessionId || searchParams.get('session_id'),
                 businessId,
-                planType
+                planType,
+                accountType
             })
         });
 
@@ -63,8 +65,13 @@ export default function PaymentSuccess() {
             // (Firebase Admin SDK not configured), update from client directly.
             if (data.dbUpdateFailed && businessId && planType) {
               try {
-                await updateDoc(doc(db, 'businesses', businessId), { planType });
-                console.log(`[PaymentSuccess] Client-side fallback: upgraded ${businessId} to ${planType}`);
+                if (accountType === 'personal') {
+                    await updateDoc(doc(db, 'account', businessId), { planType });
+                    console.log(`[PaymentSuccess] Client-side fallback: upgraded personal account ${businessId} to ${planType}`);
+                } else {
+                    await updateDoc(doc(db, 'businesses', businessId), { planType });
+                    console.log(`[PaymentSuccess] Client-side fallback: upgraded ${businessId} to ${planType}`);
+                }
               } catch (fbErr) {
                 console.warn('[PaymentSuccess] Client fallback update failed:', fbErr.message);
               }

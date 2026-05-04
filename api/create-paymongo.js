@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { businessId, planType } = req.body;
+    const { businessId, planType, accountType } = req.body;
 
     if (!businessId || !planType) {
       return res.status(400).json({ error: 'Missing businessId or planType' });
@@ -19,6 +19,7 @@ export default async function handler(req, res) {
     const protocol = req.headers['x-forwarded-proto'] || 'http';
     const host = req.headers.host || 'localhost:5173';
     const originUrl = req.headers.origin || `${protocol}://${host}`;
+    const typeQuery = accountType ? `&type=${accountType}` : '';
 
     // Auto-Mock for Local Testing: If no PayMongo Key is present, bypass the real gateway 
     // and teleport the user directly to the success page to test the UI flow.
@@ -27,7 +28,7 @@ export default async function handler(req, res) {
         console.warn("⚠️ PAYMONGO_SECRET_KEY is missing. Using mock checkout redirect for local testing.");
         // We pass fake session_id that we'll mock verify later, plus the plan/biz for the mock fallback
         return res.status(200).json({ 
-          url: `${originUrl}/payment-success?session_id=mock_session_123&plan=${planType}&biz=${businessId}` 
+          url: `${originUrl}/payment-success?session_id=mock_session_123&plan=${planType}&biz=${businessId}${typeQuery}` 
         });
     }
 
@@ -76,11 +77,12 @@ export default async function handler(req, res) {
             // 
             // Let's check: When PayMongo redirects to success_url, does it append anything? Usually no.
             // But we are creating the session NOW, so we know the session object structure.
-            success_url: `${originUrl}/payment-success?plan=${planType}&biz=${businessId}`,
+            success_url: `${originUrl}/payment-success?plan=${planType}&biz=${businessId}${typeQuery}`,
             // In a real production app, verify metadata or webhooks for security. 
             metadata: {
               businessId: businessId,
-              planType: planType
+              planType: planType,
+              accountType: accountType || 'business'
             }
           }
         }

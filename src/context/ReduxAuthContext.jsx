@@ -127,10 +127,7 @@ export const useReduxAuth = () => {
                 console.warn("Could not send verification email immediately:", verifyErr);
             }
 
-            dispatch(setSuccessMessage("Account created successfully! Redirecting..."));
-            setTimeout(() => {
-                window.location.href = "/verify-email";
-            }, 1200);
+            dispatch(setSuccessMessage("Account created successfully!"));
 
             return user;
         } catch (err) {

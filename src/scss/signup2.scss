@@ -420,31 +420,30 @@
                     </svg>");
             }
 
-            &::before {
-                content: '';
-                position: absolute;
-                top: -20%;
-                left: 15%;
-                width: 40%;
-                height: 140%;
-                background: linear-gradient(
-                    to right,
-                    transparent,
-                    var(--rd-before-glow),
-                    transparent
-                );
-                transform: rotate(12deg);
-                filter: blur(40px);
-                pointer-events: none;
-                transition: background 0.4s ease;
-            }
+            // &::before {
+            //     content: '';
+            //     position: absolute;
+            //     top: -20%;
+            //     left: 15%;
+            //     width: 40%;
+            //     height: 140%;
+            //     background: linear-gradient(
+            //         to right,
+            //         transparent,
+            //         var(--rd-before-glow),
+            //         transparent
+            //     );
+            //     transform: rotate(12deg);
+            //     filter: blur(40px);
+            //     pointer-events: none;
+            //     transition: background 0.4s ease;
+            // }
 
             .rd-grid {
                 position: absolute;
                 inset: 0;
                 pointer-events: none;
                 z-index: 1;
-
                 background-image:
                     repeating-linear-gradient(
                         0deg,
@@ -488,6 +487,7 @@
                 align-items: center;
                 padding: 48px 32px;
                 gap: 16px;
+                height: 100%;
             }
 
             // ── Logo ──
@@ -562,8 +562,7 @@
             .panels-wrapper {
                 position: relative;
                 width: 100%;
-                height: auto;
-                min-height: 480px;
+                min-height: 650px; // Ensure enough height for the tallest panel + ReCAPTCHA
                 overflow: hidden;
             }
 
@@ -572,6 +571,7 @@
                 top: 0;
                 left: 0;
                 width: 100%;
+                // background: none;
                 will-change: transform;
             }
 
@@ -585,9 +585,9 @@
                 background: var(--glass-bg);
                 border: 1px solid var(--glass-border);
                 border-radius: 14px;
-                backdrop-filter: blur(24px);
-                -webkit-backdrop-filter: blur(24px);
-                box-shadow: var(--glass-shadow);
+                backdrop-filter: blur(5px);
+                -webkit-backdrop-filter: blur(5px);
+                // box-shadow: var(--glass-shadow);
                 transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
             }
 
@@ -893,8 +893,8 @@
 
             .ld-content {
                 min-height: auto;
-                padding: 48px 28px 40px;
-                gap: 20px;
+                padding: 40px 28px 32px;
+                gap: 16px;
                 justify-content: flex-start;
                 max-width: 100%;
             }
@@ -902,10 +902,12 @@
             .ld-headline {
                 line-height: 0.92;
 
-                .line-1 { font-size: clamp(36px, 10vw, 56px); }
-                .line-2 { font-size: clamp(24px, 7vw, 40px); }
-                .line-3 { font-size: clamp(36px, 10vw, 56px); }
+                .line-1 { font-size: clamp(32px, 8vw, 48px); }
+                .line-2 { font-size: clamp(22px, 6vw, 36px); }
+                .line-3 { font-size: clamp(32px, 8vw, 48px); }
             }
+
+            .ld-sub { font-size: 13px; }
 
             .task-cards {
                 flex-direction: row;
@@ -915,7 +917,7 @@
 
                 .task-card {
                     flex: 1 1 calc(50% - 4px);
-                    min-width: 200px;
+                    min-width: 180px;
 
                     &.card-2,
                     &.card-3 { margin-left: 0; }
@@ -944,6 +946,11 @@
             .rd-inner {
                 max-width: 100%;
                 padding: 32px 24px 24px;
+                height: auto;
+            }
+
+            .panels-wrapper {
+                min-height: 580px;
             }
         }
     }
@@ -952,60 +959,74 @@
 // ── Mobile ──
 @media (max-width: 480px) {
     .signup-comp .signup-in-comp {
+        // Hide the left promotional panel entirely on small mobile
         .ld-ctn {
-            .ld-content {
-                padding: 36px 20px 32px;
-                gap: 16px;
-            }
-
-            .ld-headline {
-                .line-1 { font-size: clamp(32px, 11vw, 48px); }
-                .line-2 { font-size: clamp(21px, 7.5vw, 34px); }
-                .line-3 { font-size: clamp(32px, 11vw, 48px); }
-            }
-
-            .ld-sub { font-size: 12px; }
-
-            .task-cards {
-                flex-direction: column;
-
-                .task-card {
-                    flex: none;
-                    width: 100%;
-
-                    &.card-2,
-                    &.card-3 { margin-left: 0; }
-                }
-            }
-
-            .ld-stats {
-                gap: 16px;
-
-                .stat .stat-num { font-size: 18px; }
-                .stat .stat-label { font-size: 8px; }
-            }
+            display: none;
         }
 
         .rd-ctn {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
             .rd-inner {
-                padding: 24px 16px;
-                gap: 12px;
+                padding: 24px 20px;
+                gap: 14px;
+                height: auto;
             }
 
-            .rd-header .rd-logo {
-                font-size: 22px;
-                letter-spacing: 0.2em;
+            .rd-header {
+                margin-bottom: 0;
+                .rd-logo {
+                    font-size: 24px;
+                    letter-spacing: 0.2em;
+                }
+            }
+
+            .auth-tabs {
+                .auth-tab {
+                    padding: 10px 0;
+                    font-size: 10px;
+                }
             }
 
             .glass-card {
                 padding: 20px 16px;
-                gap: 12px;
+                gap: 11px;
+            }
+
+            .field-group {
+                label { font-size: 9px; }
+                input {
+                    padding: 10px 12px;
+                    font-size: 13px;
+                }
+            }
+
+            .terms-row {
+                font-size: 11px;
+                gap: 8px;
+            }
+
+            .auth-btn {
+                padding: 11px;
+                font-size: 11px;
             }
 
             .social-row {
                 flex-direction: column;
+                gap: 8px;
 
-                .social-btn { width: 100%; }
+                .social-btn {
+                    width: 100%;
+                    padding: 10px;
+                    font-size: 12px;
+                }
+            }
+
+            .auth-switch {
+                font-size: 12px;
             }
         }
     }
@@ -1014,16 +1035,18 @@
 // ── Very small screens ──
 @media (max-width: 360px) {
     .signup-comp .signup-in-comp {
-        .ld-ctn .ld-content {
-            padding: 28px 16px 24px;
-        }
-
         .rd-ctn .rd-inner {
-            padding: 20px 12px;
+            padding: 20px 14px;
+            gap: 10px;
         }
 
         .rd-ctn .glass-card {
             padding: 16px 12px;
+            gap: 10px;
+        }
+
+        .rd-ctn .rd-header .rd-logo {
+            font-size: 20px;
         }
     }
 }

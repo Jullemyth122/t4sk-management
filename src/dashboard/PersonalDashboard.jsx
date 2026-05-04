@@ -34,6 +34,13 @@ export default function PersonalDashboard() {
     const [viewMode, setViewMode] = useState('board');
     const [activeTab, setActiveTab] = useState('dashboard');
     const [uiError, setUiError] = useState('');
+
+    // Auto-dismiss error banner after 2 seconds
+    useEffect(() => {
+        if (!uiError) return;
+        const timer = setTimeout(() => setUiError(''), 2000);
+        return () => clearTimeout(timer);
+    }, [uiError]);
     const [newCardInputs, setNewCardInputs] = useState({});
 
     // --- Search & Highlight State ---
@@ -276,6 +283,9 @@ export default function PersonalDashboard() {
             console.warn('[handleMoveCard] missing required params', { uid, selectedBoardId, cardId, fromListId, toListId });
             return;
         }
+        
+        optimisticallyMoveCard && optimisticallyMoveCard(cardId, fromListId, toListId, 0);
+        
         try {
             await boardSvc.moveCardBetweenLists({
                 uid,
@@ -319,6 +329,92 @@ export default function PersonalDashboard() {
             setUiError('Failed to move all cards.');
         }
     }, [uid, selectedBoardId, cardsMap]);
+
+    // ─── Drag & Drop Queue + Handlers ────────────────────────────
+
+    // Sequential queue: each drag operation completes before the next starts
+    const moveQueueRef = useRef(Promise.resolve());
+    const enqueueMove = useCallback((fn) => {
+        moveQueueRef.current = moveQueueRef.current.then(fn).catch((err) => {
+            console.error('[DnD Queue] operation failed:', err);
+            setUiError('Failed to move card.');
+        });
+    }, []);
+
+    // Reorder a card within the same list by recalculating priorityRank
+    const handleReorderCard = useCallback((listId, cardId, newIndex) => {
+        if (!uid || !selectedBoardId || !listId || !cardId) return;
+
+        optimisticallyMoveCard && optimisticallyMoveCard(cardId, listId, listId, newIndex);
+
+        enqueueMove(async () => {
+            const cards = [...(cardsMap[listId] || [])];
+            const oldIndex = cards.findIndex(c => c.id === cardId);
+            if (oldIndex === -1 || oldIndex === newIndex) return;
+
+            // Remove from old position and insert at new
+            const [moved] = cards.splice(oldIndex, 1);
+            cards.splice(newIndex, 0, moved);
+
+            // Reassign priorityRank: highest rank at index 0, descending
+            const baseRank = 1000;
+            for (let i = 0; i < cards.length; i++) {
+                const newRank = baseRank - i;
+                if (cards[i].priorityRank !== newRank) {
+                    await boardSvc.updateCard({
+                        uid,
+                        boardId: selectedBoardId,
+                        listId,
+                        cardId: cards[i].id,
+                        updates: { priorityRank: newRank },
+                    });
+                }
+            }
+        });
+    }, [uid, selectedBoardId, cardsMap, enqueueMove]);
+
+    // Move a card to another list at a specific position
+    const handleMoveCardToPosition = useCallback((cardId, fromListId, toListId, newIndex) => {
+        if (!uid || !selectedBoardId || !cardId || !fromListId || !toListId) return;
+
+        optimisticallyMoveCard && optimisticallyMoveCard(cardId, fromListId, toListId, newIndex);
+
+        enqueueMove(async () => {
+            // Calculate the priorityRank for the new position
+            const destCards = [...(cardsMap[toListId] || [])];
+            const baseRank = 1000;
+            // New card's rank is based on insertion index
+            const newPriorityRank = baseRank - newIndex;
+
+            // Move the card to the new list
+            await boardSvc.moveCardBetweenLists({
+                uid,
+                boardId: selectedBoardId,
+                cardId,
+                fromListId,
+                toListId,
+                newPosition: newIndex,
+                newPriorityRank,
+            });
+
+            // Rerank remaining destination cards to avoid rank collisions
+            // Insert our card conceptually and re-assign ranks
+            destCards.splice(newIndex, 0, { id: cardId }); // placeholder
+            for (let i = 0; i < destCards.length; i++) {
+                const rank = baseRank - i;
+                if (destCards[i].id === cardId) continue; // already set above
+                if (destCards[i].priorityRank !== rank) {
+                    await boardSvc.updateCard({
+                        uid,
+                        boardId: selectedBoardId,
+                        listId: toListId,
+                        cardId: destCards[i].id,
+                        updates: { priorityRank: rank },
+                    });
+                }
+            }
+        });
+    }, [uid, selectedBoardId, cardsMap, enqueueMove]);
 
     // ─── Merge lists and cards for UI ────────────────────────────
 
@@ -605,6 +701,8 @@ export default function PersonalDashboard() {
                             onSortCards={handleSortCards}
                             onMoveAllCards={handleMoveAllCards}
                             highlightItemId={highlightItemId}
+                            onReorderCard={handleReorderCard}
+                            onMoveCardToPosition={handleMoveCardToPosition}
                         />
                     )}
                     {activeTab === 'today' && (
@@ -654,6 +752,13 @@ export default function PersonalDashboard() {
                             onRenameList={handleRenameList}
                             onDeleteList={handleDeleteList}
                             onUpdateListColor={handleUpdateListColor}
+                            onUpdateNodePosition={async (type, id, listId, x, y) => {
+                                if (type === 'list') {
+                                    await boardSvc.updateList({ uid, boardId: selectedBoardId, listId: id, updates: { canvasX: x, canvasY: y } });
+                                } else if (type === 'card') {
+                                    await boardSvc.updateCard({ uid, boardId: selectedBoardId, listId, cardId: id, updates: { canvasX: x, canvasY: y } });
+                                }
+                            }}
                         />
                     )}
                 </div>

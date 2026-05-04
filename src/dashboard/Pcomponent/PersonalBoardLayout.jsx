@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PersonalList from './PersonalList';
 import PersonalCard from './PersonalCard';
 import PersonalCardModal from './PersonalCardModal';
@@ -8,7 +8,8 @@ const PRIORITY_STYLES = {
     low:    { color: '#10b981', bg: 'rgba(16,185,129,0.12)',   label: 'Low' },
 };
 
-function ListViewRow({ card, listName, listColor, onClick, highlightItemId }) {
+function ListViewRow({ card, listName, listColor, listId, onClick, highlightItemId, isDragging, onDragStartRow, onDragOverRow, onDragEndRow, onDropRow, index }) {
+    const dragDidHappenRef = useRef(false);
     const {
         title,
         priority,
@@ -98,8 +99,36 @@ function ListViewRow({ card, listName, listColor, onClick, highlightItemId }) {
     return (
         <div
             id={`listview-${card.id}`}
-            className={`pd-listview-row ${isDone ? 'pd-listview-row--done' : ''} ${highlightClass}`}
-            onClick={() => onClick && onClick(card, listName, listColor, null)}
+            className={`pd-listview-row ${isDone ? 'pd-listview-row--done' : ''} ${highlightClass} ${isDragging ? 'pd-listview-row--dragging' : ''}`}
+            onClick={() => {
+                if (dragDidHappenRef.current) {
+                    dragDidHappenRef.current = false;
+                    return;
+                }
+                onClick && onClick(card, listName, listColor, listId);
+            }}
+            draggable="true"
+            onDragStart={(e) => {
+                dragDidHappenRef.current = true;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', card.id);
+                onDragStartRow && onDragStartRow(e, card.id, listId, index);
+            }}
+            onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.dataTransfer.dropEffect = 'move';
+                onDragOverRow && onDragOverRow(e, listId, index);
+            }}
+            onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDropRow && onDropRow(e, listId, index);
+            }}
+            onDragEnd={(e) => {
+                onDragEndRow && onDragEndRow(e);
+                setTimeout(() => { dragDidHappenRef.current = false; }, 50);
+            }}
         >
             {/* Status dot */}
             <span className="pd-listview-dot" style={{ background: listColor }} />
@@ -182,6 +211,8 @@ export default function PersonalBoardLayout({
     onSortCards,
     onMoveAllCards,
     highlightItemId,
+    onReorderCard,
+    onMoveCardToPosition,
 }) {
     const [selectedCard, setSelectedCard] = useState(null);
     const [selectedListId, setSelectedListId] = useState('');
@@ -191,6 +222,15 @@ export default function PersonalBoardLayout({
     const [isAddingList, setIsAddingList] = useState(false);
     const [newListTitle, setNewListTitle] = useState('');
     const [createCardListId, setCreateCardListId] = useState('');
+
+    // ─── Drag & Drop State ───────────────────────────────────────
+    // dragState: { cardId, fromListId, fromIndex } | null
+    const [dragState, setDragState] = useState(null);
+    // dropTarget: { listId, index } | null
+    const [dropTarget, setDropTarget] = useState(null);
+    // Ref to avoid stale closures in drag handlers
+    const dragStateRef = useRef(null);
+    const dropTargetRef = useRef(null);
 
     const handleCardClick = (card, listName, listColor, listId) => {
         setSelectedCard(card);
@@ -206,6 +246,117 @@ export default function PersonalBoardLayout({
         setSelectedListColor('');
         setCreateCardListId('');
     };
+
+    // ─── DnD Handlers (shared between Board & List views) ────────
+
+    const handleDragStart = useCallback((e, cardId, fromListId, fromIndex) => {
+        const state = { cardId, fromListId, fromIndex };
+        dragStateRef.current = state;
+        // Delay React state update by a tick so the browser can capture the drag image
+        // without the DOM changing underneath it, preventing immediate drag cancellation.
+        setTimeout(() => {
+            setDragState(state);
+        }, 0);
+    }, []);
+
+    const handleDragOverCard = useCallback((e, listId, index) => {
+        if (!dragStateRef.current) return;
+        e.dataTransfer.dropEffect = 'move';
+
+        // Determine if the drop should be above or below the hovered card
+        const rect = e.currentTarget.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        const dropIndex = e.clientY < midY ? index : index + 1;
+
+        setDropTarget(prev => {
+            if (prev && prev.listId === listId && prev.index === dropIndex) return prev;
+            const next = { listId, index: dropIndex };
+            dropTargetRef.current = next;
+            return next;
+        });
+    }, []);
+
+    const handleDragOverList = useCallback((e, listId) => {
+        if (!dragStateRef.current) return;
+        e.dataTransfer.dropEffect = 'move';
+
+        // If hovering over the list body area (not a card), set drop at end
+        const list = lists.find(l => l.id === listId);
+        const cardCount = list ? list.cards.length : 0;
+
+        setDropTarget(prev => {
+            // Only set to end if we're not already targeting a specific card position in this list
+            if (prev && prev.listId === listId) return prev;
+            const next = { listId, index: cardCount };
+            dropTargetRef.current = next;
+            return next;
+        });
+    }, [lists]);
+
+    const handleDragLeaveList = useCallback((e, listId) => {
+        // Only clear if we're actually leaving the list (not entering a child)
+        const relatedTarget = e.relatedTarget;
+        if (relatedTarget && e.currentTarget.contains(relatedTarget)) return;
+
+        setDropTarget(prev => {
+            if (prev && prev.listId === listId) {
+                dropTargetRef.current = null;
+                return null;
+            }
+            return prev;
+        });
+    }, []);
+
+    const handleDrop = useCallback((e, toListId, toIndex) => {
+        const currentDrag = dragStateRef.current;
+        if (!currentDrag) return;
+
+        const { cardId, fromListId, fromIndex } = currentDrag;
+
+        // Use dropTarget's index if available, otherwise use toIndex
+        const prevDrop = dropTargetRef.current;
+        const finalIndex = (prevDrop && prevDrop.listId === toListId) ? prevDrop.index : toIndex;
+
+        if (fromListId === toListId) {
+            // Same list reorder
+            let adjustedIndex = finalIndex;
+            // If moving down in the same list, adjust for the removed item
+            if (fromIndex < adjustedIndex) {
+                adjustedIndex = adjustedIndex - 1;
+            }
+            if (fromIndex !== adjustedIndex) {
+                onReorderCard && onReorderCard(fromListId, cardId, adjustedIndex);
+            }
+        } else {
+            // Cross-list move
+            onMoveCardToPosition && onMoveCardToPosition(cardId, fromListId, toListId, finalIndex);
+        }
+
+        // Clean up
+        setDropTarget(null);
+        dropTargetRef.current = null;
+        dragStateRef.current = null;
+        setDragState(null);
+    }, [onReorderCard, onMoveCardToPosition]);
+
+    const handleDropOnList = useCallback((e, listId) => {
+        // Drop on the list itself (not a specific card)
+        const currentDrag = dragStateRef.current;
+        if (!currentDrag) return;
+
+        const list = lists.find(l => l.id === listId);
+        const cardCount = list ? list.cards.length : 0;
+
+        handleDrop(e, listId, cardCount);
+    }, [lists, handleDrop]);
+
+    const handleDragEnd = useCallback(() => {
+        dragStateRef.current = null;
+        setDragState(null);
+        setDropTarget(null);
+        dropTargetRef.current = null;
+    }, []);
+
     return (
         <>
             {viewMode === 'list' ? (
@@ -221,25 +372,67 @@ export default function PersonalBoardLayout({
                     </div>
 
                     {/* Rows grouped by list */}
-                    {lists.map(list => (
-                        <div key={list.id} className="pd-listview-group">
-                            <div className="pd-listview-group-header">
-                                <span className="pd-list-dot" style={{ background: list.color }} />
-                                <span className="pd-listview-group-name">{list.name}</span>
-                                <span className="pd-list-count">{list.cards.length}</span>
+                    {lists.map(list => {
+                        const isDragOverGroup = dropTarget && dropTarget.listId === list.id;
+                        return (
+                            <div
+                                key={list.id}
+                                className={`pd-listview-group ${isDragOverGroup ? 'pd-listview-group--drag-over' : ''}`}
+                                onDragOver={(e) => {
+                                    e.preventDefault();
+                                    handleDragOverList(e, list.id);
+                                }}
+                                onDragLeave={(e) => handleDragLeaveList(e, list.id)}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    handleDropOnList(e, list.id);
+                                }}
+                            >
+                                <div className="pd-listview-group-header">
+                                    <span className="pd-list-dot" style={{ background: list.color }} />
+                                    <span className="pd-listview-group-name">{list.name}</span>
+                                    <span className="pd-list-count">{list.cards.length}</span>
+                                </div>
+                                {list.cards.map((card, cardIndex) => {
+                                    const isBeingDragged = dragState && dragState.cardId === card.id;
+                                    const showIndicatorBefore =
+                                        isDragOverGroup &&
+                                        dropTarget.index === cardIndex &&
+                                        dragState &&
+                                        !(dragState.fromListId === list.id && (dragState.fromIndex === cardIndex || dragState.fromIndex === cardIndex - 1));
+
+                                    return (
+                                        <React.Fragment key={card.id}>
+                                            {showIndicatorBefore && (
+                                                <div className="pd-listview-drop-indicator" />
+                                            )}
+                                            <ListViewRow
+                                                card={card}
+                                                listName={list.name}
+                                                listColor={list.color}
+                                                listId={list.id}
+                                                index={cardIndex}
+                                                highlightItemId={highlightItemId}
+                                                onClick={(c, ln, lc, lid) => handleCardClick(c, ln, lc, lid)}
+                                                isDragging={isBeingDragged}
+                                                onDragStartRow={handleDragStart}
+                                                onDragOverRow={handleDragOverCard}
+                                                onDragEndRow={handleDragEnd}
+                                                onDropRow={handleDrop}
+                                            />
+                                        </React.Fragment>
+                                    );
+                                })}
+                                {/* Drop indicator at end of list group */}
+                                {isDragOverGroup &&
+                                    dropTarget.index === list.cards.length &&
+                                    dragState &&
+                                    !(dragState.fromListId === list.id && dragState.fromIndex === list.cards.length - 1) && (
+                                        <div className="pd-listview-drop-indicator" />
+                                    )}
                             </div>
-                            {list.cards.map(card => (
-                                <ListViewRow
-                                    key={card.id}
-                                    card={card}
-                                    listName={list.name}
-                                    listColor={list.color}
-                                    highlightItemId={highlightItemId}
-                                    onClick={(c, ln, lc) => handleCardClick(c, ln, lc, list.id)}
-                                />
-                            ))}
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             ) : (
                 <div className="pd-board-layout">
@@ -258,6 +451,16 @@ export default function PersonalBoardLayout({
                             onMoveAllCards={onMoveAllCards}
                             onMoveCard={onMoveCard}
                             highlightItemId={highlightItemId}
+                            // DnD props
+                            dragState={dragState}
+                            dropTarget={dropTarget}
+                            onDragStartCard={handleDragStart}
+                            onDragOverCard={handleDragOverCard}
+                            onDragEndCard={handleDragEnd}
+                            onDropCard={handleDrop}
+                            onDragOverList={handleDragOverList}
+                            onDragLeaveList={handleDragLeaveList}
+                            onDropOnList={handleDropOnList}
                         />
                     ))}
 

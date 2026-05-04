@@ -29,5 +29,26 @@ export function usePersonalCards(uid, selectedBoardId, lists) {
         return () => unsubs.forEach((u) => u && u());
     }, [uid, selectedBoardId, lists]);
 
-    return { cardsMap };
+    const optimisticallyMoveCard = (cardId, fromListId, toListId, newIndex) => {
+        setCardsMap(prev => {
+            const newMap = { ...prev };
+            const sourceList = [...(newMap[fromListId] || [])];
+            const destList = fromListId === toListId ? sourceList : [...(newMap[toListId] || [])];
+            
+            const cardIndex = sourceList.findIndex(c => c.id === cardId);
+            if (cardIndex === -1) return prev;
+            
+            const [card] = sourceList.splice(cardIndex, 1);
+            destList.splice(newIndex, 0, card);
+            
+            newMap[fromListId] = sourceList;
+            if (fromListId !== toListId) {
+                newMap[toListId] = destList;
+            }
+            
+            return newMap;
+        });
+    };
+
+    return { cardsMap, optimisticallyMoveCard };
 }

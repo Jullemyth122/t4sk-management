@@ -1,9 +1,25 @@
 [
   {
+    "version": "0.0.4",
+    "title": "Security Enhancements, Personal Dashboard Optimizations & Canvas Persistence",
+    "date": "May 3, 2026",
+    "isLatest": true,
+    "changes": [
+      "Implemented Firebase App Check with reCAPTCHA v3 to protect the database from unauthorized access and bot traffic",
+      "Added a visible reCAPTCHA v2 widget to the signup form for enhanced frontend spam protection",
+      "Fixed layout and mobile responsiveness on the authentication pages to ensure forms are fully accessible on small screens",
+      "Resolved drag-and-drop unresponsiveness and latency in the Personal Dashboard's List and Kanban views",
+      "Implemented optimistic UI updates for instant card movement feedback during drag-and-drop operations",
+      "Added a dynamic percentage indicator for subtask weights to provide immediate visual feedback on auto-balanced progress calculation",
+      "Overhauled the Personal Canvas layout system to persist manual node positions accurately to Firestore across page reloads",
+      "Replaced unstable local state positioning in the Canvas with a robust, grid-snapped drag-and-drop system acting as the single source of truth"
+    ]
+  },
+  {
     "version": "0.0.3",
     "title": "Redux Migration, Nested Subtasks & Smart Markdown Tokens & Canvas Node View & Interactive Board Management in Personal Management",
     "date": "March 26, 2026",
-    "isLatest": true,
+    "isLatest": false,
     "changes": [
       "Migrated global state management from React Context API to Redux Toolkit for improved performance, dev-tools support, and scalable architecture",
       "Created dedicated Redux slices: authSlice for authentication state and themeSlice for theme management",
