@@ -50,9 +50,9 @@ export default function PersonalDashboard() {
     const searchRef = useRef(null);
 
     // --- AI & OCR State ---
-    const [ocrRaw, setOcrRaw] = useState(null);
+    const [, setOcrRaw] = useState(null);
     const [ocrResult, setOcrResult] = useState(null);
-    const [ocrError, setOcrError] = useState(null);
+    const [, setOcrError] = useState(null);
     const [ocrVerificationOpen, setOcrVerificationOpen] = useState(false);
     const [aiResult, setAiResult] = useState(null);
     const [aiVerificationOpen, setAiVerificationOpen] = useState(false);
@@ -708,6 +708,7 @@ export default function PersonalDashboard() {
                     {activeTab === 'today' && (
                         <TodayView
                             uid={uid}
+                            boards={boards}
                             onTaskClick={(bId, tId) => {
                                 setSelectedBoardId(bId);
                                 setActiveTab('dashboard');

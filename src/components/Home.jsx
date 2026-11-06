@@ -150,7 +150,7 @@ const Home = ({ simulateLoading = false }) => {
                                 <div className="panel-hud-corners"></div>
                                 <h4 className="panel-title">System Architecture v2.0</h4>
                                 <div className="timeline-nodes">
-                                    {activeFeatures.map((feat, idx) => (
+                                    {activeFeatures.map((feat) => (
                                         <div className="t-node-row" key={feat.id}>
                                             <div className={`t-circle feature-icon ${feat.iconClass}`}>
                                                 <div className="ring-pulse"></div>
@@ -294,7 +294,7 @@ const Home = ({ simulateLoading = false }) => {
                                 <h4 className="honeycomb-title"> T A S K F I E L D S </h4>
                                 <div className="honeycomb-grid">
                                     {/* Map personal active features into Hex Cells */}
-                                    {activeFeatures.map((feat, idx) => (
+                                    {activeFeatures.map((feat) => (
                                         <div className="hex-cell" key={feat.id}>
                                             <div className="hex-cell-inner">
                                                 <div className={`hex-icon ${feat.iconClass}`}>

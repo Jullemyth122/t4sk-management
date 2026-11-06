@@ -2,7 +2,7 @@ import { useCallback, useRef } from "react";
 import * as boardSvc from '../../services/boardService'
 import { clampInt } from "../../utils/dashboardUtils";
 import { computePriority } from "../../utils/prioritization";
-import { serverTimestamp } from "firebase/firestore";
+
 
 export function useCardHandlers(props) {
     const depsRef = useRef(props);
@@ -10,7 +10,7 @@ export function useCardHandlers(props) {
     const snapshotRef = useRef({});
 
     const handleCreateCardForList = useCallback(async (listIdOrObj) => {
-        const { businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs, actorName, boardName } = depsRef.current;
+        const { businessId, uid, dispatchSet, selectedBoardId, cardsMap, canAssignTasks, newCardInputs, actorName, boardName } = depsRef.current;
         const isObj = listIdOrObj && typeof listIdOrObj === 'object';
         const listId = isObj ? listIdOrObj.listId : listIdOrObj;
         const cardOverride = isObj ? listIdOrObj.cardOverride : null;
@@ -81,7 +81,7 @@ export function useCardHandlers(props) {
     }, []);
 
     const handleUpdateCard = useCallback(async ({ listId, cardId, updates, listAssignees }) => {
-        const { businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs, actorName, boardName } = depsRef.current;
+        const { businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, canEditBoardValue, actorName, boardName } = depsRef.current;
         if (!cardId || !listId) return dispatchSet('uiError', 'Invalid card/list');
         
         if (String(cardId).startsWith('tmp-')) {
@@ -157,7 +157,7 @@ export function useCardHandlers(props) {
     }, []);
 
     const handleDeleteCard = useCallback(async ({ listId, cardId }) => {
-        const { businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs, actorName, boardName } = depsRef.current;
+        const { businessId, uid, dispatchSet, selectedBoardId, cardsMap, canEditBoardValue } = depsRef.current;
         if (!listId || !cardId || !canEditBoardValue || !window.confirm('Delete this card?')) return;
         dispatchSet('uiError', '');
         snapshotRef.current.cardsMap = { ...cardsMap };
@@ -172,7 +172,7 @@ export function useCardHandlers(props) {
     }, []);
 
     const handleMoveCard = useCallback(async ({ fromListId, toListId, card }) => {
-        const { businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, canEditBoardValue, canAssignTasks, newCardInputs, actorName, boardName } = depsRef.current;
+        const { businessId, uid, dispatchSet, selectedBoardId, cardsMap, canEditBoardValue } = depsRef.current;
         if (!fromListId || !toListId || !card || fromListId === toListId || !canEditBoardValue) return dispatchSet('uiError', 'Permission denied or invalid move');
         snapshotRef.current.cardsMap = { ...cardsMap };
         dispatchSet('cardsMap', (prev) => {

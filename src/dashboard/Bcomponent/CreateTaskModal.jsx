@@ -62,22 +62,18 @@ export default function CreateTaskModal({
 
     // Main creation handler
     const handleSubmit = async () => {
-        if (!title.trim()) {
-            alert('Title is required to create a task.');
-            return;
-        }
-
+        if (!title.trim() || isLocked) return;
         try {
             await onCreate({
-                title,
+                title: title.trim(),
                 description,
-                startDate,
-                dueDate,
+                startDate: startDate || null,
+                dueDate: dueDate || null,
                 priority,
-                weight,
+                weight: weight || null,
                 subtasks
             });
-            // Reset and close
+            // Reset form
             setTitle('');
             setDescription('');
             setStartDate('');
@@ -87,7 +83,7 @@ export default function CreateTaskModal({
             setSubtasks([]);
             onClose();
         } catch (err) {
-            alert(err.message || 'Failed to create task.');
+            console.error('Failed to create task:', err);
         }
     };
 
@@ -237,7 +233,7 @@ export default function CreateTaskModal({
                     <button className="btn-cancel" onClick={onClose}>Cancel</button>
                     <button 
                         className="btn-create" 
-       https://github.com/Jullemyth122/t4sk-management/pull/9/conflict?name=src%252Fdashboard%252FBcomponent%252FCreateTaskModal.jsx&base_oid=1a890f2c07e450c3e098fe1e8a136f8bb561fc4a&head_oid=46159a2bb643dd6a6f3e0e8fdf70cca3d17c8692                 onClick={handleSubmit} 
+                        onClick={handleSubmit} 
                         disabled={isLocked || !title.trim()}
                     >
                         Create Task

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MarkdownPreview from './MarkdownPreview';
 
 const PRIORITY_STYLES = {
@@ -18,7 +18,7 @@ function formatCardDate(d) {
     } catch { return null; }
 }
 
-export default function PersonalCard({ card, listColor, onClick, index, listId, allLists = [], onMoveCard, highlightItemId, isDragging, onDragStartCard, onDragOverCard, onDragEndCard, onDropCard }) {
+const PersonalCard = React.memo(function PersonalCard({ card, listColor, onClick, index, listId, allLists = [], onMoveCard, highlightItemId, isDragging, onDragStartCard, onDragOverCard, onDragEndCard, onDropCard }) {
     const {
         title,
         description,
@@ -254,7 +254,7 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
         <div
             id={`card-${card.id}`}
             className={`pd-card ${isDone ? 'pd-card--done' : ''} ${highlightClass} ${isDragging ? 'pd-card--dragging' : ''}`}
-            onClick={(e) => {
+            onClick={() => {
                 // Skip click if a drag just happened
                 if (dragDidHappenRef.current) {
                     dragDidHappenRef.current = false;
@@ -381,4 +381,6 @@ export default function PersonalCard({ card, listColor, onClick, index, listId, 
             </div>
         </div>
     );
-}
+});
+
+export default PersonalCard;

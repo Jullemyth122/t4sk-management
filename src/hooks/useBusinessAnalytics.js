@@ -1,12 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { collectionGroup, query, where, getDocs, collection } from 'firebase/firestore';
+import { query, getDocs, collection } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
 export function useBusinessAnalytics(businessId) {
     const [loading, setLoading] = useState(true);
     const [cards, setCards] = useState([]);
     const [members, setMembers] = useState([]);
-    const [lists, setLists] = useState([]);
     const [error, setError] = useState(null);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 

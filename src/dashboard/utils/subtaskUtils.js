@@ -11,7 +11,7 @@ export function distributeWeights(subtasks = []) {
     const remaining = 100 - totalExplicit;
 
     // Warning flag if we are over 100
-    const isOver100 = totalExplicit > 100;
+    
     
     // Distribute remaining equally
     const count = autoWeighed.length;

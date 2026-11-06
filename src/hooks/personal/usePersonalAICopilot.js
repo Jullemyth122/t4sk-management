@@ -8,8 +8,7 @@ export function usePersonalAICopilot({
   cardsMap,
   uid,
   currentUserEmail,
-  currentUserDisplayName,
-  dispatchSet
+  currentUserDisplayName
 }) {
   const [messages, setMessages] = useState([]);
   const [isThinking, setIsThinking] = useState(false);

@@ -133,9 +133,7 @@ export default function SubmissionModal({
         return fallback;
     }, [reviewerOptionsProp, assignees]);
 
-    const ownerIncluded = useMemo(() => {
-        return Array.isArray(reviewerOptions) && reviewerOptions.some(opt => !!opt.owner);
-    }, [reviewerOptions]);
+    
 
     const reviewerSourceLabel = reviewerOptionsSource === 'higher'
         ? 'Showing higher-level staff'
@@ -200,7 +198,7 @@ export default function SubmissionModal({
                             <strong>Assignees</strong>
                             <div className="sd-assignees-list">
                                 {assignees && assignees.length ? (
-                                assignees.map((a, i) => (
+                                assignees.map((a) => (
                                     <div key={String(a.id || a.uid || a)} className="sd-assignee">
                                     <div className="sd-av">{(a.name||a.email||String(a.id||a)).split(' ').map(s => s[0]).slice(0,2).join('').toUpperCase()}</div>
                                     <div className="sd-av-meta">

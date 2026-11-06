@@ -12,7 +12,6 @@ import {
     orderBy,
     onSnapshot,
     runTransaction,
-    setDoc,
     limit,
     collectionGroup,
     where,
@@ -295,7 +294,7 @@ export const createCard = async ({ businessId = null, uid = null, boardId, listI
     return { id: snap.id, ...snap.data() };
 };
 
-export const updateCard = async ({ businessId = null, uid = null, boardId, listId, cardId, updates = {}, actorName = "A user", boardName = "Board" }) => {
+export const updateCard = async ({ businessId = null, uid = null, boardId, listId, cardId, updates = {}, actorName = "A user" }) => {
     ensure(boardId && listId && cardId, "updateCard: missing args");
     const ref = doc(db, businessId ? COLLECTIONS.BUSINESSES : COLLECTIONS.ACCOUNT, businessId ?? uid, "boards", boardId, "lists", listId, "cards", cardId);
 
@@ -431,7 +430,7 @@ export const deleteCard = async ({ businessId = null, uid = null, boardId, listI
     return true;
 };
 
-export const moveCardBetweenLists = async ({ businessId = null, uid = null, boardId, fromListId, toListId, cardId, newPosition = 0, newPriorityRank }) => {
+export const moveCardBetweenLists = async ({ businessId = null, uid = null, boardId, fromListId, toListId, cardId, newPriorityRank }) => {
     ensure(fromListId && toListId && cardId && boardId, "moveCardBetweenLists: missing args");
 
     const srcRef = doc(db, businessId ? COLLECTIONS.BUSINESSES : COLLECTIONS.ACCOUNT, businessId ?? uid, "boards", boardId, "lists", fromListId, "cards", cardId);

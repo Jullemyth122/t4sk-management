@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getTodayTasks } from '../../services/boardService';
 
-export default function TodayView({ uid, onTaskClick }) {
+export default function TodayView({ uid, boards = [], onTaskClick }) {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -52,7 +52,12 @@ export default function TodayView({ uid, onTaskClick }) {
                                     <path d="M4 5h8M4 8h8M4 11h5" strokeLinecap="round" />
                                 </svg>
                             </span>
-                            <span className="pd-today-group-title">Board ID: {boardId}</span>
+                            <span className="pd-today-group-title">
+                                {(() => {
+                                    const board = boards.find(b => b.id === boardId);
+                                    return board ? board.name : `Board: ${boardId}`;
+                                })()}
+                            </span>
                         </div>
                         <div className="pd-today-list">
                             {boardTasks.map((task) => (

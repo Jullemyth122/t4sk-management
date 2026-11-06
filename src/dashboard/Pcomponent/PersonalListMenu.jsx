@@ -58,7 +58,7 @@ const MENU_ITEMS = [
 ];
 
 export default function PersonalListMenu({
-    anchorRef,
+    
     onClose,
     listId,
     listName,

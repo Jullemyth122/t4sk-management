@@ -37,7 +37,7 @@ export function useGenerativeBoard(props) {
     }, [businessId, isOwner]);
 
     const handleGenerateBoard = useCallback(async (prompt) => {
-        const { isOwner, businessId, uid, members, dispatchSet, businessOwnerUid } = depsRef.current;
+        const { isOwner, members, dispatchSet, businessOwnerUid } = depsRef.current;
         if (!isOwner) return dispatchSet('uiError', 'Only the business owner can generate boards.');
         if (!prompt || prompt.trim().length < 5) return dispatchSet('uiError', 'Please provide a more descriptive prompt.');
         if (!isUnlimited && aiUsageCount >= limitMax) {

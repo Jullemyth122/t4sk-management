@@ -59,7 +59,25 @@ export default function PersonalCalendar({ lists }) {
     const getCardsForDate = (date) => {
         if (!date) return [];
         const dateString = date.toLocaleDateString('en-CA'); // YYYY-MM-DD
-        return allCards.filter(card => card.dueDate === dateString);
+        return allCards.filter(card => {
+            if (!card.dueDate) return false;
+            let cDate = null;
+            if (typeof card.dueDate === 'object' && card.dueDate.seconds) {
+                const dObj = new Date(card.dueDate.seconds * 1000);
+                cDate = `${dObj.getFullYear()}-${String(dObj.getMonth() + 1).padStart(2, '0')}-${String(dObj.getDate()).padStart(2, '0')}`;
+            } else {
+                const dStr = String(card.dueDate);
+                if (dStr.includes('T')) {
+                    const dObj = new Date(dStr);
+                    if (!isNaN(dObj.getTime())) {
+                        cDate = `${dObj.getFullYear()}-${String(dObj.getMonth() + 1).padStart(2, '0')}-${String(dObj.getDate()).padStart(2, '0')}`;
+                    }
+                } else if (dStr.length >= 10) {
+                    cDate = dStr.slice(0, 10);
+                }
+            }
+            return cDate === dateString;
+        });
     };
 
     return (

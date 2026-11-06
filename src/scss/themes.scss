@@ -52,7 +52,7 @@
     --home-noise-opacity: 0.15;
     --home-grid-line: rgba(255,105,180, 0.15);
     
-    --glass-bg: rgba(255, 255, 255, 0.5);
+    --glass-bg: rgba(255, 255, 255, 1.0);
     --glass-border: rgba(255,105,180, 0.4);
     --glass-shadow: 0 8px 40px rgba(255,105,180, 0.15);
     
@@ -141,7 +141,7 @@
     --home-noise-opacity: 0.35;
     --home-grid-line: rgba(57,255,20, 0.08);
     
-    --glass-bg: rgba(13, 17, 13, 0.614);
+    --glass-bg: rgba(13, 17, 13, 1.0);
     --glass-border: rgba(57,255,20, 0.5);
     --glass-shadow: 0 8px 40px rgba(0,0,0, 0.6);
     
@@ -230,7 +230,7 @@
     --home-noise-opacity: 0.3;
     --home-grid-line: rgba(0,206,209, 0.1);
     
-    --glass-bg: rgba(0, 31, 63, 0.5);
+    --glass-bg: rgba(0, 31, 63, 1.0);
     --glass-border: rgba(0,206,209, 0.4);
     --glass-shadow: 0 8px 40px rgba(0,0,0, 0.5);
     
@@ -319,7 +319,7 @@
     --home-noise-opacity: 0.3;
     --home-grid-line: rgba(255,140,0, 0.1);
     
-    --glass-bg: rgba(46, 9, 0, 0.5);
+    --glass-bg: rgba(46, 9, 0, 1.0);
     --glass-border: rgba(255,140,0, 0.4);
     --glass-shadow: 0 8px 40px rgba(0,0,0, 0.5);
     
@@ -408,7 +408,7 @@
     --home-noise-opacity: 0.4;
     --home-grid-line: rgba(255,0,255, 0.12);
     
-    --glass-bg: rgba(13, 2, 33, 0.5);
+    --glass-bg: rgba(13, 2, 33, 1.0);
     --glass-border: rgba(255,0,255, 0.45);
     --glass-shadow: 0 8px 40px rgba(255,0,255, 0.15);
     
@@ -497,7 +497,7 @@
     --home-noise-opacity: 0.25;
     --home-grid-line: rgba(189,147,249, 0.1);
     
-    --glass-bg: rgba(40, 42, 54, 0.5);
+    --glass-bg: rgba(40, 42, 54, 1.0);
     --glass-border: rgba(189,147,249, 0.4);
     --glass-shadow: 0 8px 40px rgba(0,0,0, 0.3);
     
@@ -586,7 +586,7 @@
     --home-noise-opacity: 0.3;
     --home-grid-line: rgba(76,175,80, 0.1);
     
-    --glass-bg: rgba(15, 28, 19, 0.5);
+    --glass-bg: rgba(15, 28, 19, 1.0);
     --glass-border: rgba(76,175,80, 0.4);
     --glass-shadow: 0 8px 40px rgba(0,0,0, 0.5);
     
@@ -675,7 +675,7 @@
     --home-noise-opacity: 0.35;
     --home-grid-line: rgba(255,255,255, 0.05);
     
-    --glass-bg: rgba(17, 17, 17, 0.5);
+    --glass-bg: rgba(17, 17, 17, 1.0);
     --glass-border: rgba(255,255,255, 0.3);
     --glass-shadow: 0 8px 40px rgba(0,0,0, 0.5);
     
@@ -764,7 +764,7 @@
     --home-noise-opacity: 0.12;
     --home-grid-line: rgba(156,39,176, 0.15);
     
-    --glass-bg: rgba(255, 255, 255, 0.5);
+    --glass-bg: rgba(255, 255, 255, 1.0);
     --glass-border: rgba(156,39,176, 0.4);
     --glass-shadow: 0 8px 40px rgba(156,39,176, 0.15);
     
@@ -853,7 +853,7 @@
     --home-noise-opacity: 0.12;
     --home-grid-line: rgba(76,175,80, 0.15);
     
-    --glass-bg: rgba(255, 255, 255, 0.5);
+    --glass-bg: rgba(255, 255, 255, 1.0);
     --glass-border: rgba(76,175,80, 0.4);
     --glass-shadow: 0 8px 40px rgba(76,175,80, 0.15);
     
@@ -943,7 +943,7 @@
     --home-noise-opacity: 0.12;
     --home-grid-line: rgba(0,188,212, 0.15);
     
-    --glass-bg: rgba(255, 255, 255, 0.5);
+    --glass-bg: rgba(255, 255, 255, 1.0);
     --glass-border: rgba(0,188,212, 0.4);
     --glass-shadow: 0 8px 40px rgba(0,188,212, 0.15);
     
@@ -1032,7 +1032,7 @@
     --home-noise-opacity: 0.12;
     --home-grid-line: rgba(255,179,0, 0.15);
     
-    --glass-bg: rgba(255, 255, 255, 0.5);
+    --glass-bg: rgba(255, 255, 255, 1.0);
     --glass-border: rgba(255,179,0, 0.4);
     --glass-shadow: 0 8px 40px rgba(255,179,0, 0.15);
     
@@ -1122,7 +1122,7 @@
     --home-noise-opacity: 0.15;
     --home-grid-line: rgba(0,255,204, 0.1);
     
-    --glass-bg: rgba(11,12,16, 0.75);
+    --glass-bg: rgba(11,12,16, 1.0);
     --glass-border: rgba(0,255,204, 0.3);
     --glass-shadow: 0 8px 40px rgba(0,0,0, 0.6);
     
@@ -1212,7 +1212,7 @@
     --home-noise-opacity: 0.08;
     --home-grid-line: hsla(25, 90%, 60%, 0.15);
     
-    --glass-bg: hsla(25, 10%, 100%, 0.5);
+    --glass-bg: hsla(25, 10%, 100%, 1.0);
     --glass-border: hsla(25, 90%, 60%, 0.3);
     --glass-shadow: 0 8px 40px hsla(25, 90%, 50%, 0.08);
     
@@ -1304,7 +1304,7 @@
     --home-noise-opacity: 0.08;
     --home-grid-line: hsla(10, 80%, 65%, 0.15);
     
-    --glass-bg: hsla(10, 10%, 100%, 0.5);
+    --glass-bg: hsla(10, 10%, 100%,1.0);
     --glass-border: hsla(10, 80%, 65%, 0.3);
     --glass-shadow: 0 8px 40px hsla(10, 80%, 50%, 0.08);
     
@@ -1396,7 +1396,7 @@
     --home-noise-opacity: 0.08;
     --home-grid-line: hsla(195, 90%, 60%, 0.15);
     
-    --glass-bg: hsla(195, 10%, 100%, 0.5);
+    --glass-bg: hsla(195, 10%, 100%, 1.0);
     --glass-border: hsla(195, 90%, 60%, 0.3);
     --glass-shadow: 0 8px 40px hsla(195, 90%, 50%, 0.08);
     
@@ -1488,7 +1488,7 @@
     --home-noise-opacity: 0.08;
     --home-grid-line: hsla(100, 50%, 50%, 0.15);
     
-    --glass-bg: hsla(100, 10%, 100%, 0.5);
+    --glass-bg: hsla(100, 10%, 100%, 1.0);
     --glass-border: hsla(100, 50%, 50%, 0.3);
     --glass-shadow: 0 8px 40px hsla(100, 50%, 50%, 0.08);
     
@@ -1580,7 +1580,7 @@
     --home-noise-opacity: 0.08;
     --home-grid-line: hsla(35, 40%, 65%, 0.15);
     
-    --glass-bg: hsla(35, 10%, 100%, 0.5);
+    --glass-bg: hsla(35, 10%, 100%, 1.0);
     --glass-border: hsla(35, 40%, 65%, 0.3);
     --glass-shadow: 0 8px 40px hsla(35, 40%, 50%, 0.08);
     
@@ -1672,7 +1672,7 @@
     --home-noise-opacity: 0.08;
     --home-grid-line: hsla(45, 90%, 55%, 0.15);
     
-    --glass-bg: hsla(45, 10%, 100%, 0.5);
+    --glass-bg: hsla(45, 10%, 100%, 1.0);
     --glass-border: hsla(45, 90%, 55%, 0.3);
     --glass-shadow: 0 8px 40px hsla(45, 90%, 50%, 0.08);
     
@@ -1764,7 +1764,7 @@
     --home-noise-opacity: 0.08;
     --home-grid-line: hsla(340, 80%, 65%, 0.15);
     
-    --glass-bg: hsla(340, 10%, 100%, 0.5);
+    --glass-bg: hsla(340, 10%, 100%, 1.0);
     --glass-border: hsla(340, 80%, 65%, 0.3);
     --glass-shadow: 0 8px 40px hsla(340, 80%, 50%, 0.08);
     
@@ -1856,7 +1856,7 @@
     --home-noise-opacity: 0.08;
     --home-grid-line: hsla(160, 80%, 50%, 0.15);
     
-    --glass-bg: hsla(160, 10%, 100%, 0.5);
+    --glass-bg: hsla(160, 10%, 100%, 1.0);
     --glass-border: hsla(160, 80%, 50%, 0.3);
     --glass-shadow: 0 8px 40px hsla(160, 80%, 50%, 0.08);
     
@@ -1948,7 +1948,7 @@
     --home-noise-opacity: 0.08;
     --home-grid-line: hsla(35, 95%, 55%, 0.15);
     
-    --glass-bg: hsla(35, 10%, 100%, 0.5);
+    --glass-bg: hsla(35, 10%, 100%, 1.0);
     --glass-border: hsla(35, 95%, 55%, 0.3);
     --glass-shadow: 0 8px 40px hsla(35, 95%, 50%, 0.08);
     
@@ -2040,7 +2040,7 @@
     --home-noise-opacity: 0.08;
     --home-grid-line: hsla(290, 70%, 60%, 0.15);
     
-    --glass-bg: hsla(290, 10%, 100%, 0.5);
+    --glass-bg: hsla(290, 10%, 100%, 1.0);
     --glass-border: hsla(290, 70%, 60%, 0.3);
     --glass-shadow: 0 8px 40px hsla(290, 70%, 50%, 0.08);
     
@@ -2132,7 +2132,7 @@
     --home-noise-opacity: 0.15;
     --home-grid-line: hsla(220, 80%, 60%, 0.15);
     
-    --glass-bg: hsla(220, 20%, 10%, 0.5);
+    --glass-bg: hsla(220, 20%, 10%, 1.0);
     --glass-border: hsla(220, 80%, 60%, 0.3);
     --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
     
@@ -2224,7 +2224,7 @@
     --home-noise-opacity: 0.15;
     --home-grid-line: hsla(350, 80%, 55%, 0.15);
     
-    --glass-bg: hsla(350, 20%, 10%, 0.5);
+    --glass-bg: hsla(350, 20%, 10%, 1.0);
     --glass-border: hsla(350, 80%, 55%, 0.3);
     --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
     
@@ -2316,7 +2316,7 @@
     --home-noise-opacity: 0.15;
     --home-grid-line: hsla(200, 20%, 50%, 0.15);
     
-    --glass-bg: hsla(200, 20%, 10%, 0.5);
+    --glass-bg: hsla(200, 20%, 10%, 1.0);
     --glass-border: hsla(200, 20%, 50%, 0.3);
     --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
     
@@ -2408,7 +2408,7 @@
     --home-noise-opacity: 0.15;
     --home-grid-line: hsla(25, 30%, 50%, 0.15);
     
-    --glass-bg: hsla(25, 20%, 10%, 0.5);
+    --glass-bg: hsla(25, 20%, 10%, 1.0);
     --glass-border: hsla(25, 30%, 50%, 0.3);
     --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
     
@@ -2500,7 +2500,7 @@
     --home-noise-opacity: 0.15;
     --home-grid-line: hsla(140, 100%, 45%, 0.15);
     
-    --glass-bg: hsla(140, 20%, 10%, 0.5);
+    --glass-bg: hsla(140, 20%, 10%, 1.0);
     --glass-border: hsla(140, 100%, 45%, 0.3);
     --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
     
@@ -2592,7 +2592,7 @@
     --home-noise-opacity: 0.15;
     --home-grid-line: hsla(270, 80%, 55%, 0.15);
     
-    --glass-bg: hsla(270, 20%, 10%, 0.5);
+    --glass-bg: hsla(270, 20%, 10%, 1.0);
     --glass-border: hsla(270, 80%, 55%, 0.3);
     --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
     
@@ -2684,7 +2684,7 @@
     --home-noise-opacity: 0.15;
     --home-grid-line: hsla(0, 90%, 50%, 0.15);
     
-    --glass-bg: hsla(0, 20%, 10%, 0.5);
+    --glass-bg: hsla(0, 20%, 10%, 1.0);
     --glass-border: hsla(0, 90%, 50%, 0.3);
     --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
     
@@ -2776,7 +2776,7 @@
     --home-noise-opacity: 0.15;
     --home-grid-line: hsla(200, 90%, 50%, 0.15);
     
-    --glass-bg: hsla(200, 20%, 10%, 0.5);
+    --glass-bg: hsla(200, 20%, 10%, 1.0);
     --glass-border: hsla(200, 90%, 50%, 0.3);
     --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
     
@@ -2868,7 +2868,7 @@
     --home-noise-opacity: 0.15;
     --home-grid-line: hsla(120, 80%, 45%, 0.15);
     
-    --glass-bg: hsla(120, 20%, 10%, 0.5);
+    --glass-bg: hsla(120, 20%, 10%, 1.0);
     --glass-border: hsla(120, 80%, 45%, 0.3);
     --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
     
@@ -2960,7 +2960,7 @@
     --home-noise-opacity: 0.15;
     --home-grid-line: hsla(300, 90%, 55%, 0.15);
     
-    --glass-bg: hsla(300, 20%, 10%, 0.5);
+    --glass-bg: hsla(300, 20%, 10%, 1.0);
     --glass-border: hsla(300, 90%, 55%, 0.3);
     --glass-shadow: 0 8px 40px hsla(0, 0%, 0%, 0.6);
     

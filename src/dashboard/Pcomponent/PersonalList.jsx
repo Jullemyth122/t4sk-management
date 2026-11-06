@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import PersonalCard from './PersonalCard';
 import PersonalListMenu from './PersonalListMenu';
 
@@ -48,7 +48,7 @@ export default function PersonalList({
 
     const highlightClass = id === highlightItemId ? 'pd-highlight-pulse' : '';
     const isDragOver = dropTarget && dropTarget.listId === id;
-    const isDraggingFromHere = dragState && dragState.fromListId === id;
+    
 
     React.useEffect(() => {
         if (highlightItemId === id) {

@@ -11,7 +11,7 @@ export function useApplyOCR(props) {
     const snapshotRef = useRef({});
 
     const handleApplyOCRToBoard = useCallback(async () => {
-        const { selectedBoardId, canCreateList, ocrResult, lists, businessId, uid, dispatchSet, cardsMap, emailMap, members, membersMap, getMemberLevel, roles, businessOwnerUid } = depsRef.current;
+        const { selectedBoardId, canCreateList, ocrResult, lists, businessId, uid, dispatchSet, emailMap, members, membersMap, getMemberLevel, roles, businessOwnerUid } = depsRef.current;
 
         if (!selectedBoardId) return dispatchSet('uiError', 'Select a board to import into.');
         if (!canCreateList) return dispatchSet('uiError', 'Permission denied to create lists.');
@@ -47,7 +47,7 @@ export function useApplyOCR(props) {
             return (typeof lvl === 'number') && (lvl <= 2);
         });
 
-        const lowLevelUidSet = new Set(lowLevelMembers.map(m => (m.uid || m.id)).filter(Boolean));
+        
 
         const fallbackPool = lowLevelMembers
             .map(m => (m.uid || m.id) ? (m.uid || m.id) : (m.email ? String(m.email).toLowerCase() : null))
@@ -180,7 +180,7 @@ export function useApplyOCR(props) {
 
                 const listId = created.id || created._id || created.listId || null;
                 if (!listId) throw new Error('Create list returned invalid result (no id)');
-                const realList = created;
+                
                 
                 // Update optimisitic list with real ID
                 dispatchSet('lists', (prev) => (prev || []).map(l => l.id === tempListId ? created : l));
@@ -229,7 +229,6 @@ export function useApplyOCR(props) {
                 });
                 
                 const normalized = normalizeToTargetSum(rawScores, 100);
-                let runningWeightSum = 0;
                 const allUniqueAssignees = new Set();
                 
                 // Create Cards
@@ -245,11 +244,9 @@ export function useApplyOCR(props) {
                         if (inferred) dueDate = inferred;
                      }
 
-                     const effortVal = (typeof item.effort === 'number') ? item.effort : null;
                      const w = clampInt(normalized[idx] ?? 0);
-                     runningWeightSum += w;
 
-                     const ps = item.priorityScale ? String(item.priorityScale).toLowerCase() : null;
+                     
                      let priorityLabel = (item.priority && typeof item.priority === 'string') ? String(item.priority).toLowerCase() : null;
                      if (!priorityLabel) {
                          if (w >= 70) priorityLabel = 'high';

@@ -362,11 +362,7 @@ export default function ListColumn({
     const pagedApproved = approvedCards.slice((pageApproved - 1) * pageSize, pageApproved * pageSize);
 
     // priority options for quick-add (use same labels as elsewhere)
-    const priorityOptions = [
-        { value: 'low', label: 'Easy' },
-        { value: 'medium', label: 'Medium' },
-        { value: 'high', label: 'Hard' },
-    ];
+    
 
 
     // NEW: assignee candidates (low-level only: level <= 2)

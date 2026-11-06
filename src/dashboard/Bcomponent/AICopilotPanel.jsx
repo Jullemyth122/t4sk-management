@@ -72,7 +72,6 @@ function renderMessageContent(text) {
   const elements = [];
   let inCodeBlock = false;
   let codeLines = [];
-  let codeLang = '';
 
   lines.forEach((line, i) => {
     // Code block fencing
@@ -87,7 +86,6 @@ function renderMessageContent(text) {
         inCodeBlock = false;
       } else {
         inCodeBlock = true;
-        codeLang = line.trim().replace('```', '');
       }
       return;
     }

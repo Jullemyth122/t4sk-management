@@ -25,7 +25,6 @@ export function computePriority({
     priorityLabel = "medium",
     effort = 3,
     dependencies = [],
-    createdAt = null,
     complexity = null,
     complexityMode = "auto",
     title = "",

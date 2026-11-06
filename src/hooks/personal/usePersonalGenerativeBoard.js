@@ -1,8 +1,8 @@
 import { useCallback, useState, useEffect, useRef } from "react";
 import { generateBoardLayout } from "../../config/ocr";
 import { createBoard, createList, createCard } from "../../services/boardService";
-import { doc, getDoc, setDoc, increment } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { } from "firebase/firestore";
+
 
 export function usePersonalGenerativeBoard(props) {
     const depsRef = useRef(props);
@@ -133,15 +133,24 @@ export function usePersonalGenerativeBoard(props) {
                         priorityScale === 'medium' ? 2 :
                         priorityScale === 'low'    ? 1 : 0;
 
+                    const subtasks = Array.isArray(cData.subtasks) ? cData.subtasks : [];
+                    let description = cData.description || '';
+                    if (subtasks.length > 0) {
+                        if (description && !description.endsWith('\n\n')) {
+                            description += '\n\n';
+                        }
+                        description += subtasks.map((st, sIdx) => `- [ ] <!-- subtask:${sIdx} --> ${st.text || st}`).join('\n');
+                    }
+
                     const cardPayload = {
                         title: cData.title || 'Task',
-                        description: cData.description || '',
+                        description,
                         priority: String(priorityScale).toLowerCase(),
                         priorityRank,
                         effort: cData.effort || 3,
                         startDate: cData.startDate ? new Date(cData.startDate) : null,
                         dueDate: cData.dueDate ? new Date(cData.dueDate) : null,
-                        subtasks: Array.isArray(cData.subtasks) ? cData.subtasks : [],
+                        subtasks,
                         assignees: currentUserEmail ? [uid] : [], // Just assign to current user
                         status: 'todo',
                         createdAt: new Date(),

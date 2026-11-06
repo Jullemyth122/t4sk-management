@@ -21,7 +21,7 @@ const Navbar = ({ simulateLoading = true }) => {
     const [notifications, setNotifications] = useState([]);
     const [rawInvites, setRawInvites] = useState([]); // as stored in account.invitesEmail
     const [invites, setInvites] = useState([]); // enriched invites with businessName + friendly fields
-    const [showNotifs, setShowNotifs] = useState(false);
+    const [, setShowNotifs] = useState(false);
     const [showInvites, setShowInvites] = useState(false);
     const [showThemes, setShowThemes] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
@@ -216,18 +216,7 @@ const Navbar = ({ simulateLoading = true }) => {
     };
 
   
-    const getColor = (status) => {
-        switch (status) {
-            case 'red':
-            return '#ff4d4d';
-            case 'orange':
-            return '#ffa500';
-            case 'green':
-            return '#28a745';
-            default:
-            return '#888';
-        }
-    };
+    
 
     // safe resolution of account type
     const accountType = currentUser?.profile?.accountType ?? null;

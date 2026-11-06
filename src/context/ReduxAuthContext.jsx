@@ -96,7 +96,7 @@ export const useReduxAuth = () => {
         }
     }
 
-    const handleFacebookLogin = (e) => { }
+    const handleFacebookLogin = () => { }
 
     const handleSignup = async (e, acceptedTerms = false) => {
         if (e && typeof e.preventDefault === "function") e.preventDefault();
@@ -189,7 +189,7 @@ export const ReduxAuthProvider = ({ children }) => {
 
         const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
             if (typeof unsubscribeProfile === "function") {
-                try { unsubscribeProfile(); } catch (e) { }
+                try { unsubscribeProfile(); } catch { }
                 unsubscribeProfile = null;
             }
 
@@ -223,9 +223,9 @@ export const ReduxAuthProvider = ({ children }) => {
         });
 
         return () => {
-            try { unsubscribeAuth(); } catch (e) { }
+            try { unsubscribeAuth(); } catch { }
             if (typeof unsubscribeProfile === "function") {
-                try { unsubscribeProfile(); } catch (e) { }
+                try { unsubscribeProfile(); } catch { }
             }
         };
     }, [dispatch]);

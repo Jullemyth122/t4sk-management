@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 
 export default function BoardSidebar({
-    boards,
+    
     boardQuery,
     setBoardQuery,
     boardView,
@@ -9,23 +9,17 @@ export default function BoardSidebar({
     visibleBoards,
     boardPage,
     boardsTotalPages,
-    boardsPerPage,
-    setBoardsPerPage,
     gotoBoardPage,
     selectedBoardId,
     setSelectedBoardId,
     newBoardName,
     setNewBoardName,
     handleCreateBoard,
-    canEditBoardValue,
     canCreateBoard = false, // new prop (fallback false)
     boardSort,
     setBoardSort,
     aiGenerating,
     genProgressText,
-    aiUsageCount,
-    isGenUnlimited,
-    genLimitMax,
     handleGenerateBoard,
     isOwner,
 }) {

@@ -14,7 +14,8 @@ export default function PersonalStatistics({ lists }) {
     
     const priorityCounts = { High: 0, Medium: 0, Low: 0 };
     allCards.forEach(card => {
-        const p = card.priority.charAt(0).toUpperCase() + card.priority.slice(1);
+        const priority = card.priority || 'medium';
+        const p = priority.charAt(0).toUpperCase() + priority.slice(1);
         if (priorityCounts[p] !== undefined) {
             priorityCounts[p]++;
         }

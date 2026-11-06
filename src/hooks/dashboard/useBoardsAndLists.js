@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as boardSvc from '../../services/boardService'
-export function useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards, highlightBoardId, uid, userEmail }) {
+export function useBoardsAndLists({ businessId, dispatchSet, selectedBoardId, userLevel, boards, highlightBoardId }) {
     // Subscribe to boards
     useEffect(() => {
         if (!businessId) {

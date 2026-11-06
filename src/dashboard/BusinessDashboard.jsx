@@ -135,7 +135,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
     return () => clearTimeout(timer);
   }, [highlightCardIds.size]);
 
-  const { businessId, businessName, businessOwnerUid, planType, boards, selectedBoardId, lists, cardsMap, allBoardsListsMap, roles, members, membersLoading, membersError, uiError, boardQuery, boardView, memberQuery, editingBoard, boardDraft, newBoardName, newListName, newListAssignees, assigneeSearch, assigneeDropdownOpen, listNameEditing, listNameDrafts, cardEditing, cardDrafts, newCardInputs, copiedEmailId, loading, ocrRaw, ocrResult, ocrError, ocrVerificationOpen, aiResult, aiVerificationOpen, showHeaderActions, sidebarCollapsed, sidebarTab, previewFile, previewUrl, listViewMode, copilotOpen } = state;
+  const { businessId, businessName, businessOwnerUid, planType, boards, selectedBoardId, lists, cardsMap, allBoardsListsMap, roles, members, membersLoading, membersError, uiError, boardQuery, boardView, memberQuery, editingBoard, boardDraft, newBoardName, newListName, newListAssignees, assigneeSearch, assigneeDropdownOpen, listNameEditing, listNameDrafts, cardEditing, cardDrafts, newCardInputs, copiedEmailId, loading, ocrResult, ocrError, ocrVerificationOpen, aiResult, aiVerificationOpen, showHeaderActions, sidebarCollapsed, sidebarTab, previewFile, previewUrl, listViewMode, copilotOpen } = state;
 
   const getMemberLevel = useCallback((m, rolesList = roles) => {
     if (typeof m.level === 'number') return m.level;
@@ -145,7 +145,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
     return 0;
   }, [roles]);
 
-  const { userRoleId, userLevel, userRoleName, canEditBoardValue, canCreateBoard, canCreateList, canViewMembers, canAssignTasks, canDeleteBoard, canDeleteList, canUpdateList, canCreateCard, canUseOCR, canUseAI, canUseCalendar, isOwner, isPremium, canViewBoards, boardsFiltered, membersFiltered, listsVisible, reviewerOptions, membersMap, emailMap, filterBoardsByAssignee, filterCardsByAssignee } = usePermissionsAndDerived({ profile, businessId, planType, roles, members, boards, boardQuery, memberQuery, lists, uid, userEmail, getMemberLevel, businessOwnerUid });
+  const { userRoleId, userLevel, userRoleName, canEditBoardValue, canCreateBoard, canCreateList, canViewMembers, canAssignTasks, canDeleteBoard, canDeleteList, canUpdateList, canCreateCard, canUseOCR, canUseAI, canUseCalendar, isOwner, isPremium, canViewBoards, boardsFiltered, membersFiltered, listsVisible, reviewerOptions, membersMap, emailMap, filterCardsByAssignee } = usePermissionsAndDerived({ profile, businessId, planType, roles, members, boards, boardQuery, memberQuery, lists, uid, userEmail, getMemberLevel, businessOwnerUid });
 
   useBusinessLoading({ businessId, dispatchSet, profile, uid });
   useRolesAndMembers({ businessId, dispatchSet, businessOwnerUid, members });
@@ -227,7 +227,7 @@ export default function BusinessDashboard({ businessId: propBusinessId = null })
   }, [boardsFiltered, boardSort, userLevel, allBoardsListsMap, uid, userEmail]);
 
 
-  const { page: boardPage, perPage: boardsPerPage, setPerPage: setBoardsPerPage, totalPages: boardsTotalPages, visible: visibleBoards, goto: gotoBoardPage, setPage: setBoardPage } = usePagination(finalBoardsFiltered, 6);
+  const { page: boardPage, perPage: boardsPerPage, setPerPage: setBoardsPerPage, totalPages: boardsTotalPages, visible: visibleBoards, goto: gotoBoardPage } = usePagination(finalBoardsFiltered, 6);
   const { page: memberPage, perPage: membersPerPage, setPerPage: setMembersPerPage, totalPages: membersTotalPages, visible: visibleMembers, goto: gotoMemberPage } = usePagination(finalMembersFiltered, 6);
 
   const assigneeRef = useAssigneeDropdown({ dispatchSet })

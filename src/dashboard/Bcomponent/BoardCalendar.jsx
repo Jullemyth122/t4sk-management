@@ -94,8 +94,8 @@ export default function BoardCalendar({
         const laneMemory = {};
 
         // Clamp boundaries: only render events that touch the current month
-        const monthStart = new Date(year, month, 1);
-        const monthEnd = new Date(year, month + 1, 0); // last day of month
+        
+         // last day of month
 
         return weeks.map(weekDates => {
             const firstDate = weekDates.find(d => d);

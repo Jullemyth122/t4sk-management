@@ -1,9 +1,9 @@
 import { useCallback, useRef } from "react";
 import * as boardSvc from '../../services/boardService'
-import { arrayUnion, doc, serverTimestamp, updateDoc } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { } from "firebase/firestore";
 
-export function useSubmissionHandlers({ businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, selectedBoard, members, getMemberLevel, roles, userLevel, actorName }) {
+
+export function useSubmissionHandlers({ businessId, uid, userEmail, dispatchSet, selectedBoardId, cardsMap, lists, selectedBoard, members, getMemberLevel, userLevel, actorName }) {
     const snapshotRef = useRef({});
 
     const handleSubmitCard = useCallback(async ({ listId, cardId, note = '', type = 'for-review', qaChecked = false, reviewerUid = null, reviewerEmail = null, attachments = [], submission = {} }) => {

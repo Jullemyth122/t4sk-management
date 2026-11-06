@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+
 import { getFirestore } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
@@ -24,13 +24,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize App Check
-let appCheck;
 if (typeof window !== "undefined") {
     // Enable debug token for local development
     if (import.meta.env.DEV) {
         self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
     }
-    appCheck = initializeAppCheck(app, {
+    initializeAppCheck(app, {
         provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY1),
         isTokenAutoRefreshEnabled: true
     });

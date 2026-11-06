@@ -1,5 +1,5 @@
 // src/pages/ChooseAccountType.jsx
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useReduxAuth } from "../context/ReduxAuthContext";
 import {
@@ -78,7 +78,7 @@ export default function ChooseAccountType() {
             try {
                 const b = await getBusiness(id);
                 if (b) bizMap[id] = b.name || null;
-            } catch (err) {
+            } catch {
                 // ignore and leave null
             }
             }));
@@ -99,7 +99,7 @@ export default function ChooseAccountType() {
                 try {
                 const rSnap = await getDoc(doc(db, "businesses", bizId, "roles", rid));
                 if (rSnap.exists()) roleNameMap[bizId][rid] = rSnap.data().name || null;
-                } catch (err) {
+                } catch {
                 // ignore
                 }
             }));

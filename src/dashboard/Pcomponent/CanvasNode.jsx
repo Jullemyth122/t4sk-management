@@ -19,7 +19,6 @@ function formatNodeDate(d) {
 
 export default function CanvasNode({
     node,
-    zoom,
     onDragStart,
     onNodeClick,
     onAddTask,

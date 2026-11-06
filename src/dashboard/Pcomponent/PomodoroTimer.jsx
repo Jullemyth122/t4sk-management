@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 export default function PomodoroTimer({ 
-    cardId, 
+     
     initialTimeSpent = 0, 
     onSessionComplete,
     onTimerStateChange

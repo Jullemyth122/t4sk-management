@@ -38,7 +38,7 @@ function ListViewRow({ card, listName, listColor, listId, onClick, highlightItem
     };
 
     const formattedDue = formatDate(dueDate);
-    const formattedStart = formatDate(startDate);
+    
     const isOverdue = dueDate && (() => {
         if (isDone) return false;
         let cDate = null;

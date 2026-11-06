@@ -1,5 +1,5 @@
 // hooks/personal/usePersonalBoards.js
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import * as boardSvc from "../../services/boardService";
 
 /**

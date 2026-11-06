@@ -26,7 +26,6 @@ export function useAICopilot({
   cardsMap,
   members,
   workloadMap,
-  businessId,
   uid,
   currentUserEmail,
   handleCreateCardForList,

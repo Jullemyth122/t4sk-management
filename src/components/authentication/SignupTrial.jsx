@@ -14,7 +14,6 @@ const SignupTrial = ({ simulateLoading = false }) => {
     handleSignup,
     handleLogin,
     handleGoogleLogin,
-    handleFacebookLogin,
     handleResetPassword,
     username, email, password,
     setUsername, setEmail, setPassword,
@@ -97,7 +96,7 @@ const SignupTrial = ({ simulateLoading = false }) => {
 
   const handleLoggingIn = async (e) => { await handleLogin(e); };
   const handleLogginGoogle = async (e) => { await handleGoogleLogin(e); };
-  const handleLogginFacebook = async (e) => { navigate('/dashboard'); };
+  const handleLogginFacebook = async () => { navigate('/dashboard'); };
 
   if (loading) return <SignupSkeleton />;
 

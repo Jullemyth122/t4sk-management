@@ -18,8 +18,8 @@ import { db, dbRealtime } from "../config/firebase";
 import { useReduxAuth } from "../context/ReduxAuthContext";
 import { useReduxTheme } from "../context/ReduxThemeContext";
 import {
-    createBusiness, deleteBusiness, leaveBusiness, searchUsersByEmail, updateMemberRole,
-    inviteMember, deleteRole, updateRole, createRole, updateBusinessSettings, updateMemberStatus
+    createBusiness, leaveBusiness, searchUsersByEmail, updateMemberRole,
+    inviteMember, deleteRole, updateRole, createRole, updateMemberStatus
 } from "../services/accountService";
 
 import "../scss/business-info.scss";
@@ -502,7 +502,7 @@ export default function BusinessInfo({ simulateLoading = false }) {
             };
 
             if (!state.profileExists) payload.createdAt = serverTimestamp();
-            const cleanedPayload = Object.fromEntries(Object.entries(payload).filter(([_, v]) => v !== undefined));
+            const cleanedPayload = Object.fromEntries(Object.entries(payload).filter(([, v]) => v !== undefined));
 
             if (state.usingTopLevelBusiness && state.businessId) {
                 await setDoc(doc(db, "businesses", state.businessId), cleanedPayload, { merge: true });

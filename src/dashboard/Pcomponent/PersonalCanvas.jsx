@@ -24,7 +24,7 @@ function buildNodeLayout(lists) {
     // --- Step 1: Determine auto-layout X positions for lists without saved positions ---
     // We auto-assign column positions sequentially. Lists WITH saved positions keep them;
     // lists WITHOUT get placed in the next available column slot after all positioned lists.
-    let autoColIndex = 0;
+    
 
     // First pass: figure out how many lists lack a saved X so we can place them
     // after the right-most saved list.
@@ -318,7 +318,7 @@ export default function PersonalCanvas({
     const zoomReset = () => { setZoom(0.85); setPan({ x: 0, y: 0 }); };
 
     // ── Minimap ──
-    const minimapScale = 0.06;
+    
     const minimapW = 180;
     const minimapH = 120;
 

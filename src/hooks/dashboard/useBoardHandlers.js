@@ -7,7 +7,7 @@ export function useBoardHandlers(props) {
     const snapshotRef = useRef({});
 
     const handleRefreshBoard = useCallback(async (boardIdArg) => {
-        const { businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName } = depsRef.current;
+        const { businessId, dispatchSet } = depsRef.current;
         if (!boardIdArg) return;
         try {
             const b = await boardSvc.getBoard({ businessId, uid: null, boardId: boardIdArg });
@@ -19,7 +19,7 @@ export function useBoardHandlers(props) {
     }, []);
 
     const handleUpdateBoard = useCallback(async (boardIdArg, updates) => {
-        const { businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName } = depsRef.current;
+        const { businessId, uid, dispatchSet, boards, canEditBoardValue } = depsRef.current;
         if (!boardIdArg || !canEditBoardValue) return dispatchSet('uiError', 'Permission denied or invalid board');
         dispatchSet('uiError', '');
         snapshotRef.current.boards = boards;
@@ -35,7 +35,7 @@ export function useBoardHandlers(props) {
     }, []);
 
     const handleDeleteBoard = useCallback(async (boardIdArg) => {
-        const { businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName } = depsRef.current;
+        const { businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue } = depsRef.current;
         if (!boardIdArg || !canEditBoardValue || !window.confirm('Delete board and all lists/cards?')) return;
         dispatchSet('uiError', '');
         snapshotRef.current.boards = boards;
@@ -51,7 +51,7 @@ export function useBoardHandlers(props) {
     }, []);
 
     const handleCreateBoard = useCallback(async () => {
-        const { businessId, uid, dispatchSet, boards, selectedBoardId, canEditBoardValue, newBoardName } = depsRef.current;
+        const { businessId, uid, dispatchSet, boards, newBoardName } = depsRef.current;
         if (!newBoardName || !businessId) return dispatchSet('uiError', 'Board name or business required');
         
         // Free tier board limit check

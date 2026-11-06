@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import CustomSelect from './CustomSelect';
 import '../../scss/task-details-modal.scss'; 
@@ -7,22 +7,13 @@ export default function TaskDetailsModal({
     open,
     onClose,
     card,
-    listId,
     draft,
     setDraft,
     onSave,
     onDelete,
-    membersMap,
-    emailMap,
-    businessOwnerUid,
     priorityOptions = [],
     assigneeCandidates = [],
-    handleReviewAction,
-    currentUserUid,
-    isReviewer,
-    isHighLevel,
-    canEdit,
-    isPersonal = false
+    canEdit
 }) {
     // Only render if open
     if (!open || !card) return null;
@@ -52,12 +43,7 @@ export default function TaskDetailsModal({
     };
 
     // Helper to check if current user is an assignee
-    const isAssignee = useMemo(() => {
-        const currentAssignees = draft[card.id]?.assignees ?? card.assignees ?? [];
-        const normUid = String(currentUserUid || '').toLowerCase();
-        // You might need to check email too if your system mixes them
-        return currentAssignees.some(a => String(a).toLowerCase().includes(normUid));
-    }, [card.assignees, draft, card.id, currentUserUid]);
+
 
     // Helper to format date for input (YYYY-MM-DD)
     const formatDateForInput = (d) => {
@@ -165,26 +151,10 @@ export default function TaskDetailsModal({
          }));
     };
 
-    // Review Actions
-    const [reviewNote, setReviewNote] = useState('');
-    const [actionLoading, setActionLoading] = useState(false);
 
-    const onApprove = async () => {
-        if (!handleReviewAction) return;
-        setActionLoading(true);
-        try {
-            await handleReviewAction({ listId, cardId: card.id, action: 'approve', note: reviewNote });
-            onClose();
-        } finally { setActionLoading(false); }
-    };
-    const onReject = async () => {
-        if (!handleReviewAction) return;
-        setActionLoading(true);
-        try {
-            await handleReviewAction({ listId, cardId: card.id, action: 'reject', note: reviewNote });
-            onClose();
-        } finally { setActionLoading(false); }
-    };
+
+
+
 
 
     const modalContent = (

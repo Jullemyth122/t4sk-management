@@ -1,8 +1,8 @@
 import { useCallback, useRef } from "react";
 import { clampInt, deriveListName, inferDueDateFromItem, normalizeToTargetSum, parseISODateToDate, autoBalanceSubtaskList } from "../../utils/dashboardUtils";
 import * as boardSvc from '../../services/boardService'
-import { db } from "../../config/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+
+import { } from "firebase/firestore";
 import { computePriority } from "../../utils/prioritization";
 
 export function usePersonalApplyOCR(props) {
@@ -11,7 +11,7 @@ export function usePersonalApplyOCR(props) {
     const snapshotRef = useRef({});
 
     const handleApplyOCRToBoard = useCallback(async () => {
-        const { selectedBoardId, ocrResult, lists, uid, dispatchSet, cardsMap } = depsRef.current;
+        const { selectedBoardId, ocrResult, lists, uid, dispatchSet } = depsRef.current;
 
         if (!selectedBoardId) return dispatchSet('uiError', 'Select a board to import into.');
         if (!ocrResult) return dispatchSet('uiError', 'No OCR data to import.');
@@ -83,7 +83,15 @@ export function usePersonalApplyOCR(props) {
                 for (let idx = 0; idx < toCreate.length; idx++) {
                      const item = toCreate[idx] || {};
                      const title = (item.title || item.text || item.name || '').toString().trim().split(/\r?\n/).map(s => s.trim()).find(Boolean) || `Imported task (${idx + 1})`;
-                     const description = (item.description || item.text || '') ? String(item.description || item.text).trim().slice(0, 2000) : '';
+                     
+                     const subtasks = autoBalanceSubtaskList(item.subtasks || []);
+                     let description = (item.description || item.text || '') ? String(item.description || item.text).trim().slice(0, 2000) : '';
+                     if (subtasks.length > 0) {
+                         if (description && !description.endsWith('\n\n')) {
+                             description += '\n\n';
+                         }
+                         description += subtasks.map((st, sIdx) => `- [ ] <!-- subtask:${sIdx} --> ${st.text || st}`).join('\n');
+                     }
                      
                      const dueFromOCR = item.dueDate ?? null;
                      let dueDate = parseISODateToDate(dueFromOCR);
@@ -95,7 +103,7 @@ export function usePersonalApplyOCR(props) {
                      const effortVal = (typeof item.effort === 'number') ? item.effort : null;
                      const w = clampInt(normalized[idx] ?? 0);
 
-                     const ps = item.priorityScale ? String(item.priorityScale).toLowerCase() : null;
+                     
                      let priorityLabel = (item.priority && typeof item.priority === 'string') ? String(item.priority).toLowerCase() : null;
                      if (!priorityLabel) {
                          if (w >= 70) priorityLabel = 'high';
@@ -112,7 +120,7 @@ export function usePersonalApplyOCR(props) {
                         title, description, assignees: finalAssignees, 
                         labels: item.labels || [], priority: cp.priorityLabel, priorityRank: cp.priorityRank,
                         status: 'todo', dueDate, startDate: item.startDate || null,
-                        effort: effortVal, weight: w, subtasks: autoBalanceSubtaskList(item.subtasks || []),
+                        effort: effortVal, weight: w, subtasks,
                         createdAt: new Date(), createdBy: uid
                      };
                      

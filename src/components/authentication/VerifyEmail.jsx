@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useReduxAuth } from '../../context/ReduxAuthContext';
 import { sendEmailVerification } from 'firebase/auth';
 import '../../scss/signup2.scss';
@@ -7,12 +7,11 @@ import '../../scss/signup2.scss';
 export default function VerifyEmail() {
   const { currentUser, signOut } = useReduxAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [resendStatus, setResendStatus] = useState('');
   const [isResending, setIsResending] = useState(false);
 
   // If user came via signup, location.state.fromSignup will be true
-  const fromSignup = location.state?.fromSignup;
+  
 
   useEffect(() => {
     // If no user is logged in, or if their email is already verified,

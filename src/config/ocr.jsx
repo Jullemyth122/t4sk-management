@@ -37,7 +37,7 @@ function parseLooseJSON(text) {
   if (!text || typeof text !== 'string') return null;
   // strip triple-fence
   text = text.replace(/^\s*```(?:json)?/i, '').replace(/```\s*$/i, '').trim();
-  try { return JSON.parse(text); } catch (e) { /* fallthrough */ }
+  try { return JSON.parse(text); } catch { /* fallthrough */ }
 
   // try to find first balanced {...}
   const firstOpen = text.indexOf('{');
@@ -50,7 +50,7 @@ function parseLooseJSON(text) {
       depth--;
       if (depth === 0) {
         const candidate = text.slice(firstOpen, i + 1);
-        try { return JSON.parse(candidate); } catch (e) { break; }
+        try { return JSON.parse(candidate); } catch { break; }
       }
     }
   }
@@ -168,7 +168,7 @@ function inferDueDateFromLabels(labels = [], strings = '') {
   if (tokens.some(t => /\b(quarterly|every quarter)\b/.test(t))) return addDays(90);
   const isoMatch = strings.match(/\d{4}-\d{2}-\d{2}/);
   if (isoMatch) return isoMatch[0];
-  const dmMatch = strings.match(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\b/);
+  const dmMatch = strings.match(/\b(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})\b/);
   if (dmMatch) {
     const d = Number(dmMatch[1]), m = Number(dmMatch[2]), yRaw = dmMatch[3];
     let year = Number(yRaw);
@@ -176,7 +176,7 @@ function inferDueDateFromLabels(labels = [], strings = '') {
     try {
       const candidate = new Date(year, m - 1, d);
       if (!Number.isNaN(candidate.getTime())) return candidate.toISOString().slice(0, 10);
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
   }
   return null;
 }
@@ -228,79 +228,18 @@ function normalizePriority(item, globalKeywords = []) {
   return null;
 }
 
-function levenshtein(a = '', b = '') {
-  const A = String(a || ''), B = String(b || '');
-  const al = A.length, bl = B.length;
-  if (al === 0) return bl;
-  if (bl === 0) return al;
-  const dp = Array.from({ length: al + 1 }, () => new Array(bl + 1).fill(0));
-  for (let i = 0; i <= al; i++) dp[i][0] = i;
-  for (let j = 0; j <= bl; j++) dp[0][j] = j;
-  for (let i = 1; i <= al; i++) {
-    for (let j = 1; j <= bl; j++) {
-      const cost = A[i - 1] === B[j - 1] ? 0 : 1;
-      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
-    }
-  }
-  return dp[al][bl];
-}
-
 // keep '@' in tokens (canonicalize emails & uid tokens)
 function normalizeTokenForEmail(tok = '') {
   if (!tok) return '';
-  return String(tok).trim().toLowerCase().replace(/[()\[\]<>,"'`]/g, '').replace(/\s+/g, '');
-}
-
-function findBestCandidateForToken(token, candidateEmails = []) {
-  if (!token) return null;
-  const norm = normalizeTokenForEmail(token);
-  if (!norm) return null;
-  if (!candidateEmails || candidateEmails.length === 0) return null;
-  if (norm.includes('@')) {
-    const exact = candidateEmails.find(c => c === norm);
-    if (exact) return exact;
-  }
-  const tokenLocal = norm.split('@')[0] || norm;
-  let best = null;
-  let bestScore = Infinity;
-  for (const candidate of candidateEmails) {
-    const candNorm = normalizeTokenForEmail(candidate);
-    const candLocal = (candNorm.split('@')[0] || candNorm);
-    const localDist = levenshtein(tokenLocal, candLocal);
-    const fullDist = levenshtein(norm, candNorm);
-    const score = localDist + (fullDist * 0.2);
-    if (score < bestScore) {
-      bestScore = score;
-      best = candNorm;
-    }
-  }
-  if (!best) return null;
-  const candLen = Math.max(1, (best || '').length);
-  if (bestScore <= 2 || (bestScore / candLen) <= 0.25) return best;
-  return null;
-}
-
-// Helper: detect if many items contain the exact same non-empty assignee list (order-insensitive)
-function detectRepeatedGlobalAssigneeList(intermediateItems) {
-  const lists = intermediateItems
-    .map(it => (Array.isArray(it.assignees) ? it.assignees.map(x => normalizeTokenForEmail(x)).filter(Boolean) : []))
-    .filter(l => l.length > 0)
-    .map(l => Array.from(new Set(l)).sort().join('|')); // canonical sorted signature
-  if (lists.length === 0) return null;
-  const first = lists[0];
-  const allSame = lists.every(sig => sig === first);
-  if (!allSame) return null;
-  // return tokens (sorted unique)
-  return first.split('|').map(x => x.trim()).filter(Boolean);
+  return String(tok).trim().toLowerCase().replace(/[()[\]<>,"'`]/g, '').replace(/\s+/g, '');
 }
 
 // -------------------- main exported function --------------------
-export async function processImageForTasks(imageFile, details = {}, options = {}) {
+export async function processImageForTasks(imageFile, details = {}) {
   const context = (details.context || '').trim();
   const candidateEmailsRaw = Array.isArray(details.candidateEmails) ? details.candidateEmails : [];
   const candidateMapRaw = (details.candidateMap && typeof details.candidateMap === 'object') ? details.candidateMap : {};
   const excludedTokensRaw = Array.isArray(details.excludedTokens) ? details.excludedTokens : [];
-  const fallbackPoolRaw = Array.isArray(details.fallbackPool) ? details.fallbackPool : [];
 
   // canonical candidateEmails (emails preferred; tokens normalized)
   const candidateEmails = Array.from(new Set(candidateEmailsRaw.map(e => normalizeTokenForEmail(e)).filter(Boolean)));
@@ -323,10 +262,6 @@ export async function processImageForTasks(imageFile, details = {}, options = {}
     if (excludedSet.has(k) || excludedSet.has(candidateMap[k])) delete candidateMap[k];
   });
 
-  // options controlling assignee behavior
-  const maxAssigneesPerItem = (typeof details.maxAssigneesPerItem === 'number') ? Math.max(1, Math.floor(details.maxAssigneesPerItem)) : 1;
-  const normalizedFallbackPool = Array.from(new Set(fallbackPoolRaw.map(x => normalizeTokenForEmail(x)).filter(Boolean))).filter(x => !excludedSet.has(x));
-  const forceOnePerTask = !!details.forceOnePerTask;
 
   // original long prompt (kept)
   const originalPrompt = `
@@ -503,14 +438,14 @@ export async function processImageForTasks(imageFile, details = {}, options = {}
             const isoMatch = cleanDue.match(/\d{4}-\d{2}-\d{2}/);
             if (isoMatch) parsedDue = isoMatch[0];
             else {
-              const dm = cleanDue.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+              const dm = cleanDue.match(/(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})/);
               if (dm) {
                 let d = Number(dm[1]), m = Number(dm[2]), y = Number(dm[3]);
                 if (y < 100) y += (y >= 70 ? 1900 : 2000);
                 try {
                   const dt = new Date(y, m - 1, d);
                   if (!Number.isNaN(dt.getTime())) parsedDue = dt.toISOString().slice(0, 10);
-                } catch (e) { parsedDue = null; }
+                } catch { parsedDue = null; }
               }
             }
           }
@@ -524,14 +459,14 @@ export async function processImageForTasks(imageFile, details = {}, options = {}
             const isoMatch2 = cleanStart.match(/\d{4}-\d{2}-\d{2}/);
             if (isoMatch2) parsedStart = isoMatch2[0];
             else {
-              const dm2 = cleanStart.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+              const dm2 = cleanStart.match(/(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})/);
               if (dm2) {
                 let d = Number(dm2[1]), m = Number(dm2[2]), y = Number(dm2[3]);
                 if (y < 100) y += (y >= 70 ? 1900 : 2000);
                 try {
                   const dt = new Date(y, m - 1, d);
                   if (!Number.isNaN(dt.getTime())) parsedStart = dt.toISOString().slice(0, 10);
-                } catch (e) { parsedStart = null; }
+                } catch { parsedStart = null; }
               }
             }
           }
@@ -562,7 +497,7 @@ export async function processImageForTasks(imageFile, details = {}, options = {}
         // finalization: dates/priority and assignee pool building
         // (Simplified assignee logic: we re-run this inside useApplyOCR anyway, so we just prep the items)
         // Detect repeated assignees, etc.
-        const repeatedGlobalList = detectRepeatedGlobalAssigneeList(intermediate); 
+
         
         // Build orderedPool logic is complex and relies on specific loop context. 
         // For brevity and robustness, we'll simplify here and let useApplyOCR do heavy lifting 
@@ -597,7 +532,7 @@ export async function processImageForTasks(imageFile, details = {}, options = {}
             }
           }
           
-          const toIso = (d) => { if (!d) return null; try { const dt = new Date(d); if (Number.isNaN(dt.getTime())) return null; return dt.toISOString().slice(0, 10); } catch (e) { return null; } };
+          const toIso = (d) => { if (!d) return null; try { const dt = new Date(d); if (Number.isNaN(dt.getTime())) return null; return dt.toISOString().slice(0, 10); } catch { return null; } };
           item.startDate = toIso(startDateObj);
           item.dueDate = toIso(dueDateObj);
 
@@ -641,24 +576,44 @@ export async function generateBoardLayout(promptText, candidateEmails = []) {
   if (!promptText) throw new Error("No prompt provided.");
 
   const schema = `
-You are an expert agile project manager AI. Your task is to generate a complete project Board structure based on the user's requested prompt.
+You are a world-class agile project manager and productivity expert. Your task is to generate a highly focused, professional, and practical project Board structure based on the user's prompt.
+
+Crucial Instructions:
+1. Avoid generic, bloated, or boilerplate lists and tasks (e.g., don't dump generic environment setup tasks unless the prompt is specifically about setting up a repository).
+2. Deeply analyze the exact context, domain (whether software engineering, marketing, business, creative writing, health, cooking, etc.), and goals in the prompt. Generate highly specific, context-appropriate, and actionable tasks.
+3. Keep the board focused: typically 2 to 4 lists, and 2 to 4 highly relevant, high-value cards per list. Quality and specificity over quantity.
+4. For each card, write a realistic description detailing the exact actions/goals.
+5. The prompt can cover any domain. Customize code snippets, tables, checklists, or steps to match the requested domain (e.g., a recipe checklist for cooking, a weight table for exercise, or a javascript code snippet for programming).
+
+Formatting Task Descriptions:
+The application's task description renderer supports rich markdown formatting. Leverage these formats inside the "description" field where appropriate to make tasks clear, actionable, and context-rich:
+- **Rich Text**: Use bold (**bold**), italic (*italic*), and inline code (\`code\`).
+- **Fenced Code Blocks**: Use standard triple-backtick markdown blocks to provide templates or snippets (code, config files, formulas, etc.).
+- **Markdown Tables**: Use standard tables to list parameters, uniforms, workout plans, ingredient counts, or data.
+- **Smart Checklists**: You can include checkboxes in descriptions using "- [ ] Text".
+  * For tasks requiring embedded code or scripts, append "(/code)" to the checkbox line and write the code block on subsequent lines indented by 4 spaces.
+  * For tasks requiring embedded tables, append "(/table)" to the checkbox line and write the markdown table on subsequent lines indented by 4 spaces.
+
+Subtasks:
+Provide 2 to 5 clear, actionable subtasks per card. Do NOT write the "<!-- subtask:X -->" comments inside the subtasks list; the application automatically parses and injects these. Just focus on generating the checklist in the description and standard text items in the "subtasks" array.
+
 Return ONLY valid JSON format. Do NOT wrap in markdown fences.
 Schema required:
 {
-  "boardName": "String (A catchy name for the board)",
+  "boardName": "String (A catchy, specific name for the board)",
   "lists": [
     {
-      "name": "String (Name of the list, e.g. To Do, Phase 1)",
+      "name": "String (Specific list name, e.g., TSL Setup, Shader Animation)",
       "cards": [
         {
-          "title": "String (Task title)",
-          "description": "String (Detailed task description)",
+          "title": "String (Specific, actionable task title)",
+          "description": "String (Detailed, context-aware description of the work utilizing rich Markdown, tables, code blocks, or checklist smart tokens where appropriate)",
           "priorityScale": "String (easy, medium, hard, high)",
           "effort": "Number (1-10 estimate)",
           "assignees": ["String (Select optionally 1-2 emails from CANDIDATE_EMAILS, or empty array)"],
           "subtasks": [
             {
-              "text": "String (Subtask description)",
+              "text": "String (Actionable subtask description)",
               "weight": "Number (Integer weight. Ensure weights for all subtasks in a card sum exactly to 100)"
             }
           ]

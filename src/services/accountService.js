@@ -634,7 +634,7 @@ export const removeInviteFromAccount = async ({ uid, inviteId, businessId }) => 
     }
 };
 
-export const declineInvite = async ({ businessId, inviteId, uid = null, reason = "" }) => {
+export const declineInvite = async ({ businessId, inviteId, uid = null }) => {
     ensure(businessId && inviteId, "declineInvite: missing args");
 
     const inviteRef = doc(db, COLLECTIONS.BUSINESSES, businessId, "invites", inviteId);

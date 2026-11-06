@@ -212,7 +212,7 @@ export default function useCardsSubscriptions({ businessId, uid, boardId, lists,
             const na = normalizeValue(a);
             const nb = normalizeValue(b);
             return JSON.stringify(na) === JSON.stringify(nb);
-        } catch (e) {
+        } catch {
             return JSON.stringify(a) === JSON.stringify(b);
         }
     }
